@@ -42,6 +42,8 @@ function PlayPageClient() {
   // 状态变量（State）
   // -----------------------------------------------------------------------------
   const [loading, setLoading] = useState(true);
+  // 新增状态用于跟踪播放记录是否已加载----------------------------------------
+  const [playRecordLoaded, setPlayRecordLoaded] = useState(false);
   const [loadingStage, setLoadingStage] = useState<
     'searching' | 'preferring' | 'fetching' | 'ready'
   >('searching');
@@ -760,6 +762,9 @@ function PlayPageClient() {
       }
     } catch (err) {
       console.error('读取播放记录失败:', err);
+    } finally {
+      // 标记播放记录已加载完成
+      setPlayRecordLoaded(true);
     }
   };
 
@@ -1031,6 +1036,7 @@ function PlayPageClient() {
       return;
     }
 
+
     const player = artPlayerRef.current;
     const currentTime = player.currentTime || 0;
     const duration = player.duration || 0;
@@ -1066,13 +1072,14 @@ function PlayPageClient() {
     }
   };
 
-  useEffect(() => {
+      useEffect(() => {
     // 页面即将卸载时保存播放进度
     const handleBeforeUnload = () => {
       saveCurrentPlayProgress();
       
     };
 
+ 
     // 页面可见性变化时保存播放进度
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
@@ -1090,7 +1097,7 @@ function PlayPageClient() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [currentEpisodeIndex, detail, artPlayerRef.current]);
+  }, []);
 
   // 清理定时器
   useEffect(() => {
@@ -1173,7 +1180,8 @@ function PlayPageClient() {
       !videoUrl ||
       loading ||
       currentEpisodeIndex === null ||
-      !artRef.current
+      !artRef.current ||
+      !playRecordLoaded
     ) {
       return;
     }
@@ -1274,17 +1282,11 @@ function PlayPageClient() {
               return;
             }
 
-              /*换成下面测试
+              
             if (video.hls) {
               video.hls.destroy();
             }
-             */
-              //测试-----------------------------------
-               if (artPlayerRef.current.video || artPlayerRef.current.video.hls) {
-                artPlayerRef.current.video.hls.destroy();
-                video.hls.destroy();
-              }
-              //测试-----------------------------------
+            
             const hls = new Hls({
               debug: false, // 关闭日志
               enableWorker: true, // WebWorker 解码，降低主线程压力
@@ -1584,7 +1586,7 @@ function PlayPageClient() {
       console.error('创建播放器失败:', err);
       setError('播放器初始化失败');
     }
-  }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled]);
+  }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, playRecordLoaded]);
 
   // 当组件卸载时清理定时器
   useEffect(() => {
