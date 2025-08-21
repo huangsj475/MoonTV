@@ -21,7 +21,8 @@ interface VideoInfo {
 }
 // 1. ----正则匹配视频地址，用于显示链接中的集数，如第01集，综艺的20250808-------
 function extractEpisodeName(url: string): string {
-  const match = url.match(/([^/]+)\/index\.m3u8$/);
+	//-----------只匹配暴风资源，其他资源剧集名称仍用1,2,3----------------
+  const match = url.match(/https:\/\/8\.bf8bf\.com\/video\/[^/]+\/([^/]+)\/index\.m3u8$/);
   return match ? match[1] : '';
 }
 
@@ -428,7 +429,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
     const url = currentSourceObj.episodes[episodeIndex];
     const name = extractEpisodeName(url);
     if (name) {
-      episodeLabel = name;
+      episodeLabel = name || `${episodeNumber}`;
     }
   }
 				{/* -------到这里-------- */}
