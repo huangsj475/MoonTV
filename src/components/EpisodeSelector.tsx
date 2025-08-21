@@ -19,6 +19,11 @@ interface VideoInfo {
   pingTime: number;
   hasError?: boolean; // 添加错误状态标识
 }
+// 1. ----正则匹配视频地址，用于显示链接中的集数，如第01集，综艺的20250808-------
+function extractEpisodeName(url: string): string {
+  const match = url.match(/([^/]+)\/index\.m3u8$/);
+  return match ? match[1] : '';
+}
 
 interface EpisodeSelectorProps {
   /** 总集数 */
@@ -46,10 +51,10 @@ interface EpisodeSelectorProps {
  * 选集组件，支持分页、自动滚动聚焦当前分页标签，以及换源功能。
  */
 const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
-  totalEpisodes,
-  episodesPerPage = 50,
-  value = 1,
-  onChange,
+  totalEpisodes,/** 总集数 */
+  episodesPerPage = 50,/** 每页显示多少集，默认 50 */
+  value = 1,/** 当前选中的集数（1 开始） */
+  onChange,/** 用户点击选集后的回调 */
   onSourceChange,
   currentSource,
   currentId,
@@ -61,6 +66,16 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
 }) => {
   const router = useRouter();
   const pageCount = Math.ceil(totalEpisodes / episodesPerPage);
+  
+ // 2.找到当前选中的源对象--------- 
+  const currentSourceObj = useMemo(() => {
+    return availableSources.find( 
+      (source) => 
+        source.source?.toString()  === currentSource?.toString() && 
+        source.id?.toString()  === currentId?.toString()
+    );
+  }, [availableSources, currentSource, currentId]); 
+
 
   // 存储每个源的视频信息
   const [videoInfoMap, setVideoInfoMap] = useState<Map<string, VideoInfo>>(
@@ -391,7 +406,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </div>
 
           {/* 集数网格 */}
-          <div className='grid grid-cols-[repeat(auto-fill,minmax(40px,1fr))] auto-rows-[40px] gap-x-3 gap-y-3 overflow-y-auto h-full pb-4'>
+          <div className='grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] auto-rows-[40px] gap-x-3 gap-y-3 overflow-y-auto h-full pb-4'>
             {(() => {
               const len = currentEnd - currentStart + 1;
               const episodes = Array.from({ length: len }, (_, i) =>
@@ -400,18 +415,36 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
               return episodes;
             })().map((episodeNumber) => {
               const isActive = episodeNumber === value;
+			 {/* -------开始-------正则匹配显示剧集名称 */}
+			  let episodeLabel = "";
+
+  {/*  计算当前集在源 episodes 列表中的索引 */}
+  const episodeIndex = episodeNumber - 1;
+  if (
+    currentSourceObj &&
+    Array.isArray(currentSourceObj.episodes) &&
+    currentSourceObj.episodes.length > episodeIndex
+  ) {
+    const url = currentSourceObj.episodes[episodeIndex];
+    const name = extractEpisodeName(url);
+    if (name) {
+      episodeLabel = name;
+    }
+  }
+				{/* -------到这里-------- */}
               return (
                 <button
                   key={episodeNumber}
                   onClick={() => handleEpisodeClick(episodeNumber - 1)}
-                  className={`h-10 flex items-center justify-center text-sm font-medium rounded-md transition-all duration-200 
+                  className={`h-10 flex items-center justify-center text-sm font-medium rounded-md transition-all duration-200 whitespace-normal break-words
                     ${
                       isActive
                         ? 'bg-green-500 text-white shadow-lg shadow-green-500/25 dark:bg-green-600'
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20'
                     }`.trim()}
                 >
-                  {episodeNumber}
+                  {/* //{episodeNumber}--------原来的----------- */}
+				  {episodeLabel}{/* -----改后的------ */}
                 </button>
               );
             })}
