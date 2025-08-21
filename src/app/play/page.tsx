@@ -1302,7 +1302,7 @@ useEffect(() => {
       artPlayerRef.current = new Artplayer({
         container: artRef.current,
         url: videoUrl,
-        title: '',
+        title: null,
         poster: videoCover,
         volume: 0.7,
         isLive: false,
