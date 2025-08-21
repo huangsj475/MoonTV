@@ -1506,10 +1506,11 @@ useEffect(() => {
             if (duration && target >= duration - 2) {
               target = Math.max(0, duration - 5);
             }
-            //--------原来的---------------
+           /* //--------原来的---------------
             artPlayerRef.current.currentTime = target;
             console.log('成功恢复播放进度到:', resumeTimeRef.current);
             //--------原来的---------------
+            */
             // 添加延迟确保播放器完全准备好-----改后---------
       setTimeout(() => {
         if (artPlayerRef.current) {
