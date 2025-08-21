@@ -138,6 +138,25 @@ function PlayPageClient() {
     videoTitle,
     videoYear,
   ]);
+//-----------正则匹配视频地址显示每一集名称（仅暴风资源）---------------
+  // 在组件内部添加这个工具函数
+const extractEpisodeNameFromUrl = (url: string): string | null => {
+  if (!url) return null;
+  
+  try {
+    // 使用正则表达式匹配URL中的集名称部分
+    const match = url.match(/\/video\/[^/]+\/([^/]+)\/index\.m3u8$/);
+    if (match && match[1]) {
+      return decodeURIComponent(match[1]);
+    }
+  } catch (error) {
+    console.error('解析URL失败:', error);
+  }
+  
+  return null;
+};
+//------------------到这里----------------------------
+
 
   // 视频播放地址
   const [videoUrl, setVideoUrl] = useState('');
@@ -1822,7 +1841,8 @@ useEffect(() => {
             {videoTitle || '影片标题'}
             {totalEpisodes > 1 && (
               <span className='text-gray-500 dark:text-gray-400'>
-                {` > 第 ${currentEpisodeIndex + 1} 集`}
+                {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
+                {` > ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`}
               </span>
             )}
           </h1>
