@@ -1841,7 +1841,7 @@ useEffect(() => {
             {totalEpisodes > 1 && (
               <span className='text-gray-500 dark:text-gray-400'>
                 {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
-                {`${extractEpisodeNameFromUrl(videoUrl) ||  > 第 ${currentEpisodeIndex + 1} 集`}
+                {` > ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`}
               </span>
             )}
           </h1>
