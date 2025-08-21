@@ -428,9 +428,9 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
   ) {
     const url = currentSourceObj.episodes[episodeIndex];
     const name = extractEpisodeName(url);
-    if (name) {
+    
       episodeLabel = name || `${episodeNumber}`;
-    }
+    
   }
 				{/* -------到这里-------- */}
               return (
