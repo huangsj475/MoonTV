@@ -430,7 +430,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
     currentSourceObj.episodes.length > episodeIndex
   ) {
     const url = currentSourceObj.episodes[episodeIndex];
-    const name = extractEpisodeName(url,{source.source});
+    const name = extractEpisodeName(url,{`${source.source}`});
     
       episodeLabel = name || `${episodeNumber}`;
     
