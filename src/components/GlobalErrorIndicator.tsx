@@ -12,6 +12,8 @@ export function GlobalErrorIndicator() {
   const [currentError, setCurrentError] = useState<ErrorInfo | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isReplacing, setIsReplacing] = useState(false);
+  // 新增：定时器 ref
+  const autoHideTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // 监听自定义错误事件
@@ -38,6 +40,14 @@ export function GlobalErrorIndicator() {
       }
 
       setIsVisible(true);
+
+      // 自动消失逻辑：每次新错误都清理旧定时器，再设新定时器----------
+      if (autoHideTimer.current) {
+        clearTimeout(autoHideTimer.current);
+      }
+      autoHideTimer.current = setTimeout(() => {
+        handleClose();
+      }, 3000); // 3秒后自动关闭
     };
 
     // 监听错误事件
