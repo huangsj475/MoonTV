@@ -1754,10 +1754,6 @@ useEffect(() => {
   if (artPlayerRef.current) {
     artPlayerRef.current.on('controls:show', handleControlsShow);
     artPlayerRef.current.on('controls:hide', handleControlsHide);
-    artPlayerRef.current.on('fullscreen', handleFullscreenEnter);
-    artPlayerRef.current.on('fullscreenWeb', handleFullscreenEnter);
-    artPlayerRef.current.on('fullscreenExit', handleFullscreenExit);
-    artPlayerRef.current.on('fullscreenWebExit', handleFullscreenExit);
   }
  // 窗口大小适配
   function handleResize() {
@@ -1771,10 +1767,6 @@ useEffect(() => {
     if (artPlayerRef.current) {
       artPlayerRef.current.off('controls:show', handleControlsShow);
       artPlayerRef.current.off('controls:hide', handleControlsHide);
-      artPlayerRef.current.off('fullscreen', handleFullscreenEnter);
-      artPlayerRef.current.off('fullscreenWeb', handleFullscreenEnter);
-      artPlayerRef.current.off('fullscreenExit', handleFullscreenExit);
-      artPlayerRef.current.off('fullscreenWebExit', handleFullscreenExit);
     }
     window.removeEventListener('resize', handleResize);
   };
