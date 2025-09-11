@@ -1733,6 +1733,7 @@ useEffect(() => {
   // 更新标题文本和显示状态（根据控制栏和全屏）
   function updateTitleLayer(show = true, text?: string) {
     const layerEl = document.getElementById('artplayer-title-layer');
+  
     if (layerEl) {
       layerEl.innerText =
         text ??
@@ -1796,10 +1797,10 @@ useEffect(() => {
 
   // 窗口变化适配字体
   function handleResize() {
-    // 只更新样式，不改变显示/隐藏
-    updateTitleLayer(
-      !!document.getElementById('artplayer-title-layer')?.style.display !== 'none'
-    );
+    const layerEl = document.getElementById('artplayer-title-layer');
+  // 如果 layerEl 不存在，默认显示
+  const isShow = layerEl ? layerEl.style.display !== 'none' : true;
+  updateTitleLayer(isShow);
   }
   window.addEventListener('resize', handleResize);
 
