@@ -1410,7 +1410,6 @@ useEffect(() => {
           padding: 4px 8px;
           border-radius: 4px;
           background-color: rgba(0,0,0,0.3);
-          opacity: 0;
         "></div>
       `,
     },
@@ -1764,7 +1763,6 @@ useEffect(() => {
  
   // 初始更新 
   updateCurrentTime();
-  titleLayer.style.opacity  = '1';
   
   // 每分钟更新一次 
   const timer = setInterval(updateCurrentTime, 60000);
@@ -1780,13 +1778,8 @@ useEffect(() => {
     if (timeElement) timeElement.style.display  = 'none';
   };
  
-  artPlayerRef.current.on('controls:show',  () => {
-  const titleLayer = document.getElementById('artplayer-current-time'); 
-  if (titleLayer) titleLayer.style.opacity  = '1';
-});
-  artPlayerRef.current.on('controls:hide',  () => {
-  const titleLayer = document.getElementById('artplayer-current-time'); 
-  if (titleLayer) titleLayer.style.opacity  = '0';
+    artPlayerRef.current.on('controls:show',  handleControlsShow);
+    artPlayerRef.current.on('controls:hide',  handleControlsHide);
 });
  
   return () => {
@@ -1822,7 +1815,6 @@ useEffect(() => {
     updateTitleLayer(false);
   }
  // 初始渲染时，默认显示
-  titleLayer.style.opacity  = '1';
   updateTitleLayer(true);
 // 绑定 Artplayer 事件
   if (artPlayerRef.current) {
