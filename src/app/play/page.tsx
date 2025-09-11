@@ -1386,7 +1386,6 @@ useEffect(() => {
         text-shadow: 0 0 8px #000;
         pointer-events: none;
         z-index: 20;
-        opacity: 0;
         ">${
           videoTitle
             ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
@@ -1819,11 +1818,11 @@ useEffect(() => {
   if (artPlayerRef.current) {
      artPlayerRef.current.on('controls:show',  () => {
   const titleLayer = document.getElementById('artplayer-title-layer'); 
-  if (titleLayer) titleLayer.style.opacity  = '1';
+  if (titleLayer) updateTitleLayer(true);
 });
   artPlayerRef.current.on('controls:hide',  () => {
   const titleLayer = document.getElementById('artplayer-title-layer'); 
-  if (titleLayer) titleLayer.style.opacity  = '0';
+  if (titleLayer) updateTitleLayer(false);
 });
     //artPlayerRef.current.on('controls:show', handleControlsShow);
    // artPlayerRef.current.on('controls:hide', handleControlsHide);
