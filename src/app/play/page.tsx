@@ -1778,9 +1778,8 @@ useEffect(() => {
     if (timeElement) timeElement.style.display  = 'none';
   };
  
-    artPlayerRef.current.on('controls:show',  handleControlsShow);
-    artPlayerRef.current.on('controls:hide',  handleControlsHide);
-});
+  artPlayerRef.current.on('controls:show',  handleControlsShow);
+  artPlayerRef.current.on('controls:hide',  handleControlsHide);
  
   return () => {
     clearInterval(timer);
