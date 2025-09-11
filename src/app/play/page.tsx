@@ -1386,6 +1386,7 @@ useEffect(() => {
         text-shadow: 0 0 8px #000;
         pointer-events: none;
         z-index: 20;
+        opacity: 0;
         ">${
           videoTitle
             ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
@@ -1409,6 +1410,7 @@ useEffect(() => {
           padding: 4px 8px;
           border-radius: 4px;
           background-color: rgba(0,0,0,0.3);
+          opacity: 0;
         "></div>
       `,
     },
@@ -1777,8 +1779,14 @@ useEffect(() => {
     if (timeElement) timeElement.style.display  = 'none';
   };
  
-  artPlayerRef.current.on('controls:show',  handleControlsShow);
-  artPlayerRef.current.on('controls:hide',  handleControlsHide);
+  artPlayerRef.current.on('controls:show',  () => {
+  const titleLayer = document.getElementById('artplayer-current-time'); 
+  if (titleLayer) titleLayer.style.opacity  = '1';
+});
+  artPlayerRef.current.on('controls:hide',  () => {
+  const titleLayer = document.getElementById('artplayer-current-time'); 
+  if (titleLayer) titleLayer.style.opacity  = '0';
+});
  
   return () => {
     clearInterval(timer);
@@ -1816,8 +1824,16 @@ useEffect(() => {
   updateTitleLayer(true);
 // 绑定 Artplayer 事件
   if (artPlayerRef.current) {
-    artPlayerRef.current.on('controls:show', handleControlsShow);
-    artPlayerRef.current.on('controls:hide', handleControlsHide);
+     artPlayerRef.current.on('controls:show',  () => {
+  const titleLayer = document.getElementById('artplayer-title-layer'); 
+  if (titleLayer) titleLayer.style.opacity  = '1';
+});
+  artPlayerRef.current.on('controls:hide',  () => {
+  const titleLayer = document.getElementById('artplayer-title-layer'); 
+  if (titleLayer) titleLayer.style.opacity  = '0';
+});
+    //artPlayerRef.current.on('controls:show', handleControlsShow);
+   // artPlayerRef.current.on('controls:hide', handleControlsHide);
   }
  // 窗口大小变化时，保持当前显示/隐藏状态，但调整样式
  // function handleResize() {
