@@ -1764,6 +1764,7 @@ useEffect(() => {
  
   // 初始更新 
   updateCurrentTime();
+  titleLayer.style.opacity  = '1';
   
   // 每分钟更新一次 
   const timer = setInterval(updateCurrentTime, 60000);
@@ -1821,6 +1822,7 @@ useEffect(() => {
     updateTitleLayer(false);
   }
  // 初始渲染时，默认显示
+  titleLayer.style.opacity  = '1';
   updateTitleLayer(true);
 // 绑定 Artplayer 事件
   if (artPlayerRef.current) {
