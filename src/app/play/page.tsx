@@ -1727,7 +1727,6 @@ useEffect(() => {
 
   //--------新增：全屏标题显示优化------------------
 useEffect(() => {
-  // 控制标题内容和显示
   function updateTitleLayer(show = true) {
     const layerEl = document.getElementById('artplayer-title-layer');
     if (layerEl) {
@@ -1741,7 +1740,6 @@ useEffect(() => {
     }
   }
 
-  // 控制栏显示时
   function handleControlsShow() {
     if (
       artPlayerRef.current &&
@@ -1751,15 +1749,12 @@ useEffect(() => {
       updateTitleLayer(true);
     }
   }
-  // 控制栏隐藏时
   function handleControlsHide() {
     updateTitleLayer(false);
   }
-  // 进入全屏时
   function handleFullscreenEnter() {
     updateTitleLayer(false);
   }
-  // 退出全屏时
   function handleFullscreenExit() {
     if (
       artPlayerRef.current &&
@@ -1770,10 +1765,8 @@ useEffect(() => {
     }
   }
 
-  // 初始渲染时，默认显示
   updateTitleLayer(true);
 
-  // 绑定 Artplayer 事件
   if (artPlayerRef.current) {
     artPlayerRef.current.on('controls:show', handleControlsShow);
     artPlayerRef.current.on('controls:hide', handleControlsHide);
@@ -1783,7 +1776,6 @@ useEffect(() => {
     artPlayerRef.current.on('fullscreenWebExit', handleFullscreenExit);
   }
 
-  // 窗口大小适配
   function handleResize() {
     const layerEl = document.getElementById('artplayer-title-layer');
     const isShow = layerEl ? layerEl.style.display !== 'none' : true;
@@ -1791,7 +1783,6 @@ useEffect(() => {
   }
   window.addEventListener('resize', handleResize);
 
-  // 清理事件
   return () => {
     if (artPlayerRef.current) {
       artPlayerRef.current.off('controls:show', handleControlsShow);
