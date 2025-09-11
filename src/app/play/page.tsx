@@ -1369,8 +1369,30 @@ useEffect(() => {
         moreVideoAttr: {
           crossOrigin: 'anonymous',
         },
-        // 新增：播放器标题
-        title: `${videoTitle} - 第${currentEpisodeIndex + 1}集`,
+        //-------新增标题-------------
+         layers: [
+    {
+      name: 'custom-title-layer',
+      html: `<div id="artplayer-title-layer" style="
+        position: absolute;
+        top: 16px;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #fff;
+        text-shadow: 0 0 8px #000;
+        pointer-events: none;
+        z-index: 20;
+        ">${
+          videoTitle
+            ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
+            : '影片标题'
+        }</div>`,
+    },
+  ],
+        //-------新增标题-------------
         // HLS 支持配置
         customType: {
           m3u8: function (video: HTMLVideoElement, url: string) {
@@ -1704,11 +1726,15 @@ useEffect(() => {
   }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, playRecordLoaded]);
 
         // -----------新增：若集数或标题变化也要同步--------------------
-      useEffect(() => {
-        if (artPlayerRef.current) {
-          artPlayerRef.current.title = `${videoTitle} - 第${currentEpisodeIndex + 1}集`;
-        }
-      }, [videoTitle, currentEpisodeIndex]);
+        useEffect(() => {
+          const layerEl = document.getElementById('artplayer-title-layer');
+          if (layerEl) {
+            layerEl.innerText =
+              videoTitle
+                ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
+                : '影片标题';
+          }
+        }, [videoTitle, currentEpisodeIndex]);
   
   // 当组件卸载时清理定时器
   useEffect(() => {
