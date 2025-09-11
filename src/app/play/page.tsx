@@ -1375,11 +1375,11 @@ useEffect(() => {
       name: 'custom-title-layer',
       html: `<div id="artplayer-title-layer" style="
         position: absolute;
-        top: 16px;
+        top: 10px;
         left: 0;
         width: 100%;
         text-align: center;
-        font-size: 1.25rem;
+        font-size: 1rem;
         font-weight: bold;
         color: #fff;
         text-shadow: 0 0 8px #000;
@@ -1725,6 +1725,44 @@ useEffect(() => {
     }
   }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, playRecordLoaded]);
 
+  //--------新增：全屏标题显示优化------------------
+  useEffect(() => {
+  const layerEl = document.getElementById('artplayer-title-layer');
+  if (layerEl) {
+    layerEl.innerText =
+      videoTitle
+        ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
+        : '影片标题';
+    // 初始时非全屏，显示标题
+    layerEl.style.display = 'block';
+  }
+
+  // 定义全屏事件处理
+  function handleFullscreenChange(isFullscreen: boolean) {
+    const layerEl = document.getElementById('artplayer-title-layer');
+    if (layerEl) {
+      layerEl.style.display = isFullscreen ? 'none' : 'block';
+    }
+  }
+
+  // 订阅 Artplayer 全屏事件
+  if (artPlayerRef.current) {
+    // 进入全屏
+    artPlayerRef.current.on('fullscreen', () => handleFullscreenChange(true));
+    // 退出全屏
+    artPlayerRef.current.on('fullscreenExit', () => handleFullscreenChange(false));
+  }
+
+  // 组件卸载时，清理事件监听
+  return () => {
+    if (artPlayerRef.current) {
+      artPlayerRef.current.off('fullscreen', () => handleFullscreenChange(true));
+      artPlayerRef.current.off('fullscreenExit', () => handleFullscreenChange(false));
+    }
+  };
+}, [videoTitle, currentEpisodeIndex]);
+  //--------新增：全屏标题显示优化------------------
+  
         // -----------新增：若集数或标题变化也要同步--------------------
         useEffect(() => {
           const layerEl = document.getElementById('artplayer-title-layer');
