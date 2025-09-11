@@ -1727,15 +1727,14 @@ useEffect(() => {
 
   //--------新增：全屏标题显示优化------------------
 useEffect(() => {
-  // 只负责显示/隐藏和内容同步
-  function updateTitleLayer(show = true, text?: string) {
+  // 控制标题内容和显示
+  function updateTitleLayer(show = true) {
     const layerEl = document.getElementById('artplayer-title-layer');
     if (layerEl) {
       layerEl.innerText =
-        text ??
-        (videoTitle
+        videoTitle
           ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
-          : '影片标题');
+          : '影片标题';
       layerEl.style.fontSize = window.innerWidth <= 600 ? '1rem' : '1.25rem';
       layerEl.style.top = window.innerWidth <= 600 ? '8px' : '16px';
       layerEl.style.display = show ? 'block' : 'none';
@@ -1771,10 +1770,10 @@ useEffect(() => {
     }
   }
 
-  // 初始同步内容（默认显示）
+  // 初始渲染时，默认显示
   updateTitleLayer(true);
 
-  // 绑定事件
+  // 绑定 Artplayer 事件
   if (artPlayerRef.current) {
     artPlayerRef.current.on('controls:show', handleControlsShow);
     artPlayerRef.current.on('controls:hide', handleControlsHide);
@@ -1784,7 +1783,7 @@ useEffect(() => {
     artPlayerRef.current.on('fullscreenWebExit', handleFullscreenExit);
   }
 
-  // 适配窗口大小
+  // 窗口大小适配
   function handleResize() {
     const layerEl = document.getElementById('artplayer-title-layer');
     const isShow = layerEl ? layerEl.style.display !== 'none' : true;
@@ -1805,19 +1804,7 @@ useEffect(() => {
     window.removeEventListener('resize', handleResize);
   };
 }, [videoTitle, currentEpisodeIndex, playRecordLoaded]);
-  //--------新增：全屏标题显示优化------------------
-  
-        // -----------新增：若集数或标题变化也要同步--------------------
-       /* useEffect(() => {
-          const layerEl = document.getElementById('artplayer-title-layer');
-          if (layerEl) {
-            layerEl.innerText =
-              videoTitle
-                ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
-                : '影片标题';
-          }
-        }, [videoTitle, currentEpisodeIndex]);
-        */
+  //--------新增：全屏标题显示优化-----------------
   
   // 当组件卸载时清理定时器
   useEffect(() => {
