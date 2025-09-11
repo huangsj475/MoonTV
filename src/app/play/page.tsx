@@ -1392,6 +1392,26 @@ useEffect(() => {
             : '影片标题'
         }</div>`,
     },
+           // 新增时间显示层
+    {
+      name: 'current-time-layer',
+      html: `
+        <div id="artplayer-current-time" style=" 
+          position: absolute;
+          top: 10px;
+          right: 10px;
+          font-size: 1rem;
+          font-weight: bold;
+          color: #fff;
+          text-shadow: 0 0 8px #000;
+          pointer-events: none;
+          z-index: 20;
+          padding: 4px 8px;
+          border-radius: 4px;
+          background-color: rgba(0,0,0,0.3);
+        "></div>
+      `,
+    },
   ],
         //-------新增标题-------------
         // HLS 支持配置
@@ -1724,6 +1744,51 @@ useEffect(() => {
     }
   }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, playRecordLoaded]);
 
+  //-------新增：时间显示----------------
+  // 添加时间更新函数和事件监听
+useEffect(() => {
+  if (!artPlayerRef.current)  return;
+ 
+  // 更新时间显示 
+  const updateCurrentTime = () => {
+    const timeElement = document.getElementById('artplayer-current-time'); 
+    if (timeElement) {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2,  '0');
+      const minutes = now.getMinutes().toString().padStart(2,  '0');
+      timeElement.textContent  = `${hours}:${minutes}`;
+    }
+  };
+ 
+  // 初始更新 
+  updateCurrentTime();
+  
+  // 每分钟更新一次 
+  const timer = setInterval(updateCurrentTime, 60000);
+ 
+  // 监听控制栏显示/隐藏事件来同步时间显示
+  const handleControlsShow = () => {
+    const timeElement = document.getElementById('artplayer-current-time'); 
+    if (timeElement) timeElement.style.display  = 'block';
+  };
+ 
+  const handleControlsHide = () => {
+    const timeElement = document.getElementById('artplayer-current-time'); 
+    if (timeElement) timeElement.style.display  = 'none';
+  };
+ 
+  artPlayerRef.current.on('controls:show',  handleControlsShow);
+  artPlayerRef.current.on('controls:hide',  handleControlsHide);
+ 
+  return () => {
+    clearInterval(timer);
+    if (artPlayerRef.current)  {
+      artPlayerRef.current.off('controls:show',  handleControlsShow);
+      artPlayerRef.current.off('controls:hide',  handleControlsHide);
+    }
+  };
+}, [artPlayerRef.current]);
+  //-------新增：时间显示----------------
   //--------新增：全屏标题显示优化------------------
 useEffect(() => {
   // 控制标题内容和显示
