@@ -1307,9 +1307,10 @@ useEffect(() => {
     
    if (!isWebkit && artPlayerRef.current) {
       artPlayerRef.current.switch = videoUrl;
-      artPlayerRef.current.title = `${videoTitle} - 第${
+      /*artPlayerRef.current.title = `${videoTitle} - 第${
         currentEpisodeIndex + 1
       }集`;
+      */
       artPlayerRef.current.poster = videoCover;
       if (artPlayerRef.current?.video) {
         ensureVideoSource(
@@ -1387,7 +1388,7 @@ useEffect(() => {
         z-index: 20;
         ">${
           videoTitle
-            ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
+            ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
             : '影片标题'
         }</div>`,
     },
@@ -1566,8 +1567,6 @@ useEffect(() => {
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
-        // -----------新增：始终同步标题（因切换集数或切换源时需更新）------------
-        //artPlayerRef.current.title = `${videoTitleRef.current} - 第${currentEpisodeIndexRef.current + 1}集`;
       });
 
       artPlayerRef.current.on('video:volumechange', () => {
@@ -1733,7 +1732,7 @@ useEffect(() => {
     if (layerEl) {
       layerEl.innerText =
         videoTitle
-          ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
+          ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
           : '影片标题';
       layerEl.style.fontSize = window.innerWidth <= 600 ? '1rem' : '1.25rem';
       layerEl.style.top = window.innerWidth <= 600 ? '8px' : '16px';
