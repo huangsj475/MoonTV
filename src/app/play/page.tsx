@@ -1943,24 +1943,25 @@ useEffect(() => {
                 <div
                   ref={artRef}
                   className='bg-black w-full h-full rounded-xl overflow-hidden shadow-lg'
-
-                   {/* ----移动端双击识别---- */}
-                    onTouchEnd={(e) => {
-                      {/* 移动端双击识别 */}
-                      if (!isMobile()) return;
-                      const now = Date.now();
-                      if (
-                        (window as any)._lastTouch &&
-                        now - (window as any)._lastTouch < 500
-                      ) {
-                        handleMobileDoubleTap(e);
-                        (window as any)._lastTouch = 0;
-                        e.preventDefault();
-                      } else {
-                        (window as any)._lastTouch = now;
-                      }
-                    }}
-                  {/* ----移动端双击识别---- */}
+                 
+                      onDoubleClick={isMobile() ? undefined : (e) => {/*PC原双击逻辑*/}}
+                      onTouchEnd={(e) => {
+                        // 移动端双击识别
+                        if (!isMobile()) return;
+                        // 简单双击识别（如需更精准可用第三方库）
+                        const now = Date.now();
+                        if (
+                          (window as any)._lastTouch &&
+                          now - (window as any)._lastTouch < 400
+                        ) {
+                          handleMobileDoubleTap(e);
+                          (window as any)._lastTouch = 0;
+                          e.preventDefault();
+                        } else {
+                          (window as any)._lastTouch = now;
+                        }
+                      }}
+                  
                 ></div>
 
                 {/* 换源加载蒙层 */}
