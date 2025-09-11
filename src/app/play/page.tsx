@@ -138,6 +138,42 @@ function PlayPageClient() {
     videoTitle,
     videoYear,
   ]);
+
+  //------------手机端播放双击事件优化----------------
+  //左边快退，中间暂停，右边快进
+  // 工具函数：判断是否移动端
+const isMobile = () =>
+  typeof window !== 'undefined' &&
+  (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+
+// 双击事件处理
+const handleMobileDoubleTap = (e: React.TouchEvent<HTMLDivElement>) => {
+  const rect = artRef.current?.getBoundingClientRect();
+  if (!rect) return;
+  const touch = e.changedTouches[0];
+  const x = touch.clientX - rect.left;
+  const area = x / rect.width;
+
+  if (!artPlayerRef.current) return;
+
+  // 划分区域：左（0~0.33），中（0.33~0.66），右（0.66~1）
+  if (area < 0.33) {
+    // 快退10秒
+    artPlayerRef.current.currentTime = Math.max(artPlayerRef.current.currentTime - 10, 0);
+    artPlayerRef.current.notice.show = '快退10秒';
+  } else if (area > 0.66) {
+    // 快进10秒
+    artPlayerRef.current.currentTime = Math.min(
+      artPlayerRef.current.currentTime + 10,
+      artPlayerRef.current.duration || artPlayerRef.current.currentTime + 10
+    );
+    artPlayerRef.current.notice.show = '快进10秒';
+  } else {
+    // 暂停/播放
+    artPlayerRef.current.toggle();
+  }
+};
+  //------------手机端播放双击事件优化----------------
 //-----------正则匹配视频地址显示每一集名称（仅暴风资源）---------------
   // 在组件内部添加这个工具函数
 const extractEpisodeNameFromUrl = (url: string): string | null => {
@@ -1907,6 +1943,24 @@ useEffect(() => {
                 <div
                   ref={artRef}
                   className='bg-black w-full h-full rounded-xl overflow-hidden shadow-lg'
+
+                   {/* ----移动端双击识别---- */}
+                    onTouchEnd={(e) => {
+                      {/* 移动端双击识别 */}
+                      if (!isMobile()) return;
+                      const now = Date.now();
+                      if (
+                        (window as any)._lastTouch &&
+                        now - (window as any)._lastTouch < 500
+                      ) {
+                        handleMobileDoubleTap(e);
+                        (window as any)._lastTouch = 0;
+                        e.preventDefault();
+                      } else {
+                        (window as any)._lastTouch = now;
+                      }
+                    }}
+                  {/* ----移动端双击识别---- */}
                 ></div>
 
                 {/* 换源加载蒙层 */}
