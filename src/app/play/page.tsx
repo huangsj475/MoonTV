@@ -1755,7 +1755,7 @@ useEffect(() => {
     artPlayerRef.current.on('controls:show', handleControlsShow);
     artPlayerRef.current.on('controls:hide', handleControlsHide);
   }
- // 窗口大小适配
+ // 窗口大小变化时，保持当前显示/隐藏状态，但调整样式
   function handleResize() {
     const layerEl = document.getElementById('artplayer-title-layer');
     const isShow = layerEl ? layerEl.style.display !== 'none' : true;
