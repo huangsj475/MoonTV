@@ -1820,19 +1820,19 @@ useEffect(() => {
     artPlayerRef.current.on('controls:hide', handleControlsHide);
   }
  // 窗口大小变化时，保持当前显示/隐藏状态，但调整样式
-  function handleResize() {
-    const layerEl = document.getElementById('artplayer-title-layer');
-    const isShow = layerEl ? layerEl.style.display !== 'none' : true;
-    updateTitleLayer(isShow);
-  }
-  window.addEventListener('resize', handleResize);
+ // function handleResize() {
+  //  const layerEl = document.getElementById('artplayer-title-layer');
+  //  const isShow = layerEl ? layerEl.style.display !== 'none' : true;
+ //   updateTitleLayer(isShow);
+  //}
+  //window.addEventListener('resize', handleResize);
 // 清理事件
   return () => {
     if (artPlayerRef.current) {
       artPlayerRef.current.off('controls:show', handleControlsShow);
       artPlayerRef.current.off('controls:hide', handleControlsHide);
     }
-    window.removeEventListener('resize', handleResize);
+  //  window.removeEventListener('resize', handleResize);
   };
 }, [videoTitle, currentEpisodeIndex, playRecordLoaded]);
   //--------新增：全屏标题显示优化-----------------
