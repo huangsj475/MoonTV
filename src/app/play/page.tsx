@@ -160,17 +160,17 @@ const handleMobileDoubleTap = (e: React.TouchEvent<HTMLDivElement>) => {
   if (area < 0.33) {
     // 快退10秒
     artPlayerRef.current.currentTime = Math.max(artPlayerRef.current.currentTime - 10, 0);
-    artPlayerRef.current.notice.show = '快退10秒';
+    artPlayerRef.current.notice.show('快退10秒', 1000); 
   } else if (area > 0.66) {
     // 快进10秒
     artPlayerRef.current.currentTime = Math.min(
       artPlayerRef.current.currentTime + 10,
       artPlayerRef.current.duration || artPlayerRef.current.currentTime + 10
     );
-    artPlayerRef.current.notice.show = '快进10秒';
+    artPlayerRef.current.notice.show('快进10秒', 1000); 
   } else {
     // 暂停/播放
-    artPlayerRef.current.toggle();
+    artPlayerRef.current.toggle('暂停/播放', 1000);
   }
 };
   //------------手机端播放双击事件优化----------------
