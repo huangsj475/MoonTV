@@ -1727,48 +1727,99 @@ useEffect(() => {
 
   //--------新增：全屏标题显示优化------------------
 useEffect(() => {
-  // 更新标题内容和显示状态
-  const updateTitleLayer = (hidden = false) => {
+  // 事件处理必须是稳定引用
+  let lastIsFullscreen = false;
+
+  // 更新标题文本和显示状态（根据控制栏和全屏）
+  function updateTitleLayer(show = true, text?: string) {
     const layerEl = document.getElementById('artplayer-title-layer');
     if (layerEl) {
       layerEl.innerText =
-        videoTitle
+        text ??
+        (videoTitle
           ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
-          : '影片标题';
-      layerEl.style.display = hidden ? 'none' : 'block';
-      // 移动端可适配字体
+          : '影片标题');
       layerEl.style.fontSize = window.innerWidth <= 600 ? '1rem' : '1.25rem';
       layerEl.style.top = window.innerWidth <= 600 ? '8px' : '16px';
+      layerEl.style.display = show ? 'block' : 'none';
     }
-  };
+  }
 
-  // 事件处理函数（必须是稳定引用）
-  const handleFullscreenEnter = () => updateTitleLayer(true);
-  const handleFullscreenExit = () => updateTitleLayer(false);
+  // 控制栏显示时
+  function handleControlsShow() {
+    // 只有不在全屏时才显示
+    if (
+      artPlayerRef.current &&
+      !artPlayerRef.current.fullscreen &&
+      !artPlayerRef.current.fullscreenWeb
+    ) {
+      updateTitleLayer(true);
+    }
+  }
 
-  // 初始同步
-  updateTitleLayer(false);
+  // 控制栏隐藏时
+  function handleControlsHide() {
+    updateTitleLayer(false);
+  }
 
-  // 绑定事件（Artplayer实例存在时才绑定）
+  // 进入全屏时
+  function handleFullscreenEnter() {
+    lastIsFullscreen = true;
+    updateTitleLayer(false);
+  }
+
+  // 退出全屏时
+  function handleFullscreenExit() {
+    lastIsFullscreen = false;
+    // 控制栏显示时才显示标题
+    if (
+      artPlayerRef.current &&
+      artPlayerRef.current.controls &&
+      artPlayerRef.current.controls.show
+    ) {
+      updateTitleLayer(true);
+    }
+  }
+
+  // 初始同步标题内容和显示状态（默认显示）
+  updateTitleLayer(true);
+
+  // 绑定事件
   if (artPlayerRef.current) {
+    artPlayerRef.current.on('controls:show', handleControlsShow);
+    artPlayerRef.current.on('controls:hide', handleControlsHide);
     artPlayerRef.current.on('fullscreen', handleFullscreenEnter);
     artPlayerRef.current.on('fullscreenWeb', handleFullscreenEnter);
     artPlayerRef.current.on('fullscreenExit', handleFullscreenExit);
     artPlayerRef.current.on('fullscreenWebExit', handleFullscreenExit);
   }
 
-  // 每次窗口变化也可同步字体适配
-  window.addEventListener('resize', () => updateTitleLayer());
+  // 窗口变化适配字体
+  function handleResize() {
+    // 只更新样式，不改变显示/隐藏
+    updateTitleLayer(
+      !!document.getElementById('artplayer-title-layer')?.style.display !== 'none'
+    );
+  }
+  window.addEventListener('resize', handleResize);
 
-  // 清理事件
+  // 每次依赖变化，更新标题内容
+  updateTitleLayer(
+    !(lastIsFullscreen ||
+      (artPlayerRef.current && !artPlayerRef.current.controls.show))
+  );
+
+  // 清理
   return () => {
     if (artPlayerRef.current) {
+      artPlayerRef.current.off('controls:show', handleControlsShow);
+      artPlayerRef.current.off('controls:hide', handleControlsHide);
       artPlayerRef.current.off('fullscreen', handleFullscreenEnter);
       artPlayerRef.current.off('fullscreenWeb', handleFullscreenEnter);
       artPlayerRef.current.off('fullscreenExit', handleFullscreenExit);
       artPlayerRef.current.off('fullscreenWebExit', handleFullscreenExit);
     }
-    window.removeEventListener('resize', () => updateTitleLayer());
+    window.removeEventListener('resize', handleResize);
   };
 }, [videoTitle, currentEpisodeIndex, playRecordLoaded]);
   //--------新增：全屏标题显示优化------------------
