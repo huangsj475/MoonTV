@@ -1540,23 +1540,12 @@ useEffect(() => {
           },
         ],
       });
-
-      // -----------新增：始终同步标题（因切换集数或切换源时需更新）------------
-      artPlayerRef.current.on('ready', () => {
-        setError(null);
-        artPlayerRef.current.title = `${videoTitleRef.current} - 第${currentEpisodeIndexRef.current + 1}集`;
-      });
-
-      // -----------新增：若集数或标题变化也要同步--------------------
-      useEffect(() => {
-        if (artPlayerRef.current) {
-          artPlayerRef.current.title = `${videoTitle} - 第${currentEpisodeIndex + 1}集`;
-        }
-      }, [videoTitle, currentEpisodeIndex]);
-      
+     
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
+        // -----------新增：始终同步标题（因切换集数或切换源时需更新）------------
+        artPlayerRef.current.title = `${videoTitleRef.current} - 第${currentEpisodeIndexRef.current + 1}集`;
       });
 
       artPlayerRef.current.on('video:volumechange', () => {
@@ -1714,6 +1703,13 @@ useEffect(() => {
     }
   }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, playRecordLoaded]);
 
+        // -----------新增：若集数或标题变化也要同步--------------------
+      useEffect(() => {
+        if (artPlayerRef.current) {
+          artPlayerRef.current.title = `${videoTitle} - 第${currentEpisodeIndex + 1}集`;
+        }
+      }, [videoTitle, currentEpisodeIndex]);
+  
   // 当组件卸载时清理定时器
   useEffect(() => {
     return () => {
