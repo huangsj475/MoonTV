@@ -170,7 +170,7 @@ const handleMobileDoubleTap = (e: React.TouchEvent<HTMLDivElement>) => {
     artPlayerRef.current.notice.show('快进10秒', 1000); 
   } else {
     // 暂停/播放
-    artPlayerRef.current.show('暂停/播放', 1000);
+    artPlayerRef.current.toggle();
   }
 };
   //------------手机端播放双击事件优化----------------
