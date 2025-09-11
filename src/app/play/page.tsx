@@ -1567,7 +1567,7 @@ useEffect(() => {
       artPlayerRef.current.on('ready', () => {
         setError(null);
         // -----------新增：始终同步标题（因切换集数或切换源时需更新）------------
-        artPlayerRef.current.title = `${videoTitleRef.current} - 第${currentEpisodeIndexRef.current + 1}集`;
+        //artPlayerRef.current.title = `${videoTitleRef.current} - 第${currentEpisodeIndexRef.current + 1}集`;
       });
 
       artPlayerRef.current.on('video:volumechange', () => {
