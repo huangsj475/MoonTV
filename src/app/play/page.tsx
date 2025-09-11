@@ -1727,13 +1727,9 @@ useEffect(() => {
 
   //--------新增：全屏标题显示优化------------------
 useEffect(() => {
-  // 事件处理必须是稳定引用
-  let lastIsFullscreen = false;
-
-  // 更新标题文本和显示状态（根据控制栏和全屏）
+  // 只负责显示/隐藏和内容同步
   function updateTitleLayer(show = true, text?: string) {
     const layerEl = document.getElementById('artplayer-title-layer');
-  
     if (layerEl) {
       layerEl.innerText =
         text ??
@@ -1748,7 +1744,6 @@ useEffect(() => {
 
   // 控制栏显示时
   function handleControlsShow() {
-    // 只有不在全屏时才显示
     if (
       artPlayerRef.current &&
       !artPlayerRef.current.fullscreen &&
@@ -1757,22 +1752,16 @@ useEffect(() => {
       updateTitleLayer(true);
     }
   }
-
   // 控制栏隐藏时
   function handleControlsHide() {
     updateTitleLayer(false);
   }
-
   // 进入全屏时
   function handleFullscreenEnter() {
-    lastIsFullscreen = true;
     updateTitleLayer(false);
   }
-
   // 退出全屏时
   function handleFullscreenExit() {
-    lastIsFullscreen = false;
-    // 控制栏显示时才显示标题
     if (
       artPlayerRef.current &&
       artPlayerRef.current.controls &&
@@ -1782,7 +1771,7 @@ useEffect(() => {
     }
   }
 
-  // 初始同步标题内容和显示状态（默认显示）
+  // 初始同步内容（默认显示）
   updateTitleLayer(true);
 
   // 绑定事件
@@ -1795,22 +1784,15 @@ useEffect(() => {
     artPlayerRef.current.on('fullscreenWebExit', handleFullscreenExit);
   }
 
-  // 窗口变化适配字体
+  // 适配窗口大小
   function handleResize() {
     const layerEl = document.getElementById('artplayer-title-layer');
-  // 如果 layerEl 不存在，默认显示
-  const isShow = layerEl ? layerEl.style.display !== 'none' : true;
-  updateTitleLayer(isShow);
+    const isShow = layerEl ? layerEl.style.display !== 'none' : true;
+    updateTitleLayer(isShow);
   }
   window.addEventListener('resize', handleResize);
 
-  // 每次依赖变化，更新标题内容
-  updateTitleLayer(
-    !(lastIsFullscreen ||
-      (artPlayerRef.current && !artPlayerRef.current.controls.show))
-  );
-
-  // 清理
+  // 清理事件
   return () => {
     if (artPlayerRef.current) {
       artPlayerRef.current.off('controls:show', handleControlsShow);
@@ -1826,7 +1808,7 @@ useEffect(() => {
   //--------新增：全屏标题显示优化------------------
   
         // -----------新增：若集数或标题变化也要同步--------------------
-        useEffect(() => {
+       /* useEffect(() => {
           const layerEl = document.getElementById('artplayer-title-layer');
           if (layerEl) {
             layerEl.innerText =
@@ -1835,6 +1817,7 @@ useEffect(() => {
                 : '影片标题';
           }
         }, [videoTitle, currentEpisodeIndex]);
+        */
   
   // 当组件卸载时清理定时器
   useEffect(() => {
