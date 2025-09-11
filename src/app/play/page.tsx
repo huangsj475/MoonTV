@@ -1792,7 +1792,7 @@ useEffect(() => {
   //--------新增：全屏标题显示优化------------------
 useEffect(() => {
   // 控制标题内容和显示
-  function updateTitleLayer(show = true) {
+  function updateTitleLayer(show: boolean) {
     const layerEl = document.getElementById('artplayer-title-layer');
     if (layerEl) {
       layerEl.innerText =
@@ -1805,18 +1805,27 @@ useEffect(() => {
     }
   }
 // 控制栏显示时
-  function handleControlsShow() {
+  /*function handleControlsShow() {
       updateTitleLayer(true);
   }
+  */
+  const handleControlsShow = () => {
+    updateTitleLayer(true);
+    
+  };
   // 控制栏隐藏时
-  function handleControlsHide() {
+  /*function handleControlsHide() {
     updateTitleLayer(false);
   }
+  */
+  const handleControlsHide = () => {
+    updateTitleLayer(false);
+  };
  // 初始渲染时，默认显示
-  updateTitleLayer(true);
+  updateTitleLayer(false);
 // 绑定 Artplayer 事件
   if (artPlayerRef.current) {
-     artPlayerRef.current.on('controls:show',  () => {
+   /*  artPlayerRef.current.on('controls:show',  () => {
   const titleLayer = document.getElementById('artplayer-title-layer'); 
   if (titleLayer) updateTitleLayer(true);
 });
@@ -1824,9 +1833,11 @@ useEffect(() => {
   const titleLayer = document.getElementById('artplayer-title-layer'); 
   if (titleLayer) updateTitleLayer(false);
 });
-    //artPlayerRef.current.on('controls:show', handleControlsShow);
-   // artPlayerRef.current.on('controls:hide', handleControlsHide);
+*/
+    artPlayerRef.current.on('controls:show', handleControlsShow);
+    artPlayerRef.current.on('controls:hide', handleControlsHide);
   }
+  
  // 窗口大小变化时，保持当前显示/隐藏状态，但调整样式
  // function handleResize() {
   //  const layerEl = document.getElementById('artplayer-title-layer');
@@ -1842,7 +1853,7 @@ useEffect(() => {
     }
   //  window.removeEventListener('resize', handleResize);
   };
-}, [videoTitle, currentEpisodeIndex, playRecordLoaded]);
+}, [videoTitle, currentEpisodeIndex, videoUrl]);//-----原来是playRecordLoaded--------
   //--------新增：全屏标题显示优化-----------------
   
   // 当组件卸载时清理定时器
