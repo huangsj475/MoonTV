@@ -1726,41 +1726,56 @@ useEffect(() => {
   }, [Artplayer, Hls, videoUrl, loading, blockAdEnabled, playRecordLoaded]);
 
   //--------新增：全屏标题显示优化------------------
-  useEffect(() => {
+useEffect(() => {
+  // 更新标题内容和显示状态
   const layerEl = document.getElementById('artplayer-title-layer');
   if (layerEl) {
     layerEl.innerText =
       videoTitle
         ? `${videoTitle} - 第${currentEpisodeIndex + 1}集`
         : '影片标题';
-    // 初始时非全屏，显示标题
+    // 默认显示（因为初始一般进度条是显示的）
     layerEl.style.display = 'block';
+    // 适配移动端字体
+    layerEl.style.fontSize = window.innerWidth <= 600 ? '1rem' : '1.25rem';
+    layerEl.style.top = window.innerWidth <= 600 ? '8px' : '16px';
   }
 
-  // 定义全屏事件处理
-  function handleFullscreenChange(isFullscreen: boolean) {
+  // 进度条显示时显示标题
+  const showTitle = () => {
+    const layerEl = document.getElementById('artplayer-title-layer');
+    if (layerEl) layerEl.style.display = 'block';
+  };
+  // 进度条隐藏时隐藏标题
+  const hideTitle = () => {
+    const layerEl = document.getElementById('artplayer-title-layer');
+    if (layerEl) layerEl.style.display = 'none';
+  };
+
+  if (artPlayerRef.current) {
+    artPlayerRef.current.on('controls:show', showTitle);
+    artPlayerRef.current.on('controls:hide', hideTitle);
+  }
+
+  // 监听窗口大小变化，适配字体
+  const resizeHandler = () => {
     const layerEl = document.getElementById('artplayer-title-layer');
     if (layerEl) {
-      layerEl.style.display = isFullscreen ? 'none' : 'block';
-    }
-  }
-
-  // 订阅 Artplayer 全屏事件
-  if (artPlayerRef.current) {
-    // 进入全屏
-    artPlayerRef.current.on('fullscreen', () => handleFullscreenChange(true));
-    // 退出全屏
-    artPlayerRef.current.on('fullscreenExit', () => handleFullscreenChange(false));
-  }
-
-  // 组件卸载时，清理事件监听
-  return () => {
-    if (artPlayerRef.current) {
-      artPlayerRef.current.off('fullscreen', () => handleFullscreenChange(true));
-      artPlayerRef.current.off('fullscreenExit', () => handleFullscreenChange(false));
+      layerEl.style.fontSize = window.innerWidth <= 600 ? '1rem' : '1.25rem';
+      layerEl.style.top = window.innerWidth <= 600 ? '8px' : '16px';
     }
   };
-}, [videoTitle, currentEpisodeIndex]);
+  window.addEventListener('resize', resizeHandler);
+
+  // 清理
+  return () => {
+    if (artPlayerRef.current) {
+      artPlayerRef.current.off('controls:show', showTitle);
+      artPlayerRef.current.off('controls:hide', hideTitle);
+    }
+    window.removeEventListener('resize', resizeHandler);
+  };
+}, [videoTitle, currentEpisodeIndex, playRecordLoaded]);
   //--------新增：全屏标题显示优化------------------
   
         // -----------新增：若集数或标题变化也要同步--------------------
