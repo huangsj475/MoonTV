@@ -1794,7 +1794,7 @@ useEffect(() => {
   //-------新增：时间显示----------------
   //--------新增：全屏标题显示优化------------------
   useEffect(() => {
-    if (!artPlayerRef.current)  return;
+    //if (!artPlayerRef.current)  return;
  
     const titleLayer = document.getElementById('artplayer-title-layer'); 
   if (!titleLayer) return;
