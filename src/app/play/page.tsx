@@ -1610,7 +1610,7 @@ if (oldTitleLayer) {
       artPlayerRef.current.on('ready', () => {
         setError(null);
       });
-    };
+   
               
       artPlayerRef.current.on('video:volumechange', () => {
         lastVolumeRef.current = artPlayerRef.current.volume;
