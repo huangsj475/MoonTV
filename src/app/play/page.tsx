@@ -1597,7 +1597,7 @@ if (oldTitleLayer) {
       
        // -----新增控制栏绑定事件监听器------
               // 控制栏隐藏时隐藏标题
-        artPlayerRef.current.on('controls',  (show) => {
+        artPlayerRef.current.on('controls',  (show: boolean) => {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
         titleLayer.style.display  = show ? 'block' : 'none';
