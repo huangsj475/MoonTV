@@ -1594,8 +1594,8 @@ if (oldTitleLayer) {
       name: 'custom-title',
       html: `
         <div style="
-          position: relative;
-          top: 10px;
+          position: absolute;
+          bottom: 10px;
           left: 10px;
           font-size: 16px;
           font-weight: bold;
@@ -1604,7 +1604,7 @@ if (oldTitleLayer) {
           background: rgba(0, 0, 0, 0.5);
           padding: 6px 12px;
           border-radius: 4px;
-          z-index: 12;
+          z-index: 100;
           pointer-events: none;
         ">
           ${videoTitle ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}` : '影片标题'}
