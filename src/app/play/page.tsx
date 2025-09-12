@@ -1597,18 +1597,19 @@ if (oldTitleLayer) {
       
        // -----新增控制栏绑定事件监听器------
               // 控制栏隐藏时隐藏标题
-        artPlayerRef.current.on('controls',  (show: boolean) => {
-    const titleLayer = document.getElementById('artplayer-title-layer'); 
-    if (titleLayer) {
-        titleLayer.style.display  = show ? 'block' : 'none';
-        console.log(show  ? '显示控制栏' : '隐藏控制栏');
-    }
-});
-     
+        
        // -----新增控制栏绑定事件监听器------
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
+        //---------开始------------------
+        artPlayerRef.current.on('controls',  (show: boolean) => {
+        const titleLayer = document.getElementById('artplayer-title-layer'); 
+        if (titleLayer) {
+            titleLayer.style.display  = show ? 'block' : 'none';
+            console.log(show  ? '显示控制栏' : '隐藏控制栏');
+        }
+    });//----------结束--------------
       });
    
               
