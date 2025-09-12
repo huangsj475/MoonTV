@@ -1611,8 +1611,6 @@ if (oldTitleLayer) {
         </div>
       `,
       position: 'left',
-      // 不显示在默认控制栏中
-      disableDefault: true,
     },//------------自定义标题结束-----------
         ],
       });
