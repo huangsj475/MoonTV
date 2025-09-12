@@ -140,10 +140,10 @@ function PlayPageClient() {
   ]);
 
   //--------------动态更新标题内容--------------------
-  const updatePlayerTitle = (title, episodeIndex) => {
+  const updatePlayerTitle = (videoTitle, episodeIndex) => {
   const titleElement = document.getElementById('artplayer-title'); 
   if (titleElement) {
-    titleElement.textContent  = `${title} - 第 ${episodeIndex + 1} 集`;
+    titleElement.textContent  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`;
   }
 };
   //--------------动态更新标题内容--------------------
