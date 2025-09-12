@@ -1597,39 +1597,21 @@ if (oldTitleLayer) {
       
        // -----新增控制栏绑定事件监听器------
               // 控制栏隐藏时隐藏标题
-        artPlayerRef.current.on('controlshide',  () => {
-          const titleLayer = document.getElementById('artplayer-title-layer'); 
-          if (titleLayer) titleLayer.style.display  = 'none';
-        });
-         
-        // 控制栏显示时显示标题
-        artPlayerRef.current.on('controlsshow',  () => {
-          const titleLayer = document.getElementById('artplayer-title-layer'); 
-          if (titleLayer) titleLayer.style.display  = 'block';
-        });
+        artPlayerRef.current.on('controls',  (show) => {
+    const titleLayer = document.getElementById('artplayer-title-layer'); 
+    if (titleLayer) {
+        titleLayer.style.display  = show ? 'block' : 'none';
+        console.log(show  ? '显示控制栏' : '隐藏控制栏');
+    }
+});
      
        // -----新增控制栏绑定事件监听器------
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
-              // --------新增：绑定控制栏事件----------
-          if (artPlayerRef.current)  {
-        artPlayerRef.current.on('control-show',  () => {
-            console.log(' 控制栏显示');
-        });
- 
-        artPlayerRef.current.on('control-hide',  () => {
-            console.log(' 控制栏隐藏');
-        });
-    }
       });
-      return () => {
-        if (artPlayerRef.current)  {
-            artPlayerRef.current.off('control-show'); 
-            artPlayerRef.current.off('control-hide'); 
-        }
     };
-              // --------新增：绑定控制栏事件----------
+              
       artPlayerRef.current.on('video:volumechange', () => {
         lastVolumeRef.current = artPlayerRef.current.volume;
       });
@@ -1832,34 +1814,6 @@ if (oldTitleLayer) {
 }, [artPlayerRef.current]);
 
   //-------新增：时间显示----------------
-  //--------新增：全屏标题显示优化------------------
-  /*
-  useEffect(() => {
-    if (!artPlayerRef.current)  return;
- 
-    const titleLayer = document.getElementById('artplayer-title-layer'); 
-  if (!titleLayer) return;
- 
-    const handleControlsShow = () => {
-        titleLayer.style.display  = 'block';
-    };
-    const handleControlsHide = () => {
-        titleLayer.style.display  = 'none';
-    };
-    
-    artPlayerRef.current.on('controls:show',  handleControlsShow);
-    artPlayerRef.current.on('controls:hide',  handleControlsHide);
-   
-    // 初始状态为显示
-    titleLayer.style.display  = 'block';
- 
-    return () => {
-        artPlayerRef.current.off('controls:show',  handleControlsShow);
-        artPlayerRef.current.off('controls:hide',  handleControlsHide);
-    };
-}, [artPlayerRef.current]);
-  */
-  //--------新增：全屏标题显示优化-----------------
     
     //--------------切换集数、加载新视频时调用---------------------
   function updateTitleLayer(videoTitle: string, episodeIndex: number) {
