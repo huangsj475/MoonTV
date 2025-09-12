@@ -1315,9 +1315,7 @@ if (oldTitleLayer) {
     
    if (!isWebkit && artPlayerRef.current) {
       artPlayerRef.current.switch = videoUrl;
-     // artPlayerRef.current.title = `${videoTitle} - 第${
-     //   currentEpisodeIndex + 1
-     // }集`;
+      artPlayerRef.current.title = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`;
       
       artPlayerRef.current.poster = videoCover;
       if (artPlayerRef.current?.video) {
