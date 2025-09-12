@@ -1398,8 +1398,8 @@ useEffect(() => {
       html: `
         <div id="artplayer-current-time" style=" 
           position: absolute;
-          top: 10px;
-          right: 10px;
+          top: 8px;
+          right: 8px;
           font-size: 1rem;
           font-weight: bold;
           color: #fff;
@@ -1800,23 +1800,34 @@ useEffect(() => {
  
     const handleControlsShow = () => {
         if (titleLayer) titleLayer.style.display  = 'block';
-      console.log(' 控制栏显示了');
+     
     };
- 
     const handleControlsHide = () => {
         if (titleLayer) titleLayer.style.display  = 'none';
-      console.log(' 控制栏隐藏了');
     };
- 
-    artPlayerRef.current.on('controls:show',  handleControlsShow);
-    artPlayerRef.current.on('controls:hide',  handleControlsHide);
+
+    //------------修改后----------------------
+    artPlayerRef.current.on('controls:show', () => {
+        if (titleLayer) titleLayer.style.display  = 'block';
+      console.log(' 控制栏显示了');
+      });
+    artPlayerRef.current.on('controls:hide', () => {
+        if (titleLayer) titleLayer.style.display  = 'none';
+      console.log(' 控制栏隐藏了');
+      });
+
+    //------------修改后----------------------
+    //------------修改前----------------------
+    //artPlayerRef.current.on('controls:show',  handleControlsShow);
+    //artPlayerRef.current.on('controls:hide',  handleControlsHide);
+    //------------修改前----------------------
  
     // 初始状态为显示
     if (titleLayer) titleLayer.style.display  = 'block';
  
     return () => {
-        artPlayerRef.current.off('controls:show',  handleControlsShow);
-        artPlayerRef.current.off('controls:hide',  handleControlsHide);
+        artPlayerRef.current.off('controls:show');//-------原来-----,  handleControlsShow
+        artPlayerRef.current.off('controls:hide');//-------原来-----,  handleControlsHide
     };
 }, [artPlayerRef.current]);
   
