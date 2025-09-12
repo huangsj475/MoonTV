@@ -139,14 +139,6 @@ function PlayPageClient() {
     videoYear,
   ]);
 
-  //--------------动态更新标题内容--------------------
-  const updatePlayerTitle = (videoTitle: string, episodeIndex: number) => {
-  const titleElement = document.getElementById('artplayer-title'); 
-  if (titleElement) {
-    titleElement.textContent  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`;
-  }
-};
-  //--------------动态更新标题内容--------------------
   //------------手机端播放双击事件优化----------------
   //左边快退，中间暂停，右边快进
   // 工具函数：判断是否移动端
@@ -1379,12 +1371,12 @@ useEffect(() => {
           crossOrigin: 'anonymous',
         },
         //-------新增标题-------------
-     /*    layers: [
+         layers: [
     {
       name: 'custom-title-layer',
       html: `<div id="artplayer-title-layer" style="
         position: absolute;
-        top: 10px;
+        top: 8px;
         left: 0;
         width: 100%;
         text-align: center;
@@ -1421,7 +1413,7 @@ useEffect(() => {
       `,
     },
   ],
-  */
+  
         //-------新增标题-------------
         // HLS 支持配置
         customType: {
@@ -1755,7 +1747,7 @@ useEffect(() => {
 
   //-------新增：时间显示----------------
   // 添加时间更新函数和事件监听
-/*
+
       useEffect(() => {
   if (!artPlayerRef.current)  return;
  
@@ -1798,102 +1790,49 @@ useEffect(() => {
     }
   };
 }, [artPlayerRef.current]);
-*/
+
   //-------新增：时间显示----------------
   //--------新增：全屏标题显示优化------------------
-/*
-      useEffect(() => {
-  // 控制标题内容和显示
-  function updateTitleLayer(show: boolean) {
-    const layerEl = document.getElementById('artplayer-title-layer');
-    if (layerEl) {
-      layerEl.innerText =
-        videoTitle
-          ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
-          : '影片标题';
-      layerEl.style.fontSize = window.innerWidth <= 600 ? '1rem' : '1.25rem';
-      layerEl.style.top = window.innerWidth <= 600 ? '8px' : '16px';
-      layerEl.style.display = show ? 'block' : 'none';
-    }
-  }
-  */
-// 控制栏显示时
-  /*function handleControlsShow() {
-      updateTitleLayer(true);
-  }
-  */
- /* const handleControlsShow = () => {
-    updateTitleLayer(true);
-    
-  };
-  */
-  // 控制栏隐藏时
-  /*function handleControlsHide() {
-    updateTitleLayer(false);
-  }
-  */
-/*  const handleControlsHide = () => {
-    updateTitleLayer(false);
-  };
-  */
- // 初始渲染时，默认显示
- // updateTitleLayer(false);
-// 绑定 Artplayer 事件
- /* if (artPlayerRef.current) {
-   
-    artPlayerRef.current.on('controls:show', handleControlsShow);
-    artPlayerRef.current.on('controls:hide', handleControlsHide);
-  }
-  */
+  useEffect(() => {
+    if (!artPlayerRef.current)  return;
  
-// 清理事件
-/*  return () => {
-    if (artPlayerRef.current) {
-      artPlayerRef.current.off('controls:show', handleControlsShow);
-      artPlayerRef.current.off('controls:hide', handleControlsHide);
-    }
-  //  window.removeEventListener('resize', handleResize);
-  };
-}, [videoTitle, currentEpisodeIndex, videoUrl]);//-----原来是playRecordLoaded--------
-  */
+    const titleLayer = document.getElementById('artplayer-title-layer'); 
+ 
+    const handleControlsShow = () => {
+        if (titleLayer) titleLayer.style.display  = 'block';
+    };
+ 
+    const handleControlsHide = () => {
+        if (titleLayer) titleLayer.style.display  = 'none';
+    };
+ 
+    artPlayerRef.current.on('controls:show',  handleControlsShow);
+    artPlayerRef.current.on('controls:hide',  handleControlsHide);
+ 
+    // 初始状态为显示
+    if (titleLayer) titleLayer.style.display  = 'block';
+ 
+    return () => {
+        artPlayerRef.current.off('controls:show',  handleControlsShow);
+        artPlayerRef.current.off('controls:hide',  handleControlsHide);
+    };
+}, [artPlayerRef.current]);
+  
   //--------新增：全屏标题显示优化-----------------
-
-    //--------------在播放器初始化完成后添加标题到控制栏---------------------
-
-    useEffect(() => {
-  if (!artPlayerRef.current)  return;
- 
-  // 添加标题到控制栏 
-  const titleControl = artPlayerRef.current.controls.add({ 
-    position: 'left', // 标题放在控制栏左侧
-    html: `<div id="artplayer-title" style="
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
-      text-shadow: 0 0 8px #000;
-      user-select: none;
-      pointer-events: none;
-      max-width: 300px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    ">${videoTitle ? `${videoTitle} - 第 ${currentEpisodeIndex + 1} 集` : '影片标题'}</div>`,
-  });
- 
-  // 返回一个清理函数（可选）
-  return () => {
-    if (titleControl && titleControl.remove)  {
-      titleControl.remove(); 
-    }
-  };
-}, [artPlayerRef.current, videoTitle, currentEpisodeIndex]);
-    //--------------在播放器初始化完成后添加标题到控制栏---------------------
     
     //--------------切换集数、加载新视频时调用---------------------
-    useEffect(() => {
-  if (artPlayerRef.current  && videoTitle) {
-    updatePlayerTitle(videoTitle, currentEpisodeIndex);
-  }
+  function updateTitleLayer(title: string, episodeIndex: number) {
+    const titleLayer = document.getElementById('artplayer-title-layer'); 
+    if (titleLayer) {
+        titleLayer.innerText  = `${title} - 第 ${episodeIndex + 1} 集`;
+    }
+}
+  useEffect(() => {
+    if (artPlayerRef.current  && videoTitle) {
+        updateTitleLayer(videoTitle, currentEpisodeIndex);
+    }
 }, [videoTitle, currentEpisodeIndex]);
+    
     //--------------切换集数、加载新视频时调用---------------------
     
   // 当组件卸载时清理定时器
