@@ -1807,11 +1807,11 @@ useEffect(() => {
     };
 
     //------------修改后----------------------
-    artPlayerRef.current.on('controls:show', () => {
+    artPlayerRef.current.on('control:show', () => {
         if (titleLayer) titleLayer.style.display  = 'block';
       console.log(' 控制栏显示了');
       });
-    artPlayerRef.current.on('controls:hide', () => {
+    artPlayerRef.current.on('control:hide', () => {
         if (titleLayer) titleLayer.style.display  = 'none';
       console.log(' 控制栏隐藏了');
       });
