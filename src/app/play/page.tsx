@@ -1800,10 +1800,12 @@ useEffect(() => {
  
     const handleControlsShow = () => {
         if (titleLayer) titleLayer.style.display  = 'block';
+      console.log(' 控制栏显示了');
     };
  
     const handleControlsHide = () => {
         if (titleLayer) titleLayer.style.display  = 'none';
+      console.log(' 控制栏隐藏了');
     };
  
     artPlayerRef.current.on('controls:show',  handleControlsShow);
@@ -1821,10 +1823,10 @@ useEffect(() => {
   //--------新增：全屏标题显示优化-----------------
     
     //--------------切换集数、加载新视频时调用---------------------
-  function updateTitleLayer(title: string, episodeIndex: number) {
+  function updateTitleLayer(videoTitle: string, episodeIndex: number) {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
-        titleLayer.innerText  = `${title} - 第 ${episodeIndex + 1} 集`;
+        titleLayer.innerText  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`;
     }
 }
   useEffect(() => {
