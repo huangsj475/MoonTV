@@ -140,7 +140,7 @@ function PlayPageClient() {
   ]);
 
   //--------------动态更新标题内容--------------------
-  const updatePlayerTitle = (videoTitle, episodeIndex) => {
+  const updatePlayerTitle = (videoTitle: string, episodeIndex: number) => {
   const titleElement = document.getElementById('artplayer-title'); 
   if (titleElement) {
     titleElement.textContent  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`;
