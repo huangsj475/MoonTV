@@ -1821,6 +1821,7 @@ if (oldTitleLayer) {
 
   //-------新增：时间显示----------------
   //--------新增：全屏标题显示优化------------------
+  /*
   useEffect(() => {
     if (!artPlayerRef.current)  return;
  
@@ -1845,7 +1846,7 @@ if (oldTitleLayer) {
         artPlayerRef.current.off('controls:hide',  handleControlsHide);
     };
 }, [artPlayerRef.current]);
-  
+  */
   //--------新增：全屏标题显示优化-----------------
     
     //--------------切换集数、加载新视频时调用---------------------
