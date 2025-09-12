@@ -1816,6 +1816,7 @@ useEffect(() => {
       layerEl.style.display = show ? 'block' : 'none';
     }
   }
+  */
 // 控制栏显示时
   /*function handleControlsShow() {
       updateTitleLayer(true);
@@ -1823,8 +1824,9 @@ useEffect(() => {
   */
  /* const handleControlsShow = () => {
     updateTitleLayer(true);
-    */
+    
   };
+  */
   // 控制栏隐藏时
   /*function handleControlsHide() {
     updateTitleLayer(false);
