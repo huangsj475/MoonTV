@@ -1797,37 +1797,24 @@ useEffect(() => {
     if (!artPlayerRef.current)  return;
  
     const titleLayer = document.getElementById('artplayer-title-layer'); 
+  if (!titleLayer) return;
  
     const handleControlsShow = () => {
-        if (titleLayer) titleLayer.style.display  = 'block';
-     
+        titleLayer.style.display  = 'block';
     };
     const handleControlsHide = () => {
-        if (titleLayer) titleLayer.style.display  = 'none';
+        titleLayer.style.display  = 'none';
     };
-
-    //------------修改后----------------------
-    artPlayerRef.current.on('control:show', () => {
-        if (titleLayer) titleLayer.style.display  = 'block';
-      console.log(' 控制栏显示了');
-      });
-    artPlayerRef.current.on('control:hide', () => {
-        if (titleLayer) titleLayer.style.display  = 'none';
-      console.log(' 控制栏隐藏了');
-      });
-
-    //------------修改后----------------------
-    //------------修改前----------------------
-    //artPlayerRef.current.on('controls:show',  handleControlsShow);
-    //artPlayerRef.current.on('controls:hide',  handleControlsHide);
-    //------------修改前----------------------
- 
+    
+    artPlayerRef.current.on('controls:show',  handleControlsShow);
+    artPlayerRef.current.on('controls:hide',  handleControlsHide);
+   
     // 初始状态为显示
-    if (titleLayer) titleLayer.style.display  = 'block';
+    titleLayer.style.display  = 'block';
  
     return () => {
-        artPlayerRef.current.off('controls:show');//-------原来-----,  handleControlsShow
-        artPlayerRef.current.off('controls:hide');//-------原来-----,  handleControlsHide
+        artPlayerRef.current.off('controls:show',  handleControlsShow);
+        artPlayerRef.current.off('controls:hide',  handleControlsHide);
     };
 }, [artPlayerRef.current]);
   
