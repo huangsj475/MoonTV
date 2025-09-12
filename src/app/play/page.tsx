@@ -1337,6 +1337,8 @@ if (oldTitleLayer) {
       // 销毁播放器实例
       artPlayerRef.current.destroy();
       artPlayerRef.current = null;
+      // 清理 window 上的引用
+    delete (window as any).artPlayer;
     }
 
     try {
@@ -1502,6 +1504,8 @@ if (oldTitleLayer) {
                   }
                   artPlayerRef.current.destroy();
                   artPlayerRef.current = null;
+                      // 清理 window 上的引用
+                  delete (window as any).artPlayer;
                 }
                 setBlockAdEnabled(newVal);
               } catch (_) {
@@ -1592,6 +1596,8 @@ if (oldTitleLayer) {
           },
         ],
       });
+      //--------- 挂载到 window---------
+(window as any).artPlayer = artPlayerRef.current; 
 
        // -----新增控制栏绑定事件监听器------
               // 控制栏隐藏时隐藏标题
