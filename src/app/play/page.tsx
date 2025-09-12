@@ -1612,8 +1612,22 @@ if (oldTitleLayer) {
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
+              // --------新增：绑定控制栏事件----------
+          artPlayerRef.current.on('control-show',  () => {
+              console.log(' 控制栏显示');
+          });
+       
+          artPlayerRef.current.on('control-hide',  () => {
+              console.log(' 控制栏隐藏');
+          });
       });
-
+      return () => {
+        if (artPlayerRef.current)  {
+            artPlayerRef.current.off('control-show'); 
+            artPlayerRef.current.off('control-hide'); 
+        }
+    };
+              // --------新增：绑定控制栏事件----------
       artPlayerRef.current.on('video:volumechange', () => {
         lastVolumeRef.current = artPlayerRef.current.volume;
       });
