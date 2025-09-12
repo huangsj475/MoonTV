@@ -1299,6 +1299,13 @@ useEffect(() => {
     }
     console.log(videoUrl);
 
+    // -------------在创建播放器之前移除旧的图层-------------
+const oldTitleLayer = document.getElementById('artplayer-title-layer'); 
+if (oldTitleLayer) {
+  oldTitleLayer.remove(); 
+}
+    // -------------在创建播放器之前移除旧的图层-------------
+
     // 检测是否为WebKit浏览器
     const isWebkit =
       typeof window !== 'undefined' &&
@@ -1336,7 +1343,7 @@ useEffect(() => {
       // 创建新的播放器实例
       Artplayer.PLAYBACK_RATE = [0.5, 0.75, 1, 1.25, 1.5, 2, 3];
       Artplayer.USE_RAF = true;
-
+     
       artPlayerRef.current = new Artplayer({
         container: artRef.current,
         url: videoUrl,
@@ -1587,7 +1594,17 @@ useEffect(() => {
       });
 
        // -----新增控制栏绑定事件监听器------
-      
+              // 控制栏隐藏时隐藏标题
+        artPlayerRef.current.on('controlshide',  () => {
+          const titleLayer = document.getElementById('artplayer-title-layer'); 
+          if (titleLayer) titleLayer.style.display  = 'none';
+        });
+         
+        // 控制栏显示时显示标题
+        artPlayerRef.current.on('controlsshow',  () => {
+          const titleLayer = document.getElementById('artplayer-title-layer'); 
+          if (titleLayer) titleLayer.style.display  = 'block';
+        });
      
        // -----新增控制栏绑定事件监听器------
       // 监听播放器事件
