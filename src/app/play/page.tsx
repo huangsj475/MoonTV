@@ -139,6 +139,14 @@ function PlayPageClient() {
     videoYear,
   ]);
 
+  //--------------动态更新标题内容--------------------
+  const updatePlayerTitle = (title, episodeIndex) => {
+  const titleElement = document.getElementById('artplayer-title'); 
+  if (titleElement) {
+    titleElement.textContent  = `${title} - 第 ${episodeIndex + 1} 集`;
+  }
+};
+  //--------------动态更新标题内容--------------------
   //------------手机端播放双击事件优化----------------
   //左边快退，中间暂停，右边快进
   // 工具函数：判断是否移动端
@@ -1371,7 +1379,7 @@ useEffect(() => {
           crossOrigin: 'anonymous',
         },
         //-------新增标题-------------
-         layers: [
+     /*    layers: [
     {
       name: 'custom-title-layer',
       html: `<div id="artplayer-title-layer" style="
@@ -1413,6 +1421,7 @@ useEffect(() => {
       `,
     },
   ],
+  */
         //-------新增标题-------------
         // HLS 支持配置
         customType: {
@@ -1746,7 +1755,8 @@ useEffect(() => {
 
   //-------新增：时间显示----------------
   // 添加时间更新函数和事件监听
-useEffect(() => {
+/*
+      useEffect(() => {
   if (!artPlayerRef.current)  return;
  
   // 更新时间显示 
@@ -1788,9 +1798,11 @@ useEffect(() => {
     }
   };
 }, [artPlayerRef.current]);
+*/
   //-------新增：时间显示----------------
   //--------新增：全屏标题显示优化------------------
-useEffect(() => {
+/*
+      useEffect(() => {
   // 控制标题内容和显示
   function updateTitleLayer(show: boolean) {
     const layerEl = document.getElementById('artplayer-title-layer');
@@ -1809,44 +1821,31 @@ useEffect(() => {
       updateTitleLayer(true);
   }
   */
-  const handleControlsShow = () => {
+ /* const handleControlsShow = () => {
     updateTitleLayer(true);
-    
+    */
   };
   // 控制栏隐藏时
   /*function handleControlsHide() {
     updateTitleLayer(false);
   }
   */
-  const handleControlsHide = () => {
+/*  const handleControlsHide = () => {
     updateTitleLayer(false);
   };
+  */
  // 初始渲染时，默认显示
-  updateTitleLayer(false);
+ // updateTitleLayer(false);
 // 绑定 Artplayer 事件
-  if (artPlayerRef.current) {
-   /*  artPlayerRef.current.on('controls:show',  () => {
-  const titleLayer = document.getElementById('artplayer-title-layer'); 
-  if (titleLayer) updateTitleLayer(true);
-});
-  artPlayerRef.current.on('controls:hide',  () => {
-  const titleLayer = document.getElementById('artplayer-title-layer'); 
-  if (titleLayer) updateTitleLayer(false);
-});
-*/
+ /* if (artPlayerRef.current) {
+   
     artPlayerRef.current.on('controls:show', handleControlsShow);
     artPlayerRef.current.on('controls:hide', handleControlsHide);
   }
-  
- // 窗口大小变化时，保持当前显示/隐藏状态，但调整样式
- // function handleResize() {
-  //  const layerEl = document.getElementById('artplayer-title-layer');
-  //  const isShow = layerEl ? layerEl.style.display !== 'none' : true;
- //   updateTitleLayer(isShow);
-  //}
-  //window.addEventListener('resize', handleResize);
+  */
+ 
 // 清理事件
-  return () => {
+/*  return () => {
     if (artPlayerRef.current) {
       artPlayerRef.current.off('controls:show', handleControlsShow);
       artPlayerRef.current.off('controls:hide', handleControlsHide);
@@ -1854,8 +1853,47 @@ useEffect(() => {
   //  window.removeEventListener('resize', handleResize);
   };
 }, [videoTitle, currentEpisodeIndex, videoUrl]);//-----原来是playRecordLoaded--------
+  */
   //--------新增：全屏标题显示优化-----------------
-  
+
+    //--------------在播放器初始化完成后添加标题到控制栏---------------------
+
+    useEffect(() => {
+  if (!artPlayerRef.current)  return;
+ 
+  // 添加标题到控制栏 
+  const titleControl = artPlayerRef.current.controls.add({ 
+    position: 'left', // 标题放在控制栏左侧
+    html: `<div id="artplayer-title" style="
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      text-shadow: 0 0 8px #000;
+      user-select: none;
+      pointer-events: none;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    ">${videoTitle ? `${videoTitle} - 第 ${currentEpisodeIndex + 1} 集` : '影片标题'}</div>`,
+  });
+ 
+  // 返回一个清理函数（可选）
+  return () => {
+    if (titleControl && titleControl.remove)  {
+      titleControl.remove(); 
+    }
+  };
+}, [artPlayerRef.current, videoTitle, currentEpisodeIndex]);
+    //--------------在播放器初始化完成后添加标题到控制栏---------------------
+    
+    //--------------切换集数、加载新视频时调用---------------------
+    useEffect(() => {
+  if (artPlayerRef.current  && videoTitle) {
+    updatePlayerTitle(videoTitle, currentEpisodeIndex);
+  }
+}, [videoTitle, currentEpisodeIndex]);
+    //--------------切换集数、加载新视频时调用---------------------
+    
   // 当组件卸载时清理定时器
   useEffect(() => {
     return () => {
