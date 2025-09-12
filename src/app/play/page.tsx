@@ -173,41 +173,8 @@ const handleMobileDoubleTap = (e: React.TouchEvent<HTMLDivElement>) => {
     artPlayerRef.current.toggle();
   }
 };
-
-  //--------新增：标题显示优化------------------
-  /**
- * 绑定 ArtPlayer 控制栏显示/隐藏事件 
- */
-const bindControlEvents = (artPlayerRef.current, titleLayer) => {
-    // 控制栏显示事件处理函数
-    const handleControlsShow = () => {
-        if (titleLayer) {
-            titleLayer.style.display  = 'block';
-            console.log(' 控制栏显示了');
-        }
-    };
- 
-    // 控制栏隐藏事件处理函数
-    const handleControlsHide = () => {
-        if (titleLayer) {
-            titleLayer.style.display  = 'none';
-            console.log(' 控制栏隐藏了');
-        }
-    };
- 
-    // 绑定事件监听器
-    artPlayerRef.current.on('controls:show',  handleControlsShow);
-    artPlayerRef.current.on('controls:hide',  handleControlsHide);
- 
-    // 返回解绑函数，用于清理事件监听器
-    return () => {
-        artPlayerRef.current.off('controls:show',  handleControlsShow);
-        artPlayerRef.current.off('controls:hide',  handleControlsHide);
-    };
-};
-  //--------新增：标题显示优化------------------
-  
   //------------手机端播放双击事件优化----------------
+  
 //-----------正则匹配视频地址显示每一集名称（仅暴风资源）---------------
   // 在组件内部添加这个工具函数
 const extractEpisodeNameFromUrl = (url: string): string | null => {
@@ -1620,19 +1587,7 @@ useEffect(() => {
       });
 
        // -----新增控制栏绑定事件监听器------
-      // ✅ 调用函数绑定控制栏事件 
-    const unbindControlEvents = bindControlEvents(artPlayerRef.current, titleLayer);
- 
-    // ✅ 初始状态显示标题层
-    if (titleLayer) {
-        titleLayer.style.display  = 'block';
-    }
- 
-    return () => {
-        // 🔁 清理事件监听器
-        unbindControlEvents();
- 
-    };
+      
      
        // -----新增控制栏绑定事件监听器------
       // 监听播放器事件
@@ -1844,7 +1799,7 @@ useEffect(() => {
   //-------新增：时间显示----------------
   //--------新增：全屏标题显示优化------------------
   useEffect(() => {
-    //if (!artPlayerRef.current)  return;
+    if (!artPlayerRef.current)  return;
  
     const titleLayer = document.getElementById('artplayer-title-layer'); 
   if (!titleLayer) return;
