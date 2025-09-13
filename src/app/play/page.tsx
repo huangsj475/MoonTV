@@ -1384,7 +1384,7 @@ if (oldTitleLayer) {
       html: `<div id="artplayer-title-layer" style="
         position: absolute;
         top: 8px;
-        left: 30px;
+        left: 80px;
         left: 0;
         width: 100%;
         font-size: 1rem;
