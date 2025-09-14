@@ -1385,8 +1385,7 @@ useEffect(() => {
         color: #fff;
         text-shadow: 0 0 8px #000;
         pointer-events: none;
-        z-index: 13;
-        display:'none';
+        z-index: 14;
         ">${
           videoTitle
             ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
@@ -1781,6 +1780,7 @@ useEffect(() => {
         const timeElement = document.getElementById('artplayer-current-time'); 
         if (timeElement && titleElement) {
             timeElement.style.display  = show ? 'block' : 'none';
+            titleElement.style.display  = show ? 'block' : 'none';
             console.log(show  ? '显示控制栏' : '隐藏控制栏');
         }
     });//----------结束--------------
