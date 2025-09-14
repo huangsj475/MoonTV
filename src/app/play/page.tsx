@@ -1601,7 +1601,7 @@ if (oldTitleLayer) {
       artPlayerRef.current.on('ready', () => {
         setError(null);
         //---------开始------------------
-        artPlayerRef.current.on('controls',  (show: boolean) => {
+        artPlayerRef.current.on('control',  (show: boolean) => {
         const titleLayer = document.getElementById('artplayer-title-layer'); 
         if (titleLayer) {
             titleLayer.style.display  = show ? 'block' : 'none';
@@ -1834,8 +1834,9 @@ return () => {
       artPlayerRef.current.off('controls:hide',  handleControlsHide);
     }
   };
+        **/
 }, [artPlayerRef.current]);
-**/
+
   //-------新增：时间显示----------------
     
     //--------------切换集数、加载新视频时调用---------------------
