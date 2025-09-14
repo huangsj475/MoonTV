@@ -1299,13 +1299,7 @@ useEffect(() => {
     }
     console.log(videoUrl);
 
-    // -------------在创建播放器之前移除旧的图层-------------
-const oldTitleLayer = document.getElementById('artplayer-title-layer'); 
-if (oldTitleLayer) {
-  oldTitleLayer.remove(); 
-}
-    // -------------在创建播放器之前移除旧的图层-------------
-
+  
     // 检测是否为WebKit浏览器
     const isWebkit =
       typeof window !== 'undefined' &&
@@ -1391,7 +1385,8 @@ if (oldTitleLayer) {
         color: #fff;
         text-shadow: 0 0 8px #000;
         pointer-events: none;
-        z-index: 20;
+        z-index: 13;
+        display:'none';
         ">${
           videoTitle
             ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
@@ -1778,12 +1773,13 @@ if (oldTitleLayer) {
   // 每分钟更新一次 
   const timer = setInterval(updateCurrentTime, 60000);
 
-        //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
-             // 监听控制栏状态变化事件来同步时间显示 
+        //新增-----------监听控制栏显示/隐藏事件来同步时间，标题显示-----------
+         
          //---------开始------------------
         artPlayerRef.current.on('control',  (show: boolean) => {
+        const titleElement = document.getElementById('artplayer-title-layer'); 
         const timeElement = document.getElementById('artplayer-current-time'); 
-        if (timeElement) {
+        if (timeElement && titleElement) {
             timeElement.style.display  = show ? 'block' : 'none';
             console.log(show  ? '显示控制栏' : '隐藏控制栏');
         }
@@ -1797,31 +1793,7 @@ return () => {
     artPlayerRef.current.off('control');
   }
 };
-        //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
         
- /**
-  // 监听控制栏显示/隐藏事件来同步时间显示
-  const handleControlsShow = () => {
-    const timeElement = document.getElementById('artplayer-current-time'); 
-    if (timeElement) timeElement.style.display  = 'block';
-  };
- 
-  const handleControlsHide = () => {
-    const timeElement = document.getElementById('artplayer-current-time'); 
-    if (timeElement) timeElement.style.display  = 'none';
-  };
- 
-  artPlayerRef.current.on('controls:show',  handleControlsShow);
-  artPlayerRef.current.on('controls:hide',  handleControlsHide);
- 
-  return () => {
-    clearInterval(timer);
-    if (artPlayerRef.current)  {
-      artPlayerRef.current.off('controls:show',  handleControlsShow);
-      artPlayerRef.current.off('controls:hide',  handleControlsHide);
-    }
-  };
-        **/
 }, [artPlayerRef.current]);
 
   //-------新增：时间显示----------------
