@@ -1788,7 +1788,31 @@ if (oldTitleLayer) {
   
   // 每分钟更新一次 
   const timer = setInterval(updateCurrentTime, 60000);
+
+        //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
+             // 监听控制栏状态变化事件来同步时间显示 
+const handleControlStateChange = (state) => {
+  const timeElement = document.getElementById('artplayer-current-time'); 
+  if (timeElement) {
+    // state为true表示控制栏显示，false表示隐藏 
+    timeElement.style.display  = state ? 'block' : 'none';
+  }
+  console.log(state);  // 可选：打印状态用于调试 
+};
  
+// 绑定control事件监听器 
+artPlayerRef.current.on('control',  handleControlStateChange);
+ 
+return () => {
+  clearInterval(timer);
+  if (artPlayerRef.current)  {
+    // 组件卸载时移除事件监听 
+    artPlayerRef.current.off('control',  handleControlStateChange);
+  }
+};
+        //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
+        
+ /**
   // 监听控制栏显示/隐藏事件来同步时间显示
   const handleControlsShow = () => {
     const timeElement = document.getElementById('artplayer-current-time'); 
@@ -1811,7 +1835,7 @@ if (oldTitleLayer) {
     }
   };
 }, [artPlayerRef.current]);
-
+**/
   //-------新增：时间显示----------------
     
     //--------------切换集数、加载新视频时调用---------------------
