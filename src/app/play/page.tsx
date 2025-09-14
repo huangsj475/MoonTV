@@ -1778,8 +1778,7 @@ useEffect(() => {
         artPlayerRef.current.on('control',  (show: boolean) => {
         const titleElement = document.getElementById('artplayer-title-layer'); 
         const timeElement = document.getElementById('artplayer-current-time'); 
-          //初始不显示视频标题
-          titleElement.style.display  = 'none';
+         
         if (timeElement && titleElement) {
             timeElement.style.display  = show ? 'block' : 'none';
             titleElement.style.display  = show ? 'block' : 'none';
