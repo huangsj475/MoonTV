@@ -1411,7 +1411,7 @@ if (oldTitleLayer) {
           color: #fff;
           text-shadow: 0 0 8px #000;
           pointer-events: none;
-          z-index: 20;
+          z-index: 13;
           padding: 4px 8px;
           border-radius: 4px;
           background-color: rgba(0,0,0,0.3);
@@ -1593,21 +1593,10 @@ if (oldTitleLayer) {
         ],
       });
       
-       // -----新增控制栏绑定事件监听器------
-              // 控制栏隐藏时隐藏标题
-        
-       // -----新增控制栏绑定事件监听器------
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
-        //---------开始------------------
-        artPlayerRef.current.on('control',  (show: boolean) => {
-        const titleLayer = document.getElementById('artplayer-title-layer'); 
-        if (titleLayer) {
-            titleLayer.style.display  = show ? 'block' : 'none';
-            console.log(show  ? '显示控制栏' : '隐藏控制栏');
-        }
-    });//----------结束--------------
+       
       });
    
               
@@ -1791,23 +1780,21 @@ if (oldTitleLayer) {
 
         //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
              // 监听控制栏状态变化事件来同步时间显示 
-const handleControlStateChange = (state: boolean) => {
-  const timeElement = document.getElementById('artplayer-current-time'); 
-  if (timeElement) {
-    // state为true表示控制栏显示，false表示隐藏 
-    timeElement.style.display  = state ? 'block' : 'none';
-  }
-  console.log(state);  // 可选：打印状态用于调试 
-};
- 
-// 绑定control事件监听器 
-artPlayerRef.current.on('control',  handleControlStateChange);
+         //---------开始------------------
+        artPlayerRef.current.on('control',  (show: boolean) => {
+        const timeElement = document.getElementById('artplayer-current-time'); 
+        if (timeElement) {
+            timeElement.style.display  = show ? 'block' : 'none';
+            console.log(show  ? '显示控制栏' : '隐藏控制栏');
+        }
+    });//----------结束--------------
+
  
 return () => {
   clearInterval(timer);
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
-    artPlayerRef.current.off('control',  handleControlStateChange);
+    artPlayerRef.current.off('control');
   }
 };
         //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
