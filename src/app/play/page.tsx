@@ -1385,7 +1385,7 @@ useEffect(() => {
         color: #fff;
         text-shadow: 0 0 8px #000;
         pointer-events: none;
-        z-index: 14;
+        z-index: 13;
         ">${
           videoTitle
             ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`
@@ -1778,6 +1778,8 @@ useEffect(() => {
         artPlayerRef.current.on('control',  (show: boolean) => {
         const titleElement = document.getElementById('artplayer-title-layer'); 
         const timeElement = document.getElementById('artplayer-current-time'); 
+          //初始不显示视频标题
+          titleElement.style.display  = 'none';
         if (timeElement && titleElement) {
             timeElement.style.display  = show ? 'block' : 'none';
             titleElement.style.display  = show ? 'block' : 'none';
