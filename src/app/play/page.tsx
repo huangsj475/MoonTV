@@ -1791,7 +1791,7 @@ if (oldTitleLayer) {
 
         //新增-----------监听控制栏显示/隐藏事件来同步时间显示-----------
              // 监听控制栏状态变化事件来同步时间显示 
-const handleControlStateChange = (state) => {
+const handleControlStateChange = (state: boolean) => {
   const timeElement = document.getElementById('artplayer-current-time'); 
   if (timeElement) {
     // state为true表示控制栏显示，false表示隐藏 
