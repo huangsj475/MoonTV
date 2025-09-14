@@ -50,6 +50,8 @@ function PlayPageClient() {
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
+  //新增 ------通过 Y 轴移动距离判断是否为上滑/下滑 ------
+  const touchStartY = useRef<number | null>(null);
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -187,7 +189,6 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
  
   const touch = e.changedTouches[0]; 
   const x = touch.clientX  - rect.left; 
-  const y = touch.clientY  - rect.top; 
   const area = x / rect.width; 
  
   if (!artPlayerRef.current)  return;
@@ -196,8 +197,7 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
   const isLeftSide = area < 0.33;
   const isRightSide = area > 0.66;
  
-  // 通过 Y 轴移动距离判断是否为上滑/下滑 
-  const touchStartY = useRef<number | null>(null);
+  
  
   if (e.touches.length  === 1) {
     if (touchStartY.current  === null) {
