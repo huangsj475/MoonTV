@@ -139,7 +139,88 @@ function PlayPageClient() {
     videoYear,
   ]);
 
+  //新增---------手势监听（滑动调节音量，亮度）-------------
+  //新增---------手势监听（滑动调节音量，亮度）-------------
+    // 实现音量调节函数
+  const adjustVolume = (delta: number) => {
+  if (!artPlayerRef.current)  return;
+  let newVolume = artPlayerRef.current.volume  + delta;
+  newVolume = Math.min(1,  Math.max(0,  newVolume));
+  artPlayerRef.current.volume  = newVolume;
+  artPlayerRef.current.notice.show  = `音量: ${(newVolume * 100).toFixed(0)}%`;
+};
+    // 实现亮度调节函数
+    // 由于浏览器安全策略限制，无法直接调节系统亮度，但模拟亮度变化效果，通过叠加半透明层来实现视觉反馈
+  const adjustBrightness = (delta: number, container: HTMLDivElement) => {
+  const brightnessOverlay = document.getElementById('brightness-overlay'); 
+ 
+  let currentBrightness = parseFloat(
+    brightnessOverlay?.style.opacity  || '0.0'
+  );
+  currentBrightness = Math.min( 
+    0.8,
+    Math.max(0,  currentBrightness + delta)
+  );
+ 
+  if (!brightnessOverlay) {
+    const overlay = document.createElement('div'); 
+    overlay.id  = 'brightness-overlay';
+    overlay.style.position  = 'absolute';
+    overlay.style.top  = '0';
+    overlay.style.left  = '0';
+    overlay.style.width  = '100%';
+    overlay.style.height  = '100%';
+    overlay.style.backgroundColor  = 'black';
+    overlay.style.opacity  = currentBrightness.toString(); 
+    overlay.style.pointerEvents  = 'none';
+    container.appendChild(overlay); 
+  } else {
+    brightnessOverlay.style.opacity  = currentBrightness.toString(); 
+  }
+};
+    // -----添加 屏幕滑动 事件处理逻辑-----
+const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+  if (!isMobile()) return;
+ 
+  const rect = artRef.current?.getBoundingClientRect(); 
+  if (!rect) return;
+ 
+  const touch = e.changedTouches[0]; 
+  const x = touch.clientX  - rect.left; 
+  const y = touch.clientY  - rect.top; 
+  const area = x / rect.width; 
+ 
+  if (!artPlayerRef.current)  return;
+ 
+  // 判断是否在左侧或右侧区域
+  const isLeftSide = area < 0.33;
+  const isRightSide = area > 0.66;
+ 
+  // 通过 Y 轴移动距离判断是否为上滑/下滑 
+  const touchStartY = useRef<number | null>(null);
+ 
+  if (e.touches.length  === 1) {
+    if (touchStartY.current  === null) {
+      touchStartY.current  = touch.clientY; 
+    } else {
+      const deltaY = touchStartY.current  - touch.clientY; 
+ 
+      if (Math.abs(deltaY)  > 10) {
+        if (isLeftSide) {
+          // 左侧：调节亮度
+          adjustBrightness(deltaY * 0.002, artRef.current); 
+        } else if (isRightSide) {
+          // 右侧：调节音量
+          adjustVolume(deltaY * 0.01);
+        }
+ 
+        touchStartY.current  = null; // 重置
+      }
+    }
+  }
+};
   //------------手机端播放双击事件优化----------------
+  
   //左边快退，中间暂停，右边快进
   // 工具函数：判断是否移动端
 const isMobile = () =>
@@ -2057,6 +2138,7 @@ return () => {
               <div className='relative w-full h-[300px] lg:h-full'>
                 <div
                   ref={artRef}
+                  onTouchMove={handleTouchMove}
                   className='bg-black w-full h-full rounded-xl overflow-hidden shadow-lg'
                  
                       onDoubleClick={isMobile() ? undefined : (e) => {/*PC原双击逻辑*/}}
