@@ -2079,11 +2079,7 @@ return () => {
             )}
           </h1>
         </div>
-        <div>
-          <span className="text-gray-500 dark:text-gray-400">快捷键说明：1.电脑端：上下键=音量+/-，左右键=快退/进10秒，空格=播放/暂停，F键=切换全屏，Alt+左箭头=上一集，Alt+右箭头=下一集<br />
-2.移动端：屏幕双击-&gt;左右侧=快退/进10秒，中间=播放/暂停，右侧上下滑动=音量+/-
-          </span>
-          </div>
+        
         {/* 第二行：播放器和选集 */}
         <div className='space-y-2'>
           {/* 折叠控制 - 仅在 lg 及以上屏幕显示 */}
@@ -2231,6 +2227,11 @@ return () => {
           </div>
         </div>
 
+        <div>
+          <span className="text-gray-500 dark:text-gray-400">快捷键说明：1.电脑端：上下键=音量+/-，左右键=快退/进10秒，空格=播放/暂停，F键=切换全屏，Alt+左箭头=上一集，Alt+右箭头=下一集<br />
+2.移动端：屏幕双击-&gt;左右侧=快退/进10秒，中间=播放/暂停，右侧上下滑动=音量+/-
+          </span>
+          </div>
         {/* 详情展示 */}
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           {/* 文字区 */}
