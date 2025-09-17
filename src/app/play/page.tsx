@@ -1891,7 +1891,7 @@ return () => {
     if (artPlayerRef.current && videoTitle) {
         updateTitleLayer(videoTitle, currentEpisodeIndex,videoTitle);
     }
-}, [videoTitle, currentEpisodeIndex,videoTitle]);
+}, [videoTitle, currentEpisodeIndex,videoUrl]);
     
     //--------------切换集数、加载新视频时调用---------------------
     
