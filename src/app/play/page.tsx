@@ -1889,7 +1889,7 @@ return () => {
 }
   useEffect(() => {
     if (artPlayerRef.current && videoTitle) {
-        updateTitleLayer(videoTitle, currentEpisodeIndex,videoTitle);
+        updateTitleLayer(videoTitle, currentEpisodeIndex,videoUrl);
     }
 }, [videoTitle, currentEpisodeIndex,videoUrl]);
     
