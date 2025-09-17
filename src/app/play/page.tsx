@@ -1881,7 +1881,7 @@ return () => {
   //-------新增：时间显示----------------
     
     //--------------切换集数、加载新视频时调用---------------------
-  function updateTitleLayer(videoTitle: string, currentEpisodeIndex: number，videoUrl: string) {
+  function updateTitleLayer(videoTitle: string, currentEpisodeIndex: number,videoUrl: string) {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
         titleLayer.innerText  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || `第 ${currentEpisodeIndex + 1} 集`}`;
