@@ -803,25 +803,20 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
   setLoadingMessage('🔧 正在初始化播放器...');
 } else {
   // 播放器已存在，跳过“初始化”提示，直接进入“获取详情”
-  // --- 阶段 2: 获取视频详情 ---
-      setLoadingStage(currentSource && currentId ? 'fetching' : 'searching');
-      setLoadingMessage(
-        currentSource && currentId
-          ? '🎬 正在获取视频详情...'
-          : '🔍 正在搜索播放源...'
-      );
+  setLoadingMessage('🔧 播放器加载完成...');
+      
 }
-  
+
       // 新增--- 阶段 1: 初始化播放器 ---
 
-    /*  // --- 阶段 2: 获取视频详情 ---
+      // --- 阶段 2: 获取视频详情 ---
       setLoadingStage(currentSource && currentId ? 'fetching' : 'searching');
       setLoadingMessage(
         currentSource && currentId
           ? '🎬 正在获取视频详情...'
           : '🔍 正在搜索播放源...'
       );
-    */
+    
       let sourcesInfo = await fetchSourcesData(searchTitle || videoTitle);
       if (
         currentSource &&
