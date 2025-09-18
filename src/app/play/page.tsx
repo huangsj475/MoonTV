@@ -45,8 +45,8 @@ function PlayPageClient() {
   // 新增状态用于跟踪播放记录是否已加载----------------------------------------
   const [playRecordLoaded, setPlayRecordLoaded] = useState(false);
   const [loadingStage, setLoadingStage] = useState<
-    'searching' | 'preferring' | 'fetching' | 'ready'
-  >('searching');
+    'searching' | 'preferring' | 'fetching' | 'ready'| 'initializingartplayer'
+  >('initializingartplayer');
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
@@ -798,25 +798,30 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
       }
       setLoading(true);
       // 新增--- 阶段 1: 初始化播放器 ---
-  setLoadingStage('initializing');
+  setLoadingStage('initializingartplayer');
       if (!artPlayerRef.current)  {
   setLoadingMessage('🔧 正在初始化播放器...');
 } else {
   // 播放器已存在，跳过“初始化”提示，直接进入“获取详情”
-  setLoadingMessage('ߜ 正在获取视频详情...');
-}
-  // 可以在这里做一些轻量级初始化工作
-  await new Promise(resolve => setTimeout(resolve, 100)); // 模拟初始化耗时
-      // 新增--- 阶段 1: 初始化播放器 ---
-
-      // --- 阶段 2: 获取视频详情 ---
+  // --- 阶段 2: 获取视频详情 ---
       setLoadingStage(currentSource && currentId ? 'fetching' : 'searching');
       setLoadingMessage(
         currentSource && currentId
           ? '🎬 正在获取视频详情...'
           : '🔍 正在搜索播放源...'
       );
+}
+  
+      // 新增--- 阶段 1: 初始化播放器 ---
 
+    /*  // --- 阶段 2: 获取视频详情 ---
+      setLoadingStage(currentSource && currentId ? 'fetching' : 'searching');
+      setLoadingMessage(
+        currentSource && currentId
+          ? '🎬 正在获取视频详情...'
+          : '🔍 正在搜索播放源...'
+      );
+    */
       let sourcesInfo = await fetchSourcesData(searchTitle || videoTitle);
       if (
         currentSource &&
