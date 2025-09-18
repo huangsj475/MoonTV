@@ -202,11 +202,11 @@ export default function VideoCard({
           actualYear ? `&year=${actualYear}` : ''
         }${actualSearchType ? `&stype=${actualSearchType}` : ''}`
       );
-    } else if (source || id) {
+    } else if (actualSource && actualId) {
       router.push(
-        `/play?source=${source}&id=${id}&title=${encodeURIComponent(
-          title.trim()
-        )}${year ? `&year=${year}` : ''}${
+        `/play?source=${actualSource}&id=${actualId}&title=${encodeURIComponent(
+          actualTitle.trim()
+        )}${actualYear ? `&year=${actualYear}` : ''}${
           isAggregate ? '&prefer=true' : ''
         }${
           actualQuery ? `&stitle=${encodeURIComponent(actualQuery.trim())}` : ''
@@ -215,11 +215,11 @@ export default function VideoCard({
     }
   }, [
     from,
-    source,
-    id,
+    actualSource,
+    actualId,
     router,
-    title,
-    year,
+    actualTitle,
+    actualYear,
     isAggregate,
     actualQuery,
     actualSearchType,
