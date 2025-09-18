@@ -798,7 +798,11 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
       }
       setLoading(true);
       
-      // 新增--- 阶段 1: 初始化播放器 ---
+      // 新增--- 阶段 1: 播放器还未加载完成就显示页面加载状态 ---
+      if (!artPlayerRef.current) {
+        setLoading(true);
+      }
+        
 
       // --- 阶段 2: 获取视频详情 ---
       setLoadingStage(currentSource && currentId ? 'fetching' : 'searching');
