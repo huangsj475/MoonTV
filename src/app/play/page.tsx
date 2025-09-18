@@ -46,7 +46,7 @@ function PlayPageClient() {
   const [playRecordLoaded, setPlayRecordLoaded] = useState(false);
   const [loadingStage, setLoadingStage] = useState<
     'searching' | 'preferring' | 'fetching' | 'ready'| 'initializingartplayer'
-  >('initializingartplayer');
+  >('searching');
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
