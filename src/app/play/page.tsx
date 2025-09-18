@@ -45,7 +45,7 @@ function PlayPageClient() {
   // 新增状态用于跟踪播放记录是否已加载----------------------------------------
   const [playRecordLoaded, setPlayRecordLoaded] = useState(false);
   const [loadingStage, setLoadingStage] = useState<
-    'searching' | 'preferring' | 'fetching' | 'ready'| 'initializingartplayer'
+    'searching' | 'preferring' | 'fetching' | 'ready'
   >('searching');
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
@@ -797,16 +797,7 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
         return;
       }
       setLoading(true);
-      // 新增--- 阶段 1: 初始化播放器 ---
-  setLoadingStage('initializingartplayer');
-      if (!artPlayerRef.current)  {
-  setLoadingMessage('🔧 正在初始化播放器...');
-} else {
-  // 播放器已存在，跳过“初始化”提示，直接进入“获取详情”
-  setLoadingMessage('🔧 播放器加载完成...');
       
-}
-
       // 新增--- 阶段 1: 初始化播放器 ---
 
       // --- 阶段 2: 获取视频详情 ---
@@ -1929,7 +1920,6 @@ return () => {
             <div className='relative mb-8'>
               <div className='relative mx-auto w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl shadow-2xl flex items-center justify-center transform hover:scale-105 transition-transform duration-300'>
                 <div className='text-white text-4xl'>
-                  {loadingStage === 'initializingartplayer' && '🔧'}
                   {loadingStage === 'searching' && '🔍'}
                   {loadingStage === 'preferring' && '⚡'}
                   {loadingStage === 'fetching' && '🎬'}
@@ -1958,7 +1948,7 @@ return () => {
               <div className='flex justify-center space-x-2 mb-4'>
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                    loadingStage === 'initializingartplayer' || loadingStage === 'searching' || loadingStage === 'fetching'
+                    loadingStage === 'searching' || loadingStage === 'fetching'
                       ? 'bg-green-500 scale-125'
                       : loadingStage === 'preferring' ||
                         loadingStage === 'ready'
@@ -1990,13 +1980,11 @@ return () => {
                   className='h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full transition-all duration-1000 ease-out'
                   style={{
                     width:
-                      loadingStage === 'initializingartplayer'
-                        ? '25%'
-                        : loadingStage === 'searching' ||
+                          loadingStage === 'searching' ||
                           loadingStage === 'fetching'
-                        ? '50%'
+                        ? '33%'
                         : loadingStage === 'preferring'
-                        ? '75%'
+                        ? '66%'
                         : '100%',
                   }}
                 ></div>
