@@ -1934,6 +1934,7 @@ return () => {
             <div className='relative mb-8'>
               <div className='relative mx-auto w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl shadow-2xl flex items-center justify-center transform hover:scale-105 transition-transform duration-300'>
                 <div className='text-white text-4xl'>
+                  {loadingStage === 'initializingartplayer' && '🔧'}
                   {loadingStage === 'searching' && '🔍'}
                   {loadingStage === 'preferring' && '⚡'}
                   {loadingStage === 'fetching' && '🎬'}
@@ -1962,7 +1963,7 @@ return () => {
               <div className='flex justify-center space-x-2 mb-4'>
                 <div
                   className={`w-3 h-3 rounded-full transition-all duration-500 ${
-                    loadingStage === 'searching' || loadingStage === 'fetching'
+                    loadingStage === 'initializingartplayer' || loadingStage === 'searching' || loadingStage === 'fetching'
                       ? 'bg-green-500 scale-125'
                       : loadingStage === 'preferring' ||
                         loadingStage === 'ready'
@@ -1994,11 +1995,13 @@ return () => {
                   className='h-full bg-gradient-to-r from-green-500 to-emerald-600 rounded-full transition-all duration-1000 ease-out'
                   style={{
                     width:
-                      loadingStage === 'searching' ||
-                      loadingStage === 'fetching'
-                        ? '33%'
+                      loadingStage === 'initializingartplayer'
+                        ? '25%'
+                        : loadingStage === 'searching' ||
+                          loadingStage === 'fetching'
+                        ? '50%'
                         : loadingStage === 'preferring'
-                        ? '66%'
+                        ? '75%'
                         : '100%',
                   }}
                 ></div>
