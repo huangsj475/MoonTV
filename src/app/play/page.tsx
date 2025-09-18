@@ -797,6 +797,19 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
         return;
       }
       setLoading(true);
+      // 新增--- 阶段 1: 初始化播放器 ---
+  setLoadingStage('initializing');
+      if (!artPlayerRef.current)  {
+  setLoadingMessage('🔧 正在初始化播放器...');
+} else {
+  // 播放器已存在，跳过“初始化”提示，直接进入“获取详情”
+  setLoadingMessage('ߜ 正在获取视频详情...');
+}
+  // 可以在这里做一些轻量级初始化工作
+  await new Promise(resolve => setTimeout(resolve, 100)); // 模拟初始化耗时
+      // 新增--- 阶段 1: 初始化播放器 ---
+
+      // --- 阶段 2: 获取视频详情 ---
       setLoadingStage(currentSource && currentId ? 'fetching' : 'searching');
       setLoadingMessage(
         currentSource && currentId
@@ -821,6 +834,7 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
       }
 
       let detailData: SearchResult = sourcesInfo[0];
+      
       // 指定源和id且无需优选
       if (currentSource && currentId && !needPreferRef.current) {
         const target = sourcesInfo.find(
@@ -835,6 +849,7 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
         }
       }
 
+      // --- 阶段 3: 源优选（如果开启）---
       // 未指定源和 id 或需要优选，且开启优选开关
       if (
         (!currentSource || !currentId || needPreferRef.current) &&
@@ -868,6 +883,7 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
       newUrl.searchParams.delete('prefer');
       window.history.replaceState({}, '', newUrl.toString());
 
+      // --- 阶段 4: 完成准备 ---
       setLoadingStage('ready');
       setLoadingMessage('✨ 准备就绪，即将开始播放...');
 
@@ -877,7 +893,10 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
       }, 500);
     };
 
-    initAll();
+    useEffect(() => {
+      initAll();
+    }, []);
+    //-----原来initAll();-----
   }, []);
 
   //-----------3.新添加-------------
