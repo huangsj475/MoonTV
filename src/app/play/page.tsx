@@ -893,10 +893,7 @@ const extractEpisodeNameFromUrl = (url: string): string | null => {
       }, 500);
     };
 
-    useEffect(() => {
-      initAll();
-    }, []);
-    //-----原来initAll();-----
+   initAll();
   }, []);
 
   //-----------3.新添加-------------
