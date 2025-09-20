@@ -180,7 +180,7 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
           adjustVolume(deltaY * 0.01);
         }
         // 更新起始位置（实现连续滑动）
-     // touchStartY.current  = touch.clientY; 
+      touchStartY.current  = touch.clientY; 
       }
     }
   }
