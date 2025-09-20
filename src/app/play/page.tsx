@@ -197,15 +197,13 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
   const isLeftSide = area < 0.33;
   const isRightSide = area > 0.66;
  
-  
- 
   if (e.touches.length  === 1) {
     if (touchStartY.current  === null) {
       touchStartY.current  = touch.clientY; 
     } else {
       const deltaY = touchStartY.current  - touch.clientY; 
  
-      if (Math.abs(deltaY)  > 10) {
+      if (Math.abs(deltaY)  > 20) {
         if (isLeftSide && artRef.current)  {
           // 左侧：调节亮度
           adjustBrightness(deltaY * 0.002, artRef.current); 
@@ -214,7 +212,7 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
           adjustVolume(deltaY * 0.01);
         }
  
-        touchStartY.current  = null; // 重置
+        touchStartY.current = touch.clientY;// 更新起始位置
       }
     }
   }
@@ -1464,7 +1462,7 @@ useEffect(() => {
       html: `<div id="artplayer-title-layer" style="
         position: absolute;
         top: 8px;
-        left: 50px;
+        left: 100px;
         width: 100%;
         font-size: 1rem;
         font-weight: bold;
