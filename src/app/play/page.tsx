@@ -170,19 +170,19 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
   const isRightSide = area > 0.66;
  
   if (e.touches.length  === 1) {
-    
-      touchStartY.current  = touch.clientY; 
-     
+    if (touchStartY.current  === null) {
+    touchStartY.current  = touch.clientY;   // 记录起始Y坐标
+  } else {
       const deltaY = touchStartY.current  - touch.clientY; 
- 
       if (Math.abs(deltaY)  > 10) {
          if (isRightSide) {
           // 右侧：调节音量
           adjustVolume(deltaY * 0.01);
         }
- 
+        // 更新起始位置（实现连续滑动）
+     // touchStartY.current  = touch.clientY; 
       }
-    
+    }
   }
 };
   //------------手机端播放双击事件优化----------------
