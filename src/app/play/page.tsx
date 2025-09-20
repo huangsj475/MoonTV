@@ -142,7 +142,6 @@ function PlayPageClient() {
   ]);
 
   //新增---------手势监听（滑动调节音量，亮度）-------------
-  //新增---------手势监听（滑动调节音量，亮度）-------------
     // 实现音量调节函数
   const adjustVolume = (delta: number) => {
   if (!artPlayerRef.current)  return;
@@ -152,34 +151,7 @@ function PlayPageClient() {
   artPlayerRef.current.notice.show  = `音量: ${(newVolume * 100).toFixed(0)}%`;
 };
     // 实现亮度调节函数
-    // 由于浏览器安全策略限制，无法直接调节系统亮度，但模拟亮度变化效果，通过叠加半透明层来实现视觉反馈
-  const adjustBrightness = (delta: number, container: HTMLDivElement) => {
-  const brightnessOverlay = document.getElementById('brightness-overlay'); 
- 
-  let currentBrightness = parseFloat(
-    brightnessOverlay?.style.opacity  || '0.0'
-  );
-  currentBrightness = Math.min( 
-    0.8,
-    Math.max(0,  currentBrightness + delta)
-  );
- 
-  if (!brightnessOverlay) {
-    const overlay = document.createElement('div'); 
-    overlay.id  = 'brightness-overlay';
-    overlay.style.position  = 'absolute';
-    overlay.style.top  = '0';
-    overlay.style.left  = '0';
-    overlay.style.width  = '100%';
-    overlay.style.height  = '100%';
-    overlay.style.backgroundColor  = 'black';
-    overlay.style.opacity  = currentBrightness.toString(); 
-    overlay.style.pointerEvents  = 'none';
-    container.appendChild(overlay); 
-  } else {
-    brightnessOverlay.style.opacity  = currentBrightness.toString(); 
-  }
-};
+  
     // -----添加 屏幕滑动 事件处理逻辑-----
 const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
   if (!isMobile()) return;
@@ -198,12 +170,12 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
   const isRightSide = area > 0.66;
  
   if (e.touches.length  === 1) {
-    if (touchStartY.current  === null) {
+    
       touchStartY.current  = touch.clientY; 
-    } else {
+     
       const deltaY = touchStartY.current  - touch.clientY; 
  
-      if (Math.abs(deltaY)  > 20) {
+      if (Math.abs(deltaY)  > 10) {
         if (isLeftSide && artRef.current)  {
           // 左侧：调节亮度
           adjustBrightness(deltaY * 0.002, artRef.current); 
@@ -212,9 +184,8 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
           adjustVolume(deltaY * 0.01);
         }
  
-        touchStartY.current = touch.clientY;// 更新起始位置
       }
-    }
+    
   }
 };
   //------------手机端播放双击事件优化----------------
