@@ -176,10 +176,7 @@ const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
       const deltaY = touchStartY.current  - touch.clientY; 
  
       if (Math.abs(deltaY)  > 10) {
-        if (isLeftSide && artRef.current)  {
-          // 左侧：调节亮度
-          adjustBrightness(deltaY * 0.002, artRef.current); 
-        } else if (isRightSide) {
+         if (isRightSide) {
           // 右侧：调节音量
           adjustVolume(deltaY * 0.01);
         }
