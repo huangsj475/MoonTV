@@ -44,6 +44,7 @@ export default function VideoCard({
   query = '',
   poster = '',
   episodes,
+  hasNewEpisodes,
   source,
   source_name,
   progress = 0,
