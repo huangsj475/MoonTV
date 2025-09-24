@@ -54,7 +54,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       key,
         }));
       const checkedRecords = await Promise.all(recordsArray.map(async record => {
-      const { source, id } = { source: record.source_name, id: record.key.split('+')[1] };
+      const { source, id } = { source: record.key.split('+')[0], id: record.key.split('+')[1] };
         const detail = await fetchVideoDetail({ source, id, fallbackTitle: record.title });
         const latestEpisodes = detail.episodes?.length || record.total_episodes;
         const hasNewEpisodes = latestEpisodes > record.total_episodes;
