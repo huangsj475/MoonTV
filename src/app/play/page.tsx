@@ -1835,18 +1835,18 @@ useEffect(() => {
 		
 		let isFullscreen = false;
 		let fullscreenWeb = false;
-		// 监听全屏切换事件fullscreenWeb
+		// 监听全屏切换事件fullscreen
 		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
 		isFullscreen = status;
 		// 全屏退出时强制隐藏标题
-		if (!status) {
+		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
 			}
 		});
 		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
 		fullscreenWeb = status;
 		// 全屏退出时强制隐藏标题
-		if (!status) {
+		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
 			}
 		});
