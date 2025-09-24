@@ -1828,9 +1828,10 @@ useEffect(() => {
          
    	  const titleElement = document.getElementById('artplayer-title-layer'); 
       const timeElement = document.getElementById('artplayer-current-time');
-	    if (!titleElement && !timeElement) return;
+	    if (titleElement && timeElement){
 		// 初始隐藏标题
 		titleElement.style.display  = 'none';
+		 }
 		
 		let isFullscreen = false;
 		let fullscreenWeb = false;
