@@ -41,23 +41,23 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     setPlayRecords(sortedRecords);
   };
 
+  //--------新增------------
   useEffect(() => {
-    const fetchPlayRecords = async () => {
-      try {
-        setLoading(true);
-
-        // 从缓存或API获取所有播放记录
-        const allRecords = await getAllPlayRecords();
-        //---------新增-------
-        const recordsArray = Object.entries(allRecords).map(([key, record]) => ({
+  const loadAndCheckEpisodes = async () => {
+    setLoading(true);
+    const allRecords = await getAllPlayRecords();
+    const recordsArray = Object.entries(allRecords).map(([key, record]) => ({
       ...record,
       key,
-        }));
-      const checkedRecords = await Promise.all(recordsArray.map(async record => {
-      const { source, id } = { source: record.key.split('+')[0], id: record.key.split('+')[1] };
+    }));
+
+    const checkedRecords = await Promise.all(recordsArray.map(async record => {
+      const { source, id } = { source: record.source_name, id: record.key.split('+')[1] };
+      try {
         const detail = await fetchVideoDetail({ source, id, fallbackTitle: record.title });
         const latestEpisodes = detail.episodes?.length || record.total_episodes;
         const hasNewEpisodes = latestEpisodes > record.total_episodes;
+
         // <=== 重点处理：数据库字段更新 ===>
         if (hasNewEpisodes) {
           await savePlayRecord(source, id, {
@@ -71,14 +71,30 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           total_episodes: latestEpisodes, // 确保前端同步
           hasNewEpisodes,
         };
-        //------新增-------
+      } catch {
+        return { ...record, hasNewEpisodes: false };
+      }
+    }));
+
+    setPlayRecords(checkedRecords.sort((a, b) => b.save_time - a.save_time));
+    setLoading(false);
+  };
+  loadAndCheckEpisodes();
+}, []);
+  //--------新增------------
+  
+   useEffect(() => {
+    const fetchPlayRecords = async () => {
+      try {
+        setLoading(true);
+
+        // 从缓存或API获取所有播放记录
+        const allRecords = await getAllPlayRecords();
         updatePlayRecords(allRecords);
       } catch (error) {
         console.error('获取播放记录失败:', error);
         setPlayRecords([]);
-        return { ...record, hasNewEpisodes: false };//------新增---------
       } finally {
-        setPlayRecords(checkedRecords.sort((a, b) => b.save_time - a.save_time));//------新增---------
         setLoading(false);
       }
     };
