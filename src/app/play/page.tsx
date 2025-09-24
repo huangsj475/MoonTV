@@ -1826,8 +1826,9 @@ useEffect(() => {
 
         //新增-----------监听控制栏显示/隐藏事件来同步时间，标题显示-----------
          
-   		const titleElement = document.getElementById('artplayer-title-layer'); 
+   	  const titleElement = document.getElementById('artplayer-title-layer'); 
       const timeElement = document.getElementById('artplayer-current-time');
+	    if (!titleElement && !timeElement) return;
 		// 初始隐藏标题
 		titleElement.style.display  = 'none';
 		
