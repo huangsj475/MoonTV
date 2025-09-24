@@ -1826,16 +1826,38 @@ useEffect(() => {
 
         //新增-----------监听控制栏显示/隐藏事件来同步时间，标题显示-----------
          
+   		const titleElement = document.getElementById('artplayer-title-layer'); 
+      const timeElement = document.getElementById('artplayer-current-time');
+		// 初始隐藏标题
+		titleElement.style.display  = 'none';
+		
+		let isFullscreen = false;
+		let fullscreenWeb = false;
+		// 监听全屏切换事件fullscreenWeb
+		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
+		isFullscreen = status;
+		// 全屏退出时强制隐藏标题
+		if (!status) {
+			  titleElement.style.display  = 'none';
+			}
+		});
+		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
+		fullscreenWeb = status;
+		// 全屏退出时强制隐藏标题
+		if (!status) {
+			  titleElement.style.display  = 'none';
+			}
+		});
+ 
          //---------开始------------------
         artPlayerRef.current.on('control',  (show: boolean) => {
-        const titleElement = document.getElementById('artplayer-title-layer'); 
-        const timeElement = document.getElementById('artplayer-current-time'); 
-         
+		if (isFullscreen || fullscreenWeb) {
         if (timeElement && titleElement) {
             timeElement.style.display  = show ? 'block' : 'none';
             titleElement.style.display  = show ? 'block' : 'none';
             console.log(show  ? '显示控制栏' : '隐藏控制栏');
         }
+		}
     });//----------结束--------------
 
  
@@ -1843,6 +1865,8 @@ return () => {
   clearInterval(timer);
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
+	artPlayerRef.current.off('fullscreen'); 
+	artPlayerRef.current.off('fullscreenWeb'); 
     artPlayerRef.current.off('control');
   }
 };
