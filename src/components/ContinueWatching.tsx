@@ -4,10 +4,12 @@
 import { useEffect, useState } from 'react';
 
 import type { PlayRecord } from '@/lib/db.client';
+import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
 import {
   clearAllPlayRecords,
   getAllPlayRecords,
   subscribeToDataUpdates,
+  savePlayRecord,// 关键：用此方法更新数据库
 } from '@/lib/db.client';
 
 import ScrollableRow from '@/components/ScrollableRow';
@@ -46,11 +48,37 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
         // 从缓存或API获取所有播放记录
         const allRecords = await getAllPlayRecords();
+        //---------新增-------
+        const recordsArray = Object.entries(allRecords).map(([key, record]) => ({
+      ...record,
+      key,
+        }));
+      const checkedRecords = await Promise.all(recordsArray.map(async record => {
+      const { source, id } = { source: record.source_name, id: record.key.split('+')[1] };
+        const detail = await fetchVideoDetail({ source, id, fallbackTitle: record.title });
+        const latestEpisodes = detail.episodes?.length || record.total_episodes;
+        const hasNewEpisodes = latestEpisodes > record.total_episodes;
+        // <=== 重点处理：数据库字段更新 ===>
+        if (hasNewEpisodes) {
+          await savePlayRecord(source, id, {
+            ...record,
+            total_episodes: latestEpisodes, // 更新数据库字段
+          });
+        }
+
+        return {
+          ...record,
+          total_episodes: latestEpisodes, // 确保前端同步
+          hasNewEpisodes,
+        };
+        //------新增-------
         updatePlayRecords(allRecords);
       } catch (error) {
+        return { ...record, hasNewEpisodes: false };//------新增---------
         console.error('获取播放记录失败:', error);
         setPlayRecords([]);
       } finally {
+        setPlayRecords(checkedRecords.sort((a, b) => b.save_time - a.save_time));//------新增---------
         setLoading(false);
       }
     };
