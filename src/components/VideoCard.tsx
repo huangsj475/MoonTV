@@ -25,6 +25,7 @@ interface VideoCardProps {
   query?: string;
   poster?: string;
   episodes?: number;
+  hasNewEpisodes?: boolean;//有新的总集数更新
   source_name?: string;
   progress?: number;
   year?: string;
@@ -336,6 +337,18 @@ export default function VideoCard({
             {currentEpisode
               ? `${currentEpisode}/${actualEpisodes}`
               : actualEpisodes}
+            {hasNewEpisodes && (
+      <span style={{
+        position: 'absolute',
+        top: -6,
+        right: -6,
+        width: 10,
+        height: 10,
+        background: 'red',
+        borderRadius: '50%',
+        border: '2px solid white',
+      }} />
+    )}
           </div>
         )}
 
