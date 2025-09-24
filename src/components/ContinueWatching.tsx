@@ -74,7 +74,6 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         //------新增-------
         updatePlayRecords(allRecords);
       } catch (error) {
-        
         console.error('获取播放记录失败:', error);
         setPlayRecords([]);
         return { ...record, hasNewEpisodes: false };//------新增---------
