@@ -94,7 +94,7 @@ const handleUpdateAllEpisodes = async () => {
   if (loading || playRecords.length  === 0) return;
  
   setLoading(true);
-  const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
+  //const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
  
   try {
     for (const record of playRecords) {
