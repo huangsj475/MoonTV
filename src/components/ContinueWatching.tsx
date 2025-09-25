@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 'use client';
-
+import { RefreshCw } from 'lucide-react';//导入图标组件
 import { useEffect, useState } from 'react';
 
 import type { PlayRecord } from '@/lib/db.client';
@@ -70,6 +70,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     return unsubscribe;
   }, []);
 
+
   // 如果没有播放记录，则不渲染组件
   if (!loading && playRecords.length === 0) {
     return null;
@@ -86,6 +87,48 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     const [source, id] = key.split('+');
     return { source, id };
   };
+  
+  //------新增更新总集数-----------
+  //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
+const handleUpdateAllEpisodes = async () => {
+  if (loading || playRecords.length  === 0) return;
+ 
+  setLoading(true);
+  const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
+ 
+  try {
+    for (const record of playRecords) {
+      const { source, id, total_episodes } = record;
+      try {
+        const videoDetail = await fetchVideoDetail(source, id);
+        if (!videoDetail?.episodes) continue;
+ 
+        const newTotal = videoDetail.episodes.length; 
+        if (newTotal > total_episodes) {
+          // 更新播放记录中的 total_episodes
+          await savePlayRecord(source, id, {
+            ...record,
+            total_episodes: newTotal,
+            save_time: Date.now(),  // 刷新时间
+          });
+ 
+          // 标记此视频有新集
+          //updatedFlags[record.key] = true;
+        }
+      } catch (err) {
+        console.warn(` 获取视频 ${source}-${id} 信息失败`, err);
+      }
+    }
+ 
+    // 批量更新红点标志
+    //setNewEpisodeFlags(updatedFlags);
+  } catch (error) {
+    console.error(' 更新剧集失败:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+//------新增更新总集数-----------
 
   return (
     <section className={`mb-8 ${className || ''}`}>
@@ -93,6 +136,14 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
           继续观看
         </h2>
+		<button
+      onClick={handleUpdateAllEpisodes}
+      disabled={loading}
+      className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+    >
+      <RefreshCw className="w-4 h-4" />
+      {loading ? '更新中...' : '更新剧集'}
+    </button>
         {!loading && playRecords.length > 0 && (
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
@@ -137,6 +188,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                     source_name={record.source_name}
                     progress={getProgress(record)}
                     episodes={record.total_episodes}
+					// 👇 新增字段：是否为新增集数（用于红点）
+					//hasNewEpisode={!!newEpisodeFlags[record.key]}
                     currentEpisode={record.index}
                     query={record.search_title}
                     from='playrecord'
