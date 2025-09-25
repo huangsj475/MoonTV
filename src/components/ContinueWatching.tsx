@@ -49,7 +49,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	*/
   };
   
-  const fetchPlayRecords = async () => {
+  //const fetchPlayRecords = async () => {
+  const fetchPlayRecords = useCallback(async () => {
       try {
         setLoading(true);
 
@@ -62,7 +63,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       } finally {
         setLoading(false);
       }
-    };
+    //};
+	}, []);
   
    useEffect(() => {
     console.log('加载播放记录。。。');
@@ -77,7 +79,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     );
 
     return unsubscribe;
-  }, []);
+  }, [fetchPlayRecords]);//添加依赖
 
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
