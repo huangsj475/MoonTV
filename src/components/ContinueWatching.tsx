@@ -23,7 +23,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     (PlayRecord & { key: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
-  //const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
   //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
@@ -48,10 +48,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     setNewEpisodeFlags(flags);
 	*/
   };
-  
-  
-   useEffect(() => {
-	   const fetchPlayRecords = async () => {
+  const fetchPlayRecords = async () => {
   
       try {
         setLoading(true);
@@ -66,6 +63,9 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         setLoading(false);
       }
     };
+  
+   useEffect(() => {
+	
     console.log('加载播放记录。。。');
     fetchPlayRecords();
 	
@@ -82,7 +82,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
-  /*const handleUpdateAllEpisodes = async () => {
+    const handleUpdateAllEpisodes = async () => {
 	  // 🔹1. 确认函数被调用
 	  console.log('[ 更新剧集] 按钮已点击，开始执行...');
     if (refreshing || playRecords.length  === 0) {
@@ -115,7 +115,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 			const { source, id } = parseKey(key);
 			 console.log(`[ 更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
             try {
-              const videoDetail = await fetchVideoDetail({ source, id });
+              const videoDetail = await fetchVideoDetail({ source, id,'' });
 			  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
               if (!videoDetail?.episodes) {
 				  console.warn(`[ 更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
@@ -159,7 +159,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       setRefreshing(false);
     }
   };
-  */
+  
 //------新增更新总集数-----------
 
   // 如果没有播放记录，则不渲染组件
@@ -187,7 +187,21 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
           继续观看
         </h2>
+        <button 
+              className="text-sm text-blue-500 hover:text-blue-700 mr-2"
+              onClick={handleUpdateAllEpisodes}
+              disabled={refreshing}
+            >
+              {refreshing ? '检查中...' : '检查新剧集'}
+        </button>
         {!loading && playRecords.length > 0 && (
+		<button 
+              className="text-sm text-blue-500 hover:text-blue-700 mr-2"
+              onClick={handleUpdateAllEpisodes}
+              disabled={refreshing}
+            >
+              {refreshing ? '更新中...' : '更新新剧集'}
+        </button>
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             onClick={async () => {
