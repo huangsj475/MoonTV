@@ -50,9 +50,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	*/
   };
   
-  
-   useEffect(() => {
-    const fetchPlayRecords = async () => {
+  const fetchPlayRecords = async () => {
       try {
         setLoading(true);
 
@@ -66,9 +64,23 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         setLoading(false);
       }
     };
-
+  
+   useEffect(() => {
+    
     fetchPlayRecords();
-	//------新增更新总集数-----------
+	
+    // 监听播放记录更新事件
+    const unsubscribe = subscribeToDataUpdates(
+      'playRecordsUpdated',
+      (newRecords: Record<string, PlayRecord>) => {
+        updatePlayRecords(newRecords);
+      }
+    );
+
+    return unsubscribe;
+  }, []);
+
+//------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
     if (refreshing || playRecords.length  === 0) return;
@@ -79,6 +91,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     try {
       // 并发限制：最多同时请求 5 个
       const BATCH_SIZE = 5;
+	  let hasChanges = false;
       for (let i = 0; i < playRecords.length;  i += BATCH_SIZE) {
         const batch = playRecords.slice(i,  i + BATCH_SIZE);
         await Promise.all( 
@@ -98,8 +111,9 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                   total_episodes: newTotal,
                   save_time: Date.now(), 
                 });
+				 hasChanges = true;
                 //updatedFlags[key] = true;
-				fetchPlayRecords();//再次加载一次新的播放记录
+				
               }
             } catch (err) {
               console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
@@ -108,6 +122,10 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         );
       }
  
+		if (hasChanges) {
+        fetchPlayRecords();//再次加载一次新的播放记录
+		}
+		
       //setNewEpisodeFlags(updatedFlags);
     } catch (error) {
       console.error(' 批量更新剧集失败:', error);
@@ -116,20 +134,6 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     }
   };
 //------新增更新总集数-----------
-	  
-
-    // 监听播放记录更新事件
-    const unsubscribe = subscribeToDataUpdates(
-      'playRecordsUpdated',
-      (newRecords: Record<string, PlayRecord>) => {
-        updatePlayRecords(newRecords);
-      }
-    );
-
-    return unsubscribe;
-  }, []);
-
-
 
   // 如果没有播放记录，则不渲染组件
   if (!loading && playRecords.length === 0) {
