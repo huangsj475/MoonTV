@@ -84,21 +84,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
     const handleUpdateAllEpisodes = async () => {
-		const fetchPlayRecords = async () => {
-  
-      try {
-        setLoading(true);
-
-        // 从缓存或API获取所有播放记录
-        const allRecords = await getAllPlayRecords();
-        updatePlayRecords(allRecords);
-      } catch (error) {
-        console.error('获取播放记录失败:', error);
-        setPlayRecords([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+	
 	  // 🔹1. 确认函数被调用
 	  console.log('[ 更新剧集] 按钮已点击，开始执行...');
     if (refreshing || playRecords.length  === 0) {
@@ -162,7 +148,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
  
 		if (hasChanges) {
 			console.log('[ 更新剧集] 检测到数据变化，重新加载播放记录');
-        fetchPlayRecords();//再次加载一次新的播放记录
+        //fetchPlayRecords();//再次加载一次新的播放记录
 		}else {
       console.log('[ 更新剧集] 所有剧集已是最新，无需更新');
 		}
