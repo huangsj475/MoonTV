@@ -112,6 +112,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                   save_time: Date.now(), 
                 });
                 //updatedFlags[key] = true;
+				fetchPlayRecords();//再次加载一次新的播放记录
               }
             } catch (err) {
               console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
@@ -155,21 +156,18 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           继续观看
         </h2>
 		 <button
-          onClick={handleUpdateAllEpisodes}
-          disabled={refreshing}
-          className={`p-1 rounded-full transition-colors ${
-            refreshing
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-          }`}
-          aria-label="检查新剧集"
-        >
-          <RefreshCw
-            className={`w-5 h-5 text-gray-600 dark:text-gray-300 ${
-              refreshing ? 'animate-spin' : ''
-            }`}
-          />
-        </button>
+      onClick={handleUpdateAllEpisodes}
+      disabled={refreshing}
+      className="flex gap-1 px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
+      aria-label="检查剧集更新"
+    >
+      {refreshing ? (
+        <RefreshCw className="w-4 h-4 animate-spin" />
+      ) : (
+        <RefreshCw className="w-4 h-4" />
+      )}
+      <span>{refreshing ? '检查中...' : '检查更新'}</span>
+    </button>
         {!loading && playRecords.length > 0 && (
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
