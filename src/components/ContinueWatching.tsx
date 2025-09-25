@@ -97,7 +97,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         await Promise.all( 
           batch.map(async  (record) => {
 			   
-            const { key, total_episodes, key } = record;
+            const { key, total_episodes } = record;
 			const { source, id } = parseKey(key);
             try {
               const videoDetail = await fetchVideoDetail(source, id);
