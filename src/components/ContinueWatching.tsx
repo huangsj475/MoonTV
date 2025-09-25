@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
