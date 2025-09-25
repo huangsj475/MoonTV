@@ -115,7 +115,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 			const { source, id } = parseKey(key);
 			 console.log(`[ 更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
             try {
-              const videoDetail = await fetchVideoDetail({ source, id,'' });
+              const videoDetail = await fetchVideoDetail({ source, id });
 			  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
               if (!videoDetail?.episodes) {
 				  console.warn(`[ 更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
@@ -187,13 +187,6 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
           继续观看
         </h2>
-        <button 
-              className="text-sm text-blue-500 hover:text-blue-700 mr-2"
-              onClick={handleUpdateAllEpisodes}
-              disabled={refreshing}
-            >
-              {refreshing ? '检查中...' : '检查新剧集'}
-        </button>
         {!loading && playRecords.length > 0 && (
 		<button 
               className="text-sm text-blue-500 hover:text-blue-700 mr-2"
@@ -217,10 +210,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         {loading
           ? // 加载状态显示灰色占位数据
             Array.from({ length: 6 }).map((_, index) => (
-              <div
-                key={index}
-                className='min-w-[96px] w-24 sm:min-w-[180px] sm:w-44'
-              >
+              <div key={index} className='min-w-[96px] w-24 sm:min-w-[180px] sm:w-44'>
                 <div className='relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-gray-200 animate-pulse dark:bg-gray-800'>
                   <div className='absolute inset-0 bg-gray-300 dark:bg-gray-700'></div>
                 </div>
