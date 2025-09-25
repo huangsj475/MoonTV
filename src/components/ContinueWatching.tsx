@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 'use client';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
@@ -23,7 +23,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     (PlayRecord & { key: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  //const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
   //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
@@ -49,8 +49,10 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	*/
   };
   
-  //const fetchPlayRecords = async () => {
-  const fetchPlayRecords = useCallback(async () => {
+  
+   useEffect(() => {
+	   const fetchPlayRecords = async () => {
+  
       try {
         setLoading(true);
 
@@ -63,10 +65,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       } finally {
         setLoading(false);
       }
-    //};
-	}, []);
-  
-   useEffect(() => {
+    };
     console.log('加载播放记录。。。');
     fetchPlayRecords();
 	
@@ -79,11 +78,11 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     );
 
     return unsubscribe;
-  }, [fetchPlayRecords]);//添加依赖
+  }, []);
 
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
-  const handleUpdateAllEpisodes = async () => {
+  /*const handleUpdateAllEpisodes = async () => {
 	  // 🔹1. 确认函数被调用
 	  console.log('[ 更新剧集] 按钮已点击，开始执行...');
     if (refreshing || playRecords.length  === 0) {
@@ -160,6 +159,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       setRefreshing(false);
     }
   };
+  */
 //------新增更新总集数-----------
 
   // 如果没有播放记录，则不渲染组件
@@ -187,14 +187,6 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
           继续观看
         </h2>
-		 <button
-      onClick={handleUpdateAllEpisodes}
-      disabled={refreshing}
-      className="flex gap-1 px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
-      aria-label="检查剧集更新"
-    >
-      <span>{refreshing ? '更新剧集中...' : '更新剧集'}</span>
-    </button>
         {!loading && playRecords.length > 0 && (
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
