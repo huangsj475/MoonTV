@@ -24,6 +24,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     (PlayRecord & { key: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
   const updatePlayRecords = (allRecords: Record<string, PlayRecord>) => {
@@ -39,6 +41,14 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     );
 
     setPlayRecords(sortedRecords);
+	// 初始化 flags
+    /*const flags: Record<string, boolean> = {};
+    sortedRecords.forEach(({  key }) => {
+      flags[key] = false;
+    });
+    setNewEpisodeFlags(flags);
+	*/
+  };
   };
   
    useEffect(() => {
@@ -58,6 +68,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     };
 
     fetchPlayRecords();
+	  
 
     // 监听播放记录更新事件
     const unsubscribe = subscribeToDataUpdates(
@@ -70,6 +81,51 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     return unsubscribe;
   }, []);
 
+//------新增更新总集数-----------
+// 检查所有视频是否更新了剧集
+  const handleUpdateAllEpisodes = async () => {
+    if (refreshing || playRecords.length  === 0) return;
+ 
+    setRefreshing(true);
+    //const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
+ 
+    try {
+      // 并发限制：最多同时请求 5 个
+      const BATCH_SIZE = 5;
+      for (let i = 0; i < playRecords.length;  i += BATCH_SIZE) {
+        const batch = playRecords.slice(i,  i + BATCH_SIZE);
+        await Promise.all( 
+          batch.map(async  (record) => {
+            const { source, id, total_episodes, key } = record;
+            try {
+              const videoDetail = await fetchVideoDetail(source, id);
+              if (!videoDetail?.episodes) return;
+ 
+              const newTotal = videoDetail.episodes.length; 
+              if (newTotal > total_episodes) {
+                // 更新本地记录
+                await savePlayRecord(source, id, {
+                  ...record,
+                  total_episodes: newTotal,
+                  save_time: Date.now(), 
+                });
+                //updatedFlags[key] = true;
+              }
+            } catch (err) {
+              console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
+            }
+          })
+        );
+      }
+ 
+      //setNewEpisodeFlags(updatedFlags);
+    } catch (error) {
+      console.error(' 批量更新剧集失败:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+//------新增更新总集数-----------
 
   // 如果没有播放记录，则不渲染组件
   if (!loading && playRecords.length === 0) {
@@ -88,47 +144,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     return { source, id };
   };
   
-  //------新增更新总集数-----------
-  //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
-const handleUpdateAllEpisodes = async () => {
-  if (loading || playRecords.length  === 0) return;
- 
-  setLoading(true);
-  //const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
- 
-  try {
-    for (const record of allRecords) {
-      const { source, id, total_episodes } = record;
-      try {
-        const videoDetail = await fetchVideoDetail(source, id);
-        if (!videoDetail?.episodes) continue;
- 
-        const newTotal = videoDetail.episodes.length; 
-        if (newTotal > total_episodes) {
-          // 更新播放记录中的 total_episodes
-          await savePlayRecord(source, id, {
-            ...record,
-            total_episodes: newTotal,
-            save_time: Date.now(),  // 刷新时间
-          });
- 
-          // 标记此视频有新集
-          //updatedFlags[record.key] = true;
-        }
-      } catch (err) {
-        console.warn(` 获取视频 ${source}-${id} 信息失败`, err);
-      }
-    }
- 
-    // 批量更新红点标志
-    //setNewEpisodeFlags(updatedFlags);
-  } catch (error) {
-    console.error(' 更新剧集失败:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-//------新增更新总集数-----------
+
 
   return (
     <section className={`mb-8 ${className || ''}`}>
@@ -136,14 +152,22 @@ const handleUpdateAllEpisodes = async () => {
         <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
           继续观看
         </h2>
-		<button
-      onClick={handleUpdateAllEpisodes}
-      disabled={loading}
-      className="flex items-center gap-1 px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-    >
-      <RefreshCw className="w-4 h-4" />
-      {loading ? '更新中...' : '更新剧集'}
-    </button>
+		 <button
+          onClick={handleUpdateAllEpisodes}
+          disabled={refreshing}
+          className={`p-1 rounded-full transition-colors ${
+            refreshing
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+          }`}
+          aria-label="检查新剧集"
+        >
+          <RefreshCw
+            className={`w-5 h-5 text-gray-600 dark:text-gray-300 ${
+              refreshing ? 'animate-spin' : ''
+            }`}
+          />
+        </button>
         {!loading && playRecords.length > 0 && (
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
