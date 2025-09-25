@@ -68,20 +68,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     };
 
     fetchPlayRecords();
-	  
-
-    // 监听播放记录更新事件
-    const unsubscribe = subscribeToDataUpdates(
-      'playRecordsUpdated',
-      (newRecords: Record<string, PlayRecord>) => {
-        updatePlayRecords(newRecords);
-      }
-    );
-
-    return unsubscribe;
-  }, []);
-
-//------新增更新总集数-----------
+	//------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
     if (refreshing || playRecords.length  === 0) return;
@@ -129,6 +116,20 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     }
   };
 //------新增更新总集数-----------
+	  
+
+    // 监听播放记录更新事件
+    const unsubscribe = subscribeToDataUpdates(
+      'playRecordsUpdated',
+      (newRecords: Record<string, PlayRecord>) => {
+        updatePlayRecords(newRecords);
+      }
+    );
+
+    return unsubscribe;
+  }, []);
+
+
 
   // 如果没有播放记录，则不渲染组件
   if (!loading && playRecords.length === 0) {
@@ -166,7 +167,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       ) : (
         <RefreshCw className="w-4 h-4" />
       )}
-      <span>{refreshing ? '检查中...' : '检查更新'}</span>
+      <span>{refreshing ? '更新剧集中......' : '更新剧集'}</span>
     </button>
         {!loading && playRecords.length > 0 && (
           <button
