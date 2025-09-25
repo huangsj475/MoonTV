@@ -49,7 +49,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     setNewEpisodeFlags(flags);
 	*/
   };
-  };
+  
   
    useEffect(() => {
     const fetchPlayRecords = async () => {
