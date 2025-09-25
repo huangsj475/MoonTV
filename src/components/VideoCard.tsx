@@ -25,7 +25,6 @@ interface VideoCardProps {
   query?: string;
   poster?: string;
   episodes?: number;
-  showRedDot: boolean; // 运行时标记：是否显示更新红点
   source_name?: string;
   progress?: number;
   year?: string;
@@ -44,7 +43,6 @@ export default function VideoCard({
   query = '',
   poster = '',
   episodes,
-  showRedDot,//新增更新红点
   source,
   source_name,
   progress = 0,
