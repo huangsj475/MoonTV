@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 'use client';
 import { useEffect, useState } from 'react';
-import { RefreshCw } from 'lucide-react';//导入图标组件
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
@@ -66,7 +65,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     };
   
    useEffect(() => {
-    
+    console.log('加载播放记录。。。');
     fetchPlayRecords();
 	
     // 监听播放记录更新事件
@@ -192,12 +191,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       className="flex gap-1 px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed"
       aria-label="检查剧集更新"
     >
-      {refreshing ? (
-        <RefreshCw className="w-4 h-4 animate-spin" />
-      ) : (
-        <RefreshCw className="w-4 h-4" />
-      )}
-      <span>{refreshing ? '更新剧集中......' : '更新剧集'}</span>
+      <span>{refreshing ? '更新剧集中...' : '更新剧集'}</span>
     </button>
         {!loading && playRecords.length > 0 && (
           <button
