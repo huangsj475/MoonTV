@@ -83,28 +83,48 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
-    if (refreshing || playRecords.length  === 0) return;
- 
+	  // 🔹1. 确认函数被调用
+	  console.log('[ 更新剧集] 按钮已点击，开始执行...');
+    if (refreshing || playRecords.length  === 0) {
+		// 🔹2. 检查提前返回的原因
+    if (refreshing) {
+      console.log('[ 更新剧集] 当前正在刷新中，跳过本次请求');
+    } else if (playRecords.length  === 0) {
+      console.log('[ 更新剧集] 当前没有播放记录，无需更新');
+    }
+		return;
+	}
+	
     setRefreshing(true);
+	// 🔹3. 设置 loading 并确认进入主流程
+  console.log('[ 更新剧集] 开始设置 refreshing = true');
     //const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
  
     try {
       // 并发限制：最多同时请求 5 个
       const BATCH_SIZE = 5;
 	  let hasChanges = false;
+	  console.log(`[ 更新剧集] 共有 ${playRecords.length}  条播放记录，将分批处理`);
       for (let i = 0; i < playRecords.length;  i += BATCH_SIZE) {
         const batch = playRecords.slice(i,  i + BATCH_SIZE);
+		console.log(`[ 更新剧集] 正在处理第 ${i / BATCH_SIZE + 1} 批次，包含 ${batch.length}  个视频`);
         await Promise.all( 
           batch.map(async  (record) => {
 			   
-            const { key, total_episodes } = record;
+            const { key, total_episodes, title } = record;
 			const { source, id } = parseKey(key);
+			 console.log(`[ 更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
             try {
               const videoDetail = await fetchVideoDetail({ source, id });
-              if (!videoDetail?.episodes) return;
- 
+			  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
+              if (!videoDetail?.episodes) {
+				  console.warn(`[ 更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
+				  return;
+			  }
               const newTotal = videoDetail.episodes.length; 
+			  console.log(`[ 更新剧集 - ${source}+${id}] 集数对比: 原 ${total_episodes} → 新 ${newTotal}`);
               if (newTotal > total_episodes) {
+				  console.log(`[ 更新剧集 - ${source}+${id}] 发现新集！正在保存...`);
                 // 更新本地记录
                 await savePlayRecord(source, id, {
                   ...record,
@@ -114,7 +134,9 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 				 hasChanges = true;
                 //updatedFlags[key] = true;
 				
-              }
+              }else {
+              console.log(`[ 更新剧集 - ${source}+${id}] 无新增集数，跳过`);
+				}
             } catch (err) {
               console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
             }
@@ -123,13 +145,17 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       }
  
 		if (hasChanges) {
+			console.log('[ 更新剧集] 检测到数据变化，重新加载播放记录');
         fetchPlayRecords();//再次加载一次新的播放记录
+		}else {
+      console.log('[ 更新剧集] 所有剧集已是最新，无需更新');
 		}
 		
       //setNewEpisodeFlags(updatedFlags);
     } catch (error) {
       console.error(' 批量更新剧集失败:', error);
     } finally {
+	  console.log('[ 更新剧集] 更新流程结束，设置 refreshing = false');
       setRefreshing(false);
     }
   };
