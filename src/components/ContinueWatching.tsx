@@ -100,7 +100,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
             const { key, total_episodes } = record;
 			const { source, id } = parseKey(key);
             try {
-              const videoDetail = await fetchVideoDetail(source, id);
+              const videoDetail = await fetchVideoDetail({ source, id });
               if (!videoDetail?.episodes) return;
  
               const newTotal = videoDetail.episodes.length; 
