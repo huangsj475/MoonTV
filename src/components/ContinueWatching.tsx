@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 'use client';
-import { RefreshCw } from 'lucide-react';//导入图标组件
 import { useEffect, useState } from 'react';
+import { RefreshCw } from 'lucide-react';//导入图标组件
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
