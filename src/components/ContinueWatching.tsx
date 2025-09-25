@@ -186,13 +186,14 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           继续观看
         </h2>
         {!loading && playRecords.length > 0 && (
+		<>
 		<button 
               className="text-sm text-blue-500 hover:text-blue-700 mr-2"
               onClick={handleUpdateAllEpisodes}
               disabled={refreshing}
             >
               {refreshing ? '更新中...' : '更新新剧集'}
-        </button>
+          </button>
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             onClick={async () => {
@@ -202,6 +203,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           >
             清空
           </button>
+		 </>
         )}
       </div>
       <ScrollableRow>
