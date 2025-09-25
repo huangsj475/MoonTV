@@ -97,7 +97,7 @@ const handleUpdateAllEpisodes = async () => {
   //const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
  
   try {
-    for (const record of playRecords) {
+    for (const record of allRecords) {
       const { source, id, total_episodes } = record;
       try {
         const videoDetail = await fetchVideoDetail(source, id);
