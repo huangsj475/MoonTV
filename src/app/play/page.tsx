@@ -1361,7 +1361,7 @@ useEffect(() => {
     
    if (!isWebkit && artPlayerRef.current) {
       artPlayerRef.current.switch = videoUrl;
-      artPlayerRef.current.title = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) - 第 ${currentEpisodeIndex + 1} || `第 ${currentEpisodeIndex + 1} 集`}/${totalEpisodes}集`;
+      artPlayerRef.current.title = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || ``} - 第 ${currentEpisodeIndex + 1} /${totalEpisodes}集`;
       
       artPlayerRef.current.poster = videoCover;
       if (artPlayerRef.current?.video) {
@@ -1440,7 +1440,7 @@ useEffect(() => {
         z-index: 13;
         ">${
           videoTitle
-            ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) - 第 ${currentEpisodeIndex + 1} || `第 ${currentEpisodeIndex + 1} 集`}/${totalEpisodes}集`
+            ? `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || ``} - 第 ${currentEpisodeIndex + 1} /${totalEpisodes}集`
             : '影片标题'
         }</div>`,
     },
@@ -1881,7 +1881,7 @@ return () => {
   function updateTitleLayer(videoTitle: string, currentEpisodeIndex: number,videoUrl: string) {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
-        titleLayer.innerText  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) - 第 ${currentEpisodeIndex + 1} || `第 ${currentEpisodeIndex + 1} 集`}/${totalEpisodes}集`;
+        titleLayer.innerText  = `${videoTitle} - ${extractEpisodeNameFromUrl(videoUrl) || ``} - 第 ${currentEpisodeIndex + 1} /${totalEpisodes}集`;
     }
 }
   useEffect(() => {
@@ -2071,7 +2071,7 @@ return () => {
             {totalEpisodes > 1 && (
               <span className='text-gray-500 dark:text-gray-400'>
                 {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
-                {` > ${extractEpisodeNameFromUrl(videoUrl) - 第 ${currentEpisodeIndex + 1} || `第 ${currentEpisodeIndex + 1} 集`}/${totalEpisodes}集`}
+                {` > ${extractEpisodeNameFromUrl(videoUrl) || ``} - 第 ${currentEpisodeIndex + 1} /${totalEpisodes}集`}
               </span>
             )}
           </h1>
