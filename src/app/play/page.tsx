@@ -1363,8 +1363,8 @@ useEffect(() => {
       artPlayerRef.current.switch = videoUrl;
       artPlayerRef.current.title = `${videoTitle} - ${
       extractEpisodeNameFromUrl(videoUrl) 
-    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第${currentEpisodeIndex + 1} / ${totalEpisodes}集` 
-    : `第${currentEpisodeIndex + 1} / ${totalEpisodes}集`
+    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
+    : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
 }`;
       
       artPlayerRef.current.poster = videoCover;
@@ -1446,8 +1446,8 @@ useEffect(() => {
           videoTitle
             ? `${videoTitle} - ${
   				extractEpisodeNameFromUrl(videoUrl) 
-   		    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第${currentEpisodeIndex + 1} / ${totalEpisodes}集` 
-   		 		: `第${currentEpisodeIndex + 1} / ${totalEpisodes}集`
+   		    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
+   		 		: `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
 				}`
             : '影片标题'
         }</div>`,
@@ -1891,8 +1891,8 @@ return () => {
     if (titleLayer) {
         titleLayer.innerText  = `${videoTitle} - ${
       extractEpisodeNameFromUrl(videoUrl) 
-    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第${currentEpisodeIndex + 1} / ${totalEpisodes}集` 
-    : `第${currentEpisodeIndex + 1} / ${totalEpisodes}集`
+    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
+    : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
 }`;
     }
 }
@@ -2085,8 +2085,8 @@ return () => {
                 {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
                 {` > ${
       extractEpisodeNameFromUrl(videoUrl) 
-    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第${currentEpisodeIndex + 1} / ${totalEpisodes}集` 
-    : `第${currentEpisodeIndex + 1} / ${totalEpisodes}集`
+    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
+    : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
 }`}
               </span>
             )}
