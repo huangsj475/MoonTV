@@ -162,7 +162,7 @@ div[data-media-provider] video {
 
 @media (min-width: 769px) {
   .art-fullscreen {
-    --art-control-icon-scale: 1.6 !important;
+    --art-control-icon-scale: 1.4 !important;
   }
   
 }
