@@ -1374,6 +1374,8 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
     if (config?.SiteConfig) {
       setSiteSettings({
         ...config.SiteConfig,
+		SiteName: config.SiteConfig.SiteName || '',
+		Announcement: config.SiteConfig.Announcement || '',
         ImageProxy: config.SiteConfig.ImageProxy || '',
         DoubanProxy: config.SiteConfig.DoubanProxy || '',
         DisableYellowFilter: config.SiteConfig.DisableYellowFilter || false,
