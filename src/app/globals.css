@@ -162,8 +162,8 @@ div[data-media-provider] video {
 
 /* 增加控制栏左右内边距 */
   .art-controls {
-  padding-left: 7px !important;
-  padding-right: 12px !important;
+  padding-left: 20px !important;
+  padding-right: 35px !important;
   }
 
 /* 隐藏移动端竖屏时的 pip 按钮 */
