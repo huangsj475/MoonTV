@@ -1634,13 +1634,6 @@ useEffect(() => {
         ],
         // 控制栏配置
         controls: [
-		// 播放/暂停按钮（左对齐，距离左边10px）
-		  {
-			position: 'left',
-			html: '<i class="art-icon art-icon-play"></i>',
-			style: { marginLeft: '10px' },
-			
-		  },
           {
             position: 'left',
             index: 13,
@@ -1650,13 +1643,6 @@ useEffect(() => {
               handleNextEpisode();
             },
           },
-         // 全屏按钮（右对齐，距离右边10px）
-		  {
-			position: 'right',
-			html: '<i class="art-icon art-icon-fullscreen"></i>',
-			style: { marginRight: '10px' },
-			
-		  },
         ],
       });
       
