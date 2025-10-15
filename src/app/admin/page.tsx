@@ -337,10 +337,6 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
               userSettings.enableRegistration
                 ? 'bg-green-600'
                 : 'bg-gray-200 dark:bg-gray-700'
-            } ${
-              isD1Storage || isUpstashStorage
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
             }`}
           >
             <span
@@ -1227,11 +1223,7 @@ const CategoryConfig = ({
             setShowAddForm(!showAddForm)
           }
           disabled={false}
-          className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-            isD1Storage || isUpstashStorage
-              ? 'bg-gray-400 cursor-not-allowed text-white'
-              : 'bg-green-600 hover:bg-green-700 text-white'
-          }`}
+          className='px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors'
         >
           {showAddForm ? '取消' : '添加分类'}
         </button>
