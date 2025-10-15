@@ -176,8 +176,8 @@ div[data-media-provider] video {
     display: none !important;
   }
   /* 增加全屏时控制栏左右内边距 */
- .art-fullscreen .art-control,
- .art-fullscreenWeb .art-control {
+ .art-fullscreen .art-controls,
+ .art-fullscreenWeb .art-controls {
   padding-left: 5px !important;
   padding-right: 10px !important;
   }
