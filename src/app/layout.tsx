@@ -17,6 +17,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 // 动态生成 metadata，支持配置更新后的标题变化
 export async function generateMetadata(): Promise<Metadata> {
+	/*修改前
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
     process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'd1' &&
@@ -25,7 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
-
+  */
+  //----改后的----
+  let siteName = (await getConfig()).SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
+ 
   return {
     title: siteName,
     description: '影视聚合',
@@ -43,6 +47,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+	/*----原来的-----
   let siteName = process.env.SITE_NAME || 'MoonTV';
   let announcement =
     process.env.ANNOUNCEMENT ||
@@ -77,7 +82,47 @@ export default async function RootLayout({
       query: category.query,
     }));
   }
-
+  */
+  //----原来的-----
+  //------------修改后-------------
+  // 先获取配置（无论存储类型是什么）
+const config = await getConfig();
+ 
+// 优先级：config.SiteConfig > 环境变量 > 默认值 
+let siteName = config.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
+let announcement = 
+  config.SiteConfig?.Announcement || 
+  process.env.ANNOUNCEMENT  || 
+  '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
+let enableRegister = 
+  config.UserConfig?.AllowRegister ?? 
+  (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'true');
+let imageProxy = 
+  config.SiteConfig?.ImageProxy || 
+  process.env.NEXT_PUBLIC_IMAGE_PROXY  || 
+  '';
+let doubanProxy = 
+  config.SiteConfig?.DoubanProxy || 
+  process.env.NEXT_PUBLIC_DOUBAN_PROXY  || 
+  '';
+let disableYellowFilter = 
+  config.SiteConfig?.DisableYellowFilter ?? 
+  (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true');
+let customCategories = 
+  config.CustomCategories?.filter(category => !category.disabled).map(category  => ({
+    name: category.name  || '',
+    type: category.type, 
+    query: category.query, 
+  })) || 
+  (RuntimeConfig as any).custom_category?.map((category: any) => ({
+    name: 'name' in category ? category.name  : '',
+    type: category.type, 
+    query: category.query, 
+  })) || 
+  ([] as Array<{ name: string; type: 'movie' | 'tv'; query: string }>);
+  //------------修改后-------------
+  
+  
   // 将运行时配置注入到全局 window 对象，供客户端在运行时读取
   const runtimeConfig = {
     STORAGE_TYPE: process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage',
