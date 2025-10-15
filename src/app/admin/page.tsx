@@ -1615,7 +1615,6 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
                   : 'translate-x-1'
               }`}
             />
-            />
           </button>
         </div>
         <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
