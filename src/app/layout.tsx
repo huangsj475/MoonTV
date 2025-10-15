@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
   */
   //----改后的----
-  let siteName = (await getConfig()).SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
+  const siteName = (await getConfig()).SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
  
   return {
     title: siteName,
@@ -85,30 +85,30 @@ export default async function RootLayout({
   */
   //----原来的-----
   //------------修改后-------------
-  // 先获取配置（无论存储类型是什么）
+ // 先获取配置（无论存储类型是什么）
 const config = await getConfig();
  
-// 优先级：config.SiteConfig > 环境变量 > 默认值 
-let siteName = config.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
-let announcement = 
+// 优先级：config.SiteConfig > 环境变量 > 默认值
+const siteName = config.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
+const announcement = 
   config.SiteConfig?.Announcement || 
   process.env.ANNOUNCEMENT  || 
   '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
-let enableRegister = 
+const enableRegister = 
   config.UserConfig?.AllowRegister ?? 
   (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'true');
-let imageProxy = 
+const imageProxy = 
   config.SiteConfig?.ImageProxy || 
   process.env.NEXT_PUBLIC_IMAGE_PROXY  || 
   '';
-let doubanProxy = 
+const doubanProxy = 
   config.SiteConfig?.DoubanProxy || 
   process.env.NEXT_PUBLIC_DOUBAN_PROXY  || 
   '';
-let disableYellowFilter = 
+const disableYellowFilter = 
   config.SiteConfig?.DisableYellowFilter ?? 
   (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true');
-let customCategories = 
+const customCategories = 
   config.CustomCategories?.filter(category => !category.disabled).map(category  => ({
     name: category.name  || '',
     type: category.type, 
