@@ -312,9 +312,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
         </h4>
         <div className='flex items-center justify-between'>
           <label
-            className={`text-gray-700 dark:text-gray-300 ${
-              isD1Storage || isUpstashStorage ? 'opacity-50' : ''
-            }`}
+            className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
           >
             允许新用户注册
             {isD1Storage && (
@@ -1226,9 +1224,9 @@ const CategoryConfig = ({
         </h4>
         <button
           onClick={() =>
-            !isD1Storage && !isUpstashStorage && setShowAddForm(!showAddForm)
+            setShowAddForm(!showAddForm)
           }
-          disabled={isD1Storage || isUpstashStorage}
+          disabled={false}
           className={`px-3 py-1 text-sm rounded-lg transition-colors ${
             isD1Storage || isUpstashStorage
               ? 'bg-gray-400 cursor-not-allowed text-white'
@@ -1239,7 +1237,7 @@ const CategoryConfig = ({
         </button>
       </div>
 
-      {showAddForm && !isD1Storage && !isUpstashStorage && (
+      {showAddForm && (
         <div className='p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 space-y-4'>
           <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
             <input
@@ -1419,9 +1417,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
       {/* 站点名称 */}
       <div>
         <label
-          className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-            isD1Storage || isUpstashStorage ? 'opacity-50' : ''
-          }`}
+          className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
         >
           站点名称
           {isD1Storage && (
@@ -1442,20 +1438,14 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
             setSiteSettings((prev) => ({ ...prev, SiteName: e.target.value }))
           }
           disabled={false}
-          className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-            isD1Storage || isUpstashStorage
-              ? 'opacity-50 cursor-not-allowed'
-              : ''
-          }`}
+          className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
         />
       </div>
 
       {/* 站点公告 */}
       <div>
         <label
-          className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-            isD1Storage || isUpstashStorage ? 'opacity-50' : ''
-          }`}
+          className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
         >
           站点公告
           {isD1Storage && (
@@ -1481,11 +1471,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
           }
           disabled={isD1Storage || isUpstashStorage}
           rows={3}
-          className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-            isD1Storage || isUpstashStorage
-              ? 'opacity-50 cursor-not-allowed'
-              : ''
-          }`}
+          className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
         />
       </div>
 
@@ -1530,9 +1516,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
       {/* 图片代理 */}
       <div>
         <label
-          className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-            isD1Storage || isUpstashStorage ? 'opacity-50' : ''
-          }`}
+          className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
         >
           图片代理前缀
           {isD1Storage && (
@@ -1567,9 +1551,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
       {/* 豆瓣代理设置 */}
       <div>
         <label
-          className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-            isD1Storage || isUpstashStorage ? 'opacity-50' : ''
-          }`}
+          className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
         >
           豆瓣代理地址
           {isD1Storage && (
@@ -1596,11 +1578,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
             }))
           }
           disabled={isD1Storage || isUpstashStorage}
-          className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-            isD1Storage || isUpstashStorage
-              ? 'opacity-50 cursor-not-allowed'
-              : ''
-          }`}
+          className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
         />
         <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
           用于代理豆瓣数据访问，解决跨域或访问限制问题。留空则使用服务端API。
@@ -1611,9 +1589,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
       <div>
         <div className='flex items-center justify-between'>
           <label
-            className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${
-              isD1Storage || isUpstashStorage ? 'opacity-50' : ''
-            }`}
+            className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'
           >
             禁用黄色过滤器
             {isD1Storage && (
@@ -1630,23 +1606,13 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
           <button
             type='button'
             onClick={() =>
-              !isD1Storage &&
-              !isUpstashStorage &&
-              setSiteSettings((prev) => ({
+             setSiteSettings((prev) => ({
                 ...prev,
                 DisableYellowFilter: !prev.DisableYellowFilter,
               }))
             }
-            disabled={isD1Storage || isUpstashStorage}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-              siteSettings.DisableYellowFilter
-                ? 'bg-green-600'
-                : 'bg-gray-200 dark:bg-gray-700'
-            } ${
-              isD1Storage || isUpstashStorage
-                ? 'opacity-50 cursor-not-allowed'
-                : ''
-            }`}
+            disabled={false}
+           className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
           >
             <span
               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
