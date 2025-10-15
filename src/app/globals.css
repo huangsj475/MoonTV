@@ -160,7 +160,11 @@ div[data-media-provider] video {
   background-color: #000 !important; /* 其余区域填充为黑色 */
 }
 
-
+/* 增加控制栏左右内边距 */
+  .art-controls {
+  padding-left: 7px !important;
+  padding-right: 12px !important;
+  }
 
 /* 隐藏移动端竖屏时的 pip 按钮 */
 @media (max-width: 768px) {
@@ -175,10 +179,6 @@ div[data-media-provider] video {
   .art-control-volume {
     display: none !important;
   }
-  /* 增加全屏时控制栏左右内边距 */
-  .art-controls {
-  padding-left: 7px !important;
-  padding-right: 12px !important;
-  }
+  
   
 }
