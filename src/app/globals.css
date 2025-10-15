@@ -160,6 +160,8 @@ div[data-media-provider] video {
   background-color: #000 !important; /* 其余区域填充为黑色 */
 }
 
+
+
 /* 隐藏移动端竖屏时的 pip 按钮 */
 @media (max-width: 768px) {
   .art-control-pip {
@@ -173,4 +175,11 @@ div[data-media-provider] video {
   .art-control-volume {
     display: none !important;
   }
+  /* 增加全屏时控制栏左右内边距 */
+ .art-fullscreen .art-control,
+ .art-fullscreenWeb .art-control {
+  padding-left: 5px !important;
+  padding-right: 10px !important;
+  }
+  
 }
