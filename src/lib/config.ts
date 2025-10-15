@@ -295,18 +295,13 @@ export async function getConfig(): Promise<AdminConfig> {
     }
 
     // 合并一些环境变量配置
-    adminConfig.SiteConfig.SiteName = process.env.SITE_NAME || 'MoonTV';
-    adminConfig.SiteConfig.Announcement =
-      process.env.ANNOUNCEMENT ||
+    process.env.SITE_NAME = adminConfig.SiteConfig.SiteName || 'MoonTV';
+    process.env.ANNOUNCEMENT = adminConfig.SiteConfig.Announcement ||
       '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
-    adminConfig.UserConfig.AllowRegister =
-      process.env.NEXT_PUBLIC_ENABLE_REGISTER === 'true';
-    adminConfig.SiteConfig.ImageProxy =
-      process.env.NEXT_PUBLIC_IMAGE_PROXY || '';
-    adminConfig.SiteConfig.DoubanProxy =
-      process.env.NEXT_PUBLIC_DOUBAN_PROXY || '';
-    adminConfig.SiteConfig.DisableYellowFilter =
-      process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
+    process.env.NEXT_PUBLIC_ENABLE_REGISTER = adminConfig.UserConfig.AllowRegister === 'true';
+    process.env.NEXT_PUBLIC_IMAGE_PROXY = adminConfig.SiteConfig.ImageProxy || '';
+    process.env.NEXT_PUBLIC_DOUBAN_PROXY = adminConfig.SiteConfig.DoubanProxy || '';
+    process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER = adminConfig.SiteConfig.DisableYellowFilter === 'true';
 
     // 合并文件中的源信息
     fileConfig = runtimeConfig as unknown as ConfigFileStruct;
