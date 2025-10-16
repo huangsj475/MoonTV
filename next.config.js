@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const nextConfig = {
-  output: 'standalone',
+  //output: 'standalone',
+  output: 'export', // ------Cloudflare 必须使用静态导出------
   eslint: {
     dirs: ['src'],
   },
@@ -63,7 +64,7 @@ const nextConfig = {
     return config;
   },
 };
-
+/*------------改前-----------
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
@@ -72,3 +73,6 @@ const withPWA = require('next-pwa')({
 });
 
 module.exports = withPWA(nextConfig);
+------------改前-----------
+*/
+module.exports  = nextConfig; // ------直接导出配置--------
