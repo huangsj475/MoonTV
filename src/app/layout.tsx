@@ -145,7 +145,7 @@ const customCategories =
   */
   
   //-----新更改------
-  //let configFromDB = null;
+  let configFromDB = null;
  
 // 判断是否应该尝试从数据库加载配置（避免在不支持的环境调用）
 //if (
@@ -153,7 +153,7 @@ const customCategories =
   //process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'upstash'
 //) {
   try {
-    const configFromDB = await getConfig();
+     configFromDB = await getConfig();
   } catch (error) {
     console.warn('获取数据库值失败，改为使用环境变量:', error);
     // 失败时不阻断，降级使用环境变量
