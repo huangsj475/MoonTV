@@ -47,7 +47,10 @@ export async function generateMetadata(): Promise<Metadata> {
   }
  
   // 最终优先级：config > 环境变量 > 默认值
-  siteName = process.env.SITE_NAME  || siteName;
+  // 只有当 config 没提供时，才考虑环境变量
+  if (!siteName) {
+    siteName = process.env.SITE_NAME  || 'MoonTV';
+  }
 
 	//-------新更改---------
 	
