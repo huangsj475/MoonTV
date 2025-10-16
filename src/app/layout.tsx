@@ -37,21 +37,19 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
  
     // 如果成功获取配置，则使用其中的 SiteName
-    if (config?.SiteConfig?.SiteName) {
-      siteName = config.SiteConfig.SiteName;
+    //if (config?.SiteConfig?.SiteName) {
+      //siteName = config.SiteConfig.SiteName;
+	  // 最终优先级：config > 环境变量 > 默认值
+	  siteName = config?.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
 	  console.log('获取到数据库站点名:', siteName);
-    }
-  } catch (error) {
-    console.warn('获取数据库值“站点名“失败，改为使用环境变量:', error);
+    //}
+  } catch (e) {
+    siteName = process.env.SITE_NAME  || 'MoonTV';
+    console.warn('获取数据库值“站点名“失败，改为使用环境变量:', e);
     // 失败时降级：继续检查环境变量
   }
  
-  // 最终优先级：config > 环境变量 > 默认值
-  // 只有当 config 没提供时，才考虑环境变量
-  if (!siteName) {
-    siteName = process.env.SITE_NAME  || 'MoonTV';
-  }
-
+  
 	//-------新更改---------
 	
   return {
