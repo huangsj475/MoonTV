@@ -321,13 +321,15 @@ export async function getConfig(): Promise<AdminConfig> {
       ImageProxy: adminConfig.SiteConfig?.ImageProxy || process.env.NEXT_PUBLIC_IMAGE_PROXY  || '',
       DoubanProxy: adminConfig.SiteConfig?.DoubanProxy || process.env.NEXT_PUBLIC_DOUBAN_PROXY  || '',
       DisableYellowFilter:
-        adminConfig.SiteConfig?.DisableYellowFilter ??
-        (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true'),
+  adminConfig.SiteConfig?.DisableYellowFilter ??
+  (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true'),
       SearchDownstreamMaxPage:
-        adminConfig.SiteConfig?.SearchDownstreamMaxPage ??
-        Number(process.env.NEXT_PUBLIC_SEARCH_MAX_PAGE)  || 5,
-      SiteInterfaceCacheTime:
-        adminConfig.SiteConfig?.SiteInterfaceCacheTime ?? fileConfig.cache_time  || 7200,
+  adminConfig.SiteConfig?.SearchDownstreamMaxPage ??
+  (Number(process.env.NEXT_PUBLIC_SEARCH_MAX_PAGE)  || 5),
+ 
+SiteInterfaceCacheTime:
+  adminConfig.SiteConfig?.SiteInterfaceCacheTime ??
+  (fileConfig.cache_time  || 7200),
     },
     UserConfig: {
       ...adminConfig.UserConfig,
