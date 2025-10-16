@@ -312,36 +312,8 @@ export async function getConfig(): Promise<AdminConfig> {
       process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
       ------原来的
       */
- const finalConfig: AdminConfig = {
-    ...adminConfig,
-    SiteConfig: {
-      ...adminConfig.SiteConfig,
-      SiteName: adminConfig.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV',
-      Announcement: adminConfig.SiteConfig?.Announcement || process.env.ANNOUNCEMENT  || '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。',
-      ImageProxy: adminConfig.SiteConfig?.ImageProxy || process.env.NEXT_PUBLIC_IMAGE_PROXY  || '',
-      DoubanProxy: adminConfig.SiteConfig?.DoubanProxy || process.env.NEXT_PUBLIC_DOUBAN_PROXY  || '',
-      DisableYellowFilter:
-  adminConfig.SiteConfig?.DisableYellowFilter ??
-  (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true'),
-      SearchDownstreamMaxPage:
-  adminConfig.SiteConfig?.SearchDownstreamMaxPage ??
-  (Number(process.env.NEXT_PUBLIC_SEARCH_MAX_PAGE)  || 5),
  
-SiteInterfaceCacheTime:
-  adminConfig.SiteConfig?.SiteInterfaceCacheTime ??
-  (fileConfig.cache_time  || 7200),
-    },
-    UserConfig: {
-      ...adminConfig.UserConfig,
-      AllowRegister:
-        adminConfig.UserConfig?.AllowRegister ??
-        (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'false'),
-    },
-  };
- 
-  
-  return finalConfig;
-    /*
+    
       // 只有当数据库没有配置时，才用环境变量或默认值
     //--------------------修改后------------------------
   if (!adminConfig.SiteConfig.SiteName) {
@@ -368,13 +340,13 @@ SiteInterfaceCacheTime:
     adminConfig.SiteConfig.DisableYellowFilter =
       process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
   }
-  */
+  
 //--------------------修改后------------------------
     // 合并文件中的源信息
     fileConfig = runtimeConfig as unknown as ConfigFileStruct;
     const apiSiteEntries = Object.entries(fileConfig.api_site);
     const sourceConfigMap = new Map(
-      (adminConfig?.SourceConfig || []).map((s) => [s.key, s])
+      (adminConfig.SourceConfig || []).map((s) => [s.key, s])
     );
 
     apiSiteEntries.forEach(([key, site]) => {
