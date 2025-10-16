@@ -280,7 +280,7 @@ export async function getConfig(): Promise<AdminConfig> {
   const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
   //新增：Cloudflare平台判断，因为cachedConfig会被长期缓存，不能及时更新我想要的数据库Sitename站点名
   const isCloudflare = process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' || !!process.env.CF_PAGES  || !!process.env.CLOUDFLARE_ENV; 
-  if (isCloudflare || process.env.DOCKER_ENV === 'true' || storageType === 'localstorage') {
+  if (process.env.DOCKER_ENV === 'true' || storageType === 'localstorage') {
     await initConfig();
     return cachedConfig;
   }
@@ -298,7 +298,7 @@ export async function getConfig(): Promise<AdminConfig> {
 
     /*------原来的
     // 合并一些环境变量配置
-    adminConfig.SiteConfig.SiteName = process.env.SITE_NAME || 'MoonTV';
+    process.env.SITE_NAME = adminConfig.SiteConfig.SiteName || 'MoonTV';
     adminConfig.SiteConfig.Announcement =
       process.env.ANNOUNCEMENT ||
       '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
@@ -312,8 +312,34 @@ export async function getConfig(): Promise<AdminConfig> {
       process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
       ------原来的
       */
+ const finalConfig: AdminConfig = {
+    ...adminConfig,
+    SiteConfig: {
+      ...adminConfig.SiteConfig,
+      SiteName: adminConfig.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV',
+      Announcement: adminConfig.SiteConfig?.Announcement || process.env.ANNOUNCEMENT  || '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。',
+      ImageProxy: adminConfig.SiteConfig?.ImageProxy || process.env.NEXT_PUBLIC_IMAGE_PROXY  || '',
+      DoubanProxy: adminConfig.SiteConfig?.DoubanProxy || process.env.NEXT_PUBLIC_DOUBAN_PROXY  || '',
+      DisableYellowFilter:
+        adminConfig.SiteConfig?.DisableYellowFilter ??
+        (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true'),
+      SearchDownstreamMaxPage:
+        adminConfig.SiteConfig?.SearchDownstreamMaxPage ??
+        Number(process.env.NEXT_PUBLIC_SEARCH_MAX_PAGE)  || 5,
+      SiteInterfaceCacheTime:
+        adminConfig.SiteConfig?.SiteInterfaceCacheTime ?? fileConfig.cache_time  || 7200,
+    },
+    UserConfig: {
+      ...adminConfig.UserConfig,
+      AllowRegister:
+        adminConfig.UserConfig?.AllowRegister ??
+        (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'false'),
+    },
+  };
  
-    
+  
+  return finalConfig;
+    /*
       // 只有当数据库没有配置时，才用环境变量或默认值
     //--------------------修改后------------------------
   if (!adminConfig.SiteConfig.SiteName) {
@@ -340,7 +366,7 @@ export async function getConfig(): Promise<AdminConfig> {
     adminConfig.SiteConfig.DisableYellowFilter =
       process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
   }
-  
+  */
 //--------------------修改后------------------------
     // 合并文件中的源信息
     fileConfig = runtimeConfig as unknown as ConfigFileStruct;
