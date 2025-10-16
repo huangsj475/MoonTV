@@ -29,24 +29,28 @@ export async function generateMetadata(): Promise<Metadata> {
   */
   
   //-------新更改---------
-  let siteName = 'MoonTV'; // 默认值
+  //let siteName = 'MoonTV'; // 默认值
+  let config = null;
  
   try {
     // 不管什么存储类型，都可以安全调用 getConfig()
     // getConfig() 内部已处理不同环境下的逻辑（Docker、Serverless、Redis等）
-    const config = await getConfig();
+    config = await getConfig();
  
     // 如果成功获取配置，则使用其中的 SiteName
 	// 最终优先级：config > 环境变量 > 默认值
-    if (config?.SiteConfig?.SiteName) {
-      siteName = config.SiteConfig.SiteName;
-    }
+   // if (config?.SiteConfig?.SiteName) {
+      //siteName = config.SiteConfig.SiteName;
+    //}
   } catch (e) {
-    siteName = process.env.SITE_NAME  || 'MoonTV';
+   // siteName = process.env.SITE_NAME  || 'MoonTV';
     // 失败时降级：继续检查环境变量
   }
  
-  
+  const siteName =
+  config?.SiteConfig?.SiteName ||
+  process.env.SITE_NAME  ||
+  'MoonTV';
 	//-------新更改---------
 	
   return {
