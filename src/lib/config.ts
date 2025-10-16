@@ -49,7 +49,10 @@ let fileConfig: ConfigFileStruct;
 let cachedConfig: AdminConfig;
 
 async function initConfig() {
-  if (cachedConfig) {
+	const isCloudflare = process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' ||
+                       !!process.env.CF_PAGES  ||
+                       !!process.env.CLOUDFLARE_ENV; 
+  if (!isCloudflare && cachedConfig) {
     return;
   }
 
@@ -278,8 +281,7 @@ async function initConfig() {
 
 export async function getConfig(): Promise<AdminConfig> {
   const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
-  //新增：Cloudflare平台判断，因为cachedConfig会被长期缓存，不能及时更新我想要的数据库Sitename站点名
-  const isCloudflare = process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' || !!process.env.CF_PAGES  || !!process.env.CLOUDFLARE_ENV; 
+  
   if (process.env.DOCKER_ENV === 'true' || storageType === 'localstorage') {
     await initConfig();
     return cachedConfig;
@@ -298,7 +300,7 @@ export async function getConfig(): Promise<AdminConfig> {
 
     /*------原来的
     // 合并一些环境变量配置
-    process.env.SITE_NAME = adminConfig.SiteConfig.SiteName || 'MoonTV';
+    adminConfig.SiteConfig.SiteName = process.env.SITE_NAME || 'MoonTV';
     adminConfig.SiteConfig.Announcement =
       process.env.ANNOUNCEMENT ||
       '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
@@ -324,7 +326,7 @@ export async function getConfig(): Promise<AdminConfig> {
       process.env.ANNOUNCEMENT ||
       '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
   }
-  if (adminConfig.UserConfig.AllowRegister === undefined) {
+  if (adminConfig.UserConfig.AllowRegister === null) {
     adminConfig.UserConfig.AllowRegister =
       process.env.NEXT_PUBLIC_ENABLE_REGISTER === 'true';
   }
@@ -336,7 +338,7 @@ export async function getConfig(): Promise<AdminConfig> {
     adminConfig.SiteConfig.DoubanProxy =
       process.env.NEXT_PUBLIC_DOUBAN_PROXY || '';
   }
-  if (adminConfig.SiteConfig.DisableYellowFilter === undefined) {
+  if (adminConfig.SiteConfig.DisableYellowFilter === null) {
     adminConfig.SiteConfig.DisableYellowFilter =
       process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
   }
