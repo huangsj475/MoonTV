@@ -40,11 +40,9 @@ export async function generateMetadata(): Promise<Metadata> {
 	// 最终优先级：config > 环境变量 > 默认值
     if (config?.SiteConfig?.SiteName) {
       siteName = config.SiteConfig.SiteName;
-	  console.log('获取到数据库站点名:', siteName);
     }
   } catch (e) {
     siteName = process.env.SITE_NAME  || 'MoonTV';
-    console.warn('获取数据库值“站点名“失败，改为使用环境变量:', e);
     // 失败时降级：继续检查环境变量
   }
  
@@ -105,45 +103,7 @@ export default async function RootLayout({
   }
   */
   //----原来的-----
-  //------------修改后-------------
-  /*
- // 先获取配置（无论存储类型是什么）
-const config = await getConfig();
- 
-// 优先级：config.SiteConfig > 环境变量 > 默认值
-const siteName = config.SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
-const announcement = 
-  config.SiteConfig?.Announcement || 
-  process.env.ANNOUNCEMENT  || 
-  '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
-const enableRegister = 
-  config.UserConfig?.AllowRegister ?? 
-  (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'true');
-const imageProxy = 
-  config.SiteConfig?.ImageProxy || 
-  process.env.NEXT_PUBLIC_IMAGE_PROXY  || 
-  '';
-const doubanProxy = 
-  config.SiteConfig?.DoubanProxy || 
-  process.env.NEXT_PUBLIC_DOUBAN_PROXY  || 
-  '';
-const disableYellowFilter = 
-  config.SiteConfig?.DisableYellowFilter ?? 
-  (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true');
-const customCategories = 
-  config.CustomCategories?.filter(category => !category.disabled).map(category  => ({
-    name: category.name  || '',
-    type: category.type, 
-    query: category.query, 
-  })) || 
-  (RuntimeConfig as any).custom_category?.map((category: any) => ({
-    name: 'name' in category ? category.name  : '',
-    type: category.type, 
-    query: category.query, 
-  })) || 
-  ([] as Array<{ name: string; type: 'movie' | 'tv'; query: string }>);
-  //------------修改后-------------
-  */
+  
   
   //-----新更改------
   let configFromDB = null;
@@ -156,7 +116,7 @@ const customCategories =
   try {
      configFromDB = await getConfig();
   } catch (error) {
-    console.warn('获取数据库值失败，改为使用环境变量:', error);
+    
     // 失败时不阻断，降级使用环境变量
   }
 //}
