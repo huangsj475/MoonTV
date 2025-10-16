@@ -279,8 +279,8 @@ async function initConfig() {
 export async function getConfig(): Promise<AdminConfig> {
   const storageType = process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage';
   //新增：Cloudflare平台判断，因为cachedConfig会被长期缓存，不能及时更新我想要的数据库Sitename站点名
-  const isCloudflare = process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1'; 
-  if (!isCloudflare && process.env.DOCKER_ENV === 'true' || storageType === 'localstorage') {
+  const isCloudflare = process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' || !!process.env.CF_PAGES  || !!process.env.CLOUDFLARE_ENV; 
+  if (isCloudflare && process.env.DOCKER_ENV === 'true' || storageType === 'localstorage') {
     await initConfig();
     return cachedConfig;
   }
