@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 // 动态生成 metadata，支持配置更新后的标题变化
 export async function generateMetadata(): Promise<Metadata> {
-	
+	/*
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
     process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'd1' &&
@@ -26,10 +26,29 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
+  */
   
-  
-  //const siteName = (await getConfig()).SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
+  //-------新更改---------
+  let siteName = 'MoonTV'; // 默认值
+ 
+  try {
+    // 不管什么存储类型，都可以安全调用 getConfig()
+    // getConfig() 内部已处理不同环境下的逻辑（Docker、Serverless、Redis等）
+    const config = await getConfig();
+ 
+    // 如果成功获取配置，则使用其中的 SiteName
+    if (config?.SiteConfig?.SiteName) {
+      siteName = config.SiteConfig.SiteName;
+    }
+  } catch (error) {
+    console.warn('获取数据库值“站点名“失败，改为使用环境变量:', error);
+    // 失败时降级：继续检查环境变量
+  }
+ 
+  // 最终优先级：config > 环境变量 > 默认值
+  siteName = process.env.SITE_NAME  || siteName;
 
+	//-------新更改---------
 	
   return {
     title: siteName,
@@ -126,20 +145,20 @@ const customCategories =
   */
   
   //-----新更改------
-  let configFromDB = null;
+  //let configFromDB = null;
  
 // 判断是否应该尝试从数据库加载配置（避免在不支持的环境调用）
-if (
-  process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' ||
-  process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'upstash'
-) {
+//if (
+  //process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' ||
+  //process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'upstash'
+//) {
   try {
-    configFromDB = await getConfig();
+    const configFromDB = await getConfig();
   } catch (error) {
-    console.warn('Failed  to load config from database:', error);
+    console.warn('获取数据库值失败，改为使用环境变量:', error);
     // 失败时不阻断，降级使用环境变量
   }
-}
+//}
  
 // 优先级：数据库 > 环境变量 > 默认值
 const siteName =
