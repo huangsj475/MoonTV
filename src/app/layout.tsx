@@ -39,6 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
     // 如果成功获取配置，则使用其中的 SiteName
     if (config?.SiteConfig?.SiteName) {
       siteName = config.SiteConfig.SiteName;
+	  console.log('获取到数据库站点名:', siteName);
     }
   } catch (error) {
     console.warn('获取数据库值“站点名“失败，改为使用环境变量:', error);
