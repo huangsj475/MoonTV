@@ -374,7 +374,7 @@ SiteInterfaceCacheTime:
     fileConfig = runtimeConfig as unknown as ConfigFileStruct;
     const apiSiteEntries = Object.entries(fileConfig.api_site);
     const sourceConfigMap = new Map(
-      (adminConfig.SourceConfig || []).map((s) => [s.key, s])
+      (adminConfig?.SourceConfig || []).map((s) => [s.key, s])
     );
 
     apiSiteEntries.forEach(([key, site]) => {
