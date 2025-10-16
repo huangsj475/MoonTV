@@ -295,7 +295,7 @@ export async function getConfig(): Promise<AdminConfig> {
     }
 
     // 合并一些环境变量配置
-   /*
+   
     process.env.SITE_NAME = adminConfig.SiteConfig.SiteName || 'MoonTV';
     process.env.ANNOUNCEMENT = adminConfig.SiteConfig.Announcement ||
       '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
@@ -303,7 +303,7 @@ export async function getConfig(): Promise<AdminConfig> {
     process.env.NEXT_PUBLIC_IMAGE_PROXY = adminConfig.SiteConfig.ImageProxy || '';
     process.env.NEXT_PUBLIC_DOUBAN_PROXY = adminConfig.SiteConfig.DoubanProxy || '';
     process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER = adminConfig.SiteConfig.DisableYellowFilter === 'true';
-    */
+    /*
       // 只有当数据库没有配置时，才用环境变量或默认值
     //--------------------修改后------------------------
   if (!adminConfig.SiteConfig.SiteName) {
@@ -330,6 +330,7 @@ export async function getConfig(): Promise<AdminConfig> {
     adminConfig.SiteConfig.DisableYellowFilter =
       process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true';
   }
+  */
 //--------------------修改后------------------------
     // 合并文件中的源信息
     fileConfig = runtimeConfig as unknown as ConfigFileStruct;
