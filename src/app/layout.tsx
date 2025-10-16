@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 // 动态生成 metadata，支持配置更新后的标题变化
 export async function generateMetadata(): Promise<Metadata> {
-	/*修改前
+	
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
     process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'd1' &&
@@ -26,10 +26,11 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
-  */
-  //----改后的----
-  const siteName = (await getConfig()).SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
- 
+  
+  
+  //const siteName = (await getConfig()).SiteConfig?.SiteName || process.env.SITE_NAME  || 'MoonTV';
+
+	
   return {
     title: siteName,
     description: '影视聚合',
@@ -85,6 +86,7 @@ export default async function RootLayout({
   */
   //----原来的-----
   //------------修改后-------------
+  /*
  // 先获取配置（无论存储类型是什么）
 const config = await getConfig();
  
@@ -121,6 +123,68 @@ const customCategories =
   })) || 
   ([] as Array<{ name: string; type: 'movie' | 'tv'; query: string }>);
   //------------修改后-------------
+  */
+  
+  //-----新更改------
+  let configFromDB = null;
+ 
+// 判断是否应该尝试从数据库加载配置（避免在不支持的环境调用）
+if (
+  process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' ||
+  process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'upstash'
+) {
+  try {
+    configFromDB = await getConfig();
+  } catch (error) {
+    console.warn('Failed  to load config from database:', error);
+    // 失败时不阻断，降级使用环境变量
+  }
+}
+ 
+// 优先级：数据库 > 环境变量 > 默认值
+const siteName =
+  configFromDB?.SiteConfig?.SiteName ||
+  process.env.SITE_NAME  ||
+  'MoonTV';
+ 
+const announcement =
+  configFromDB?.SiteConfig?.Announcement ||
+  process.env.ANNOUNCEMENT  ||
+  '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
+ 
+const enableRegister =
+  configFromDB?.UserConfig?.AllowRegister ??
+  (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'true');
+ 
+const imageProxy =
+  configFromDB?.SiteConfig?.ImageProxy ||
+  process.env.NEXT_PUBLIC_IMAGE_PROXY  ||
+  '';
+ 
+const doubanProxy =
+  configFromDB?.SiteConfig?.DoubanProxy ||
+  process.env.NEXT_PUBLIC_DOUBAN_PROXY  ||
+  '';
+ 
+const disableYellowFilter =
+  configFromDB?.SiteConfig?.DisableYellowFilter ??
+  (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true');
+ 
+const customCategories =
+  configFromDB?.CustomCategories?.filter((c: any) => !c.disabled).map( 
+    (category: any) => ({
+      name: category.name  || '',
+      type: category.type, 
+      query: category.query, 
+    })
+  ) ||
+  (RuntimeConfig as any)?.custom_category?.map((category: any) => ({
+    name: 'name' in category ? category.name  : '',
+    type: category.type, 
+    query: category.query, 
+  })) ||
+  [];
+  //-----新更改------
   
   
   // 将运行时配置注入到全局 window 对象，供客户端在运行时读取
