@@ -1536,13 +1536,17 @@ const CategoryConfig = ({
           >
             {!category.disabled ? '禁用' : '启用'}
           </button>
-          {category.from !== 'config' && (
+          {category.from !== 'config' ? (
             <button
               onClick={() => handleDelete(category.query, category.type)}
               className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700/40 dark:hover:bg-gray-700/60 dark:text-gray-200 transition-colors'
             >
               删除
             </button>
+          ) : (
+            <span className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-200 text-gray-500 dark:bg-gray-800 dark:text-gray-400'>
+              不可删除
+            </span>
           )}
         </td>
       </tr>
@@ -1810,14 +1814,12 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
         <textarea
           value={siteSettings.Announcement}
           onChange={(e) =>
-            !isD1Storage &&
-            !isUpstashStorage &&
             setSiteSettings((prev) => ({
               ...prev,
               Announcement: e.target.value,
             }))
           }
-          disabled={isD1Storage || isUpstashStorage}
+          disabled={false}
           rows={3}
           className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
         />
@@ -1918,14 +1920,12 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
           placeholder='例如: https://proxy.example.com/fetch?url='
           value={siteSettings.DoubanProxy}
           onChange={(e) =>
-            !isD1Storage &&
-            !isUpstashStorage &&
-            setSiteSettings((prev) => ({
+           setSiteSettings((prev) => ({
               ...prev,
               DoubanProxy: e.target.value,
             }))
           }
-          disabled={isD1Storage || isUpstashStorage}
+          disabled={false}
           className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent'
         />
         <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
