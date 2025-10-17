@@ -952,7 +952,7 @@ const VideoSourceConfig = ({
             successCount++;
           } catch (error) {
             errorCount++;
-            errors.push(`${key}: ${error instanceof Error ? error.message : '未知错误'}`);
+            //errors.push(`${key}: ${error instanceof Error ? error.message : '未知错误'}`);
           }
         }
 
@@ -1444,7 +1444,7 @@ const CategoryConfig = ({
   };
 
   const handleDragEnd = (event: any) => {
-    if (isD1Storage || isUpstashStorage) return;
+    //if (isD1Storage || isUpstashStorage) return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
     const oldIndex = categories.findIndex(
@@ -1485,15 +1485,9 @@ const CategoryConfig = ({
         className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors select-none'
       >
         <td
-          className={`px-2 py-4 ${
-            isD1Storage || isUpstashStorage
-              ? 'text-gray-200'
-              : 'cursor-grab text-gray-400'
-          }`}
+          className='px-2 py-4 cursor-grab text-gray-400'
           style={{ touchAction: 'none' }}
-          {...(isD1Storage || isUpstashStorage
-            ? {}
-            : { ...attributes, ...listeners })}
+			{...{ ...attributes, ...listeners }}
         >
           <GripVertical size={16} />
         </td>
@@ -1531,22 +1525,16 @@ const CategoryConfig = ({
         <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
           <button
             onClick={() =>
-              !isD1Storage &&
-              !isUpstashStorage &&
-              handleToggleEnable(category.query, category.type)
+             handleToggleEnable(category.query, category.type)
             }
-            disabled={isD1Storage || isUpstashStorage}
-            className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
-              isD1Storage || isUpstashStorage
-                ? 'bg-gray-400 cursor-not-allowed text-white'
-                : !category.disabled
+            disabled={false}
+            className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium !category.disabled
                 ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60'
-                : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60'
-            } transition-colors`}
+                : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60' transition-colors'
           >
             {!category.disabled ? '禁用' : '启用'}
           </button>
-          {category.from !== 'config' && !isD1Storage && !isUpstashStorage && (
+          {category.from !== 'config' && (
             <button
               onClick={() => handleDelete(category.query, category.type)}
               className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700/40 dark:hover:bg-gray-700/60 dark:text-gray-200 transition-colors'
@@ -1666,7 +1654,7 @@ const CategoryConfig = ({
             </tr>
           </thead>
           <DndContext
-            sensors={isD1Storage || isUpstashStorage ? [] : sensors}
+            sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
             autoScroll={false}
@@ -1690,7 +1678,7 @@ const CategoryConfig = ({
       </div>
 
       {/* 保存排序按钮 */}
-      {orderChanged && !isD1Storage && !isUpstashStorage && (
+      {orderChanged && (
         <div className='flex justify-end'>
           <button
             onClick={handleSaveOrder}
