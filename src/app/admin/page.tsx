@@ -1163,11 +1163,11 @@ const VideoSourceConfig = ({
               
               {/* 添加视频源按钮 */}
               <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className='px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors'
-        >
-          {showAddForm ? '取消' : '添加视频源'}
-        </button>
+                onClick={() => setShowAddForm(!showAddForm)}
+                className='px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition-colors'
+              >
+                {showAddForm ? '取消' : '➕ 添加'}
+              </button>
             </>
           ) : (
             <>
