@@ -1528,9 +1528,11 @@ const CategoryConfig = ({
              handleToggleEnable(category.query, category.type)
             }
             disabled={false}
-            className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium !category.disabled
-                ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60'
-                : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60' transition-colors'
+			className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+  !category.disabled  
+    ? 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/60'
+    : 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60'
+}`}
           >
             {!category.disabled ? '禁用' : '启用'}
           </button>
