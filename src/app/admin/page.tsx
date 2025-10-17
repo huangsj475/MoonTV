@@ -1055,9 +1055,17 @@ const VideoSourceConfig = ({
             />
           </td>
         )}
-        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
-          {source.name}
+		<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+          <div className="flex items-center space-x-2">
+            <span>{source.name}</span>
+            {source.from === 'config' && (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
+                示例源
+              </span>
+            )}
+          </div>
         </td>
+        
         <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           {source.key}
         </td>
