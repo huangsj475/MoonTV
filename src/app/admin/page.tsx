@@ -748,7 +748,7 @@ const VideoSourceConfig = ({
     }
     setSelectedSources(newSelected);
   };
-/*
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       // 只选择可删除的视频源（排除示例源）
@@ -758,7 +758,7 @@ const VideoSourceConfig = ({
       setSelectedSources(new Set());
     }
   };
-*/
+
   const handleBatchDelete = async () => {
     if (selectedSources.size === 0) {
       showError('请先选择要删除的视频源');
