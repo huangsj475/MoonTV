@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+  /*
   if (storageType === 'd1' || storageType === 'upstash') {
     return NextResponse.json(
       {
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  
+  */
 
   try {
     const body = (await request.json()) as BaseBody & Record<string, any>;
