@@ -5,5 +5,11 @@
       "api": "https://your-video-api.com/api.php/provide/vod",
       "name": "示例视频源",
       "detail": "https://your-video-api.com/api.php/provide/vod"
+    },
+    "example_api": {
+      "api": "https://example.com/api.php/provide/vod",
+      "name": "示例资源",
+      "detail": "https://example.com/api.php/provide/vod"
     }
+  }
 }
