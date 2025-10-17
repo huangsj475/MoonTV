@@ -1196,12 +1196,6 @@ const VideoSourceConfig = ({
           )}
         </div>
 		
-        <button
-          onClick={() => setShowAddForm(!showAddForm)}
-          className='px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors'
-        >
-          {showAddForm ? '取消' : '添加视频源'}
-        </button>
       </div>
 
       {showAddForm && (
