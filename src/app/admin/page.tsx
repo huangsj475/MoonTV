@@ -786,10 +786,25 @@ const VideoSourceConfig = ({
 
     for (let i = 0; i < selectedArray.length; i++) {
       const key = selectedArray[i];
+	  const sourceName = sources.find(s => s.key === key)?.name || key;
+  
+  // 状态：进行中
+  Swal.update({
+    title: '批量删除中...',
+    html: `
+      <div class="text-center">
+        <div class="mb-2">🔄 <b>正在删除:</b> ${sourceName}</div>
+        <div class="text-sm text-gray-600">${i + 1} / ${selectedArray.length}</div>
+        <div class="text-xs text-gray-500 mt-2">请稍候...</div>
+      </div>
+    `
+  });
+  
+  await new Promise(resolve => setTimeout(resolve, 50));
       try {
         await callSourceApi({ action: 'delete', key });
         successCount++;
-        
+        /*
         // 显示进度
         if (selectedArray.length > 1) {
           Swal.update({
@@ -800,6 +815,7 @@ const VideoSourceConfig = ({
             allowOutsideClick: false
           });
         }
+		*/
       } catch (error) {
         errorCount++;
         const sourceName = sources.find(s => s.key === key)?.name || key;
