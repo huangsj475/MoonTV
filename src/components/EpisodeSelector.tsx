@@ -409,7 +409,13 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </div>
 
           {/* 集数网格 */}
-          <div className='grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] auto-rows-[40px] gap-x-3 gap-y-3 overflow-y-auto h-full pb-4'>
+          <div 
+  className={`grid auto-rows-[40px] gap-x-3 gap-y-3 overflow-y-auto h-full pb-4 ${
+    episodeLabel && episodeLabel !== `${episodeNumber}` 
+      ? 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))]'  // 暴风资源：宽按钮
+      : 'grid-cols-[repeat(auto-fill,minmax(40px,1fr))]'   // 其他资源：窄按钮
+  }`}
+>
             {(() => {
               const len = currentEnd - currentStart + 1;
               const episodes = Array.from({ length: len }, (_, i) =>
