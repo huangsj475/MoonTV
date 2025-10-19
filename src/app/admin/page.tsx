@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, no-console */
+ /* eslint-disable @typescript-eslint/no-explicit-any, no-console */
 
 'use client';
 
@@ -812,9 +812,6 @@ const VideoSourceConfig = ({
         <div class="text-xs text-gray-500 mt-2">请稍候...</div>
       </div>
     `
-	  showConfirmButton: false,
-        showCancelButton: false,
-        allowOutsideClick: false
   });
   
   await new Promise(resolve => setTimeout(resolve, 100));
