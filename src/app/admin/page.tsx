@@ -779,7 +779,7 @@ const VideoSourceConfig = ({
 
     if (!result.isConfirmed) return;
 
-	  /*
+	  
 	// 创建独立的进度弹窗
   const progressSwal = Swal.fire({
     title: '批量删除中...',
@@ -791,7 +791,7 @@ const VideoSourceConfig = ({
       Swal.showLoading();
     }
   });
-	  */
+	  
 
     // 批量删除逐个进行，显示进度
     let successCount = 0;
@@ -812,6 +812,9 @@ const VideoSourceConfig = ({
         <div class="text-xs text-gray-500 mt-2">请稍候...</div>
       </div>
     `
+	  showConfirmButton: false,
+        showCancelButton: false,
+        allowOutsideClick: false
   });
   
   await new Promise(resolve => setTimeout(resolve, 100));
@@ -838,7 +841,7 @@ const VideoSourceConfig = ({
     }
 
 	  // 关闭进度弹窗
-     //Swal.close();
+     Swal.close();
 	  
     // 显示删除结果
     if (errorCount === 0) {
