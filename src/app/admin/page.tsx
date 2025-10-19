@@ -779,6 +779,20 @@ const VideoSourceConfig = ({
 
     if (!result.isConfirmed) return;
 
+	  /*
+	// 创建独立的进度弹窗
+  const progressSwal = Swal.fire({
+    title: '批量删除中...',
+    html: '准备开始...',
+    showConfirmButton: false,
+    showCancelButton: false,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+	  */
+
     // 批量删除逐个进行，显示进度
     let successCount = 0;
     let errorCount = 0;
@@ -789,7 +803,7 @@ const VideoSourceConfig = ({
 	  const sourceName = sources.find(s => s.key === key)?.name || key;
   
   // 状态：进行中
-  Swal.update({
+  await Swal.update({
     title: '批量删除中...',
     html: `
       <div class="text-center">
@@ -800,7 +814,7 @@ const VideoSourceConfig = ({
     `
   });
   
-  await new Promise(resolve => setTimeout(resolve, 50));
+  await new Promise(resolve => setTimeout(resolve, 100));
       try {
         await callSourceApi({ action: 'delete', key });
         successCount++;
@@ -823,6 +837,9 @@ const VideoSourceConfig = ({
       }
     }
 
+	  // 关闭进度弹窗
+     //Swal.close();
+	  
     // 显示删除结果
     if (errorCount === 0) {
       showSuccess(`成功删除 ${successCount} 个视频源`);
