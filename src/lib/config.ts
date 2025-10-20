@@ -46,7 +46,7 @@ export const API_CONFIG = {
 
 // 在模块加载时根据环境决定配置来源
 let fileConfig: ConfigFileStruct;
-let cachedConfig: AdminConfig | null = null;
+let cachedConfig: AdminConfig ;
 
 async function initConfig() {
 	
@@ -283,11 +283,6 @@ export async function getConfig(): Promise<AdminConfig> {
   if (process.env.DOCKER_ENV === 'true' || storageType === 'localstorage') {
     await initConfig();
     return cachedConfig;
-  }
-	
-	// 如果是 D1 数据库环境，每次都重新获取，不使用缓存
-  if (storageType === 'd1') {
-    cachedConfig = null; // 强制清空缓存
   }
 	
   // 非 docker 环境且 DB 存储，直接读 db 配置
