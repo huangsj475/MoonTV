@@ -108,7 +108,7 @@ export default async function RootLayout({
   */
   //----原来的-----
   
-  
+ /* 
   //-----新更改------
   let configFromDB = null;
 
@@ -117,8 +117,19 @@ export default async function RootLayout({
   } catch (error) {
     console.warn('获取数据库最新配置失败:', error);
   }
-//}
- 
+*/
+ const storage = getStorage();
+  let configFromDB: AdminConfig | null = null;
+  if (storage && typeof (storage as any).getAdminConfig === 'function') {
+  try {
+    //config = await getConfig();原来的
+	// 强制从数据库读取最新配置（跳过内存缓存）
+      // 尝试从数据库获取管理员配置
+        configFromDB = await (storage as any).getAdminConfig();
+  } catch (error) {
+      console.warn('获取数据库最新配置失败:', error);
+  }
+  }
 // 优先级：数据库 > 环境变量 > 默认值
 const siteName =
   configFromDB?.SiteConfig?.SiteName ||
