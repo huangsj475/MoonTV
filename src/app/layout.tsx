@@ -10,7 +10,7 @@ import { getConfig } from '@/lib/config';
 import RuntimeConfig from '@/lib/runtime';
 
 import { getStorage } from '@/lib/db';
-import { AdminConfig } from './admin.types';
+import { AdminConfig } from '@/lib/admin.types';
 import { GlobalErrorIndicator } from '../components/GlobalErrorIndicator';
 import { SiteProvider } from '../components/SiteProvider';
 import { ThemeProvider } from '../components/ThemeProvider';
