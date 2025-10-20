@@ -1221,7 +1221,7 @@ const handleBatchDisable = async () => {
             successCount++;
           } catch (error) {
             errorCount++;
-            //errors.push(`${key}: ${error instanceof Error ? error.message : '未知错误'}`);
+            errors.push(`${key}: ${error instanceof Error ? error.message : '未知错误'}`);
           }
         }
 		// 关闭进度弹窗
