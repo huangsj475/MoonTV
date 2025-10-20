@@ -48,11 +48,15 @@ export const API_CONFIG = {
 let fileConfig: ConfigFileStruct;
 let cachedConfig: AdminConfig;
 
+// 新增：清除缓存的方法
+export function clearConfigCache() {
+  cachedConfig = null as any;
+  console.log('配置缓存已清除');
+}
+
 async function initConfig() {
-	const isCloudflare = process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' ||
-                       !!process.env.CF_PAGES  ||
-                       !!process.env.CLOUDFLARE_ENV; 
-  if (!isCloudflare && cachedConfig) {
+	
+  if (cachedConfig) {
     return;
   }
 
