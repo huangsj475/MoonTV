@@ -46,7 +46,7 @@ export const API_CONFIG = {
 
 // 在模块加载时根据环境决定配置来源
 let fileConfig: ConfigFileStruct;
-let cachedConfig: AdminConfig;
+let cachedConfig: AdminConfig | null = null;
 
 async function initConfig() {
 	
