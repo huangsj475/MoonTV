@@ -941,7 +941,8 @@ const handleBatchEnable = async () => {
       errors.push(`${sourceName}: ${error instanceof Error ? error.message : '启用失败'}`);
     }
   }
-
+	// 关闭进度弹窗
+      Swal.close();
   // 显示启用结果
   if (errorCount === 0) {
     showSuccess(`成功启用 ${successCount} 个视频源`);
@@ -1043,7 +1044,8 @@ const handleBatchDisable = async () => {
       errors.push(`${sourceName}: ${error instanceof Error ? error.message : '禁用失败'}`);
     }
   }
-
+	// 关闭进度弹窗
+      Swal.close();
   // 显示禁用结果
   if (errorCount === 0) {
     showSuccess(`成功禁用 ${successCount} 个视频源`);
@@ -1146,6 +1148,7 @@ const handleBatchDisable = async () => {
           return;
         }
 
+		const sourceEntries = Object.entries(importConfig.api_site);
         // 确认导入
         const result = await Swal.fire({
           title: '确认导入',
@@ -1159,13 +1162,42 @@ const handleBatchDisable = async () => {
         });
 
         if (!result.isConfirmed) return;
+		
+		// 创建进度弹窗
+      const progressSwal = Swal.fire({
+        title: '导入配置中...',
+        html: '准备开始导入...',
+        showConfirmButton: false,
+        showCancelButton: false,
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
 
         // 批量导入视频源
         let successCount = 0;
         let errorCount = 0;
         const errors: string[] = [];
 
-        for (const [key, source] of Object.entries(importConfig.api_site)) {
+        for (let i = 0; i < sourceEntries.length; i++) {
+		const [key, source] = sourceEntries[i];
+        const sourceName = (source as any)?.name || key;
+        
+        // 更新进度显示
+        await Swal.update({
+          title: '导入配置中...',
+          html: `
+            <div class="text-center">
+              <div class="mb-2">📥 <b>正在导入:</b> ${sourceName}</div>
+              <div class="text-sm text-gray-600">${i + 1} / ${sourceEntries.length}</div>
+              <div class="text-xs text-gray-500 mt-2">请稍候...</div>
+            </div>
+          `
+        });
+        
+        // 稍微延迟，让进度显示更明显
+        await new Promise(resolve => setTimeout(resolve, 80));
           try {
             // 类型检查和验证
             if (!source || typeof source !== 'object' || Array.isArray(source)) {
@@ -1192,6 +1224,8 @@ const handleBatchDisable = async () => {
             //errors.push(`${key}: ${error instanceof Error ? error.message : '未知错误'}`);
           }
         }
+		// 关闭进度弹窗
+		Swal.close();
 
         // 显示导入结果
         if (errorCount === 0) {
