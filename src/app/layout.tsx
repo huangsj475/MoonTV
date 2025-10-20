@@ -9,8 +9,6 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import { getConfig } from '@/lib/config';
 import RuntimeConfig from '@/lib/runtime';
 
-import { getStorage } from '@/lib/db';
-import { AdminConfig } from '@/lib/admin.types';
 import { GlobalErrorIndicator } from '../components/GlobalErrorIndicator';
 import { SiteProvider } from '../components/SiteProvider';
 import { ThemeProvider } from '../components/ThemeProvider';
@@ -31,22 +29,14 @@ export async function generateMetadata(): Promise<Metadata> {
   */
   
   //-------新更改---------
-  //let siteName = 'MoonTV'; // 默认值
-  //let config = null;
+  let config = null;
 
-  const storage = getStorage();
-  let config: AdminConfig | null = null;
-  if (storage && typeof (storage as any).getAdminConfig === 'function') {
   try {
-    //config = await getConfig();原来的
-	// 强制从数据库读取最新配置（跳过内存缓存）
-      // 尝试从数据库获取管理员配置
-        config = await (storage as any).getAdminConfig();
+    config = await getConfig();
   } catch (error) {
       console.warn('获取数据库最新配置失败:', error);
   }
-  }
- 
+  
   const siteName =
   config?.SiteConfig?.SiteName ||
   process.env.SITE_NAME  ||
@@ -108,7 +98,7 @@ export default async function RootLayout({
   */
   //----原来的-----
   
- /* 
+  
   //-----新更改------
   let configFromDB = null;
 
@@ -117,19 +107,7 @@ export default async function RootLayout({
   } catch (error) {
     console.warn('获取数据库最新配置失败:', error);
   }
-*/
- const storage = getStorage();
-  let configFromDB: AdminConfig | null = null;
-  if (storage && typeof (storage as any).getAdminConfig === 'function') {
-  try {
-    //config = await getConfig();原来的
-	// 强制从数据库读取最新配置（跳过内存缓存）
-      // 尝试从数据库获取管理员配置
-        configFromDB = await (storage as any).getAdminConfig();
-  } catch (error) {
-      console.warn('获取数据库最新配置失败:', error);
-  }
-  }
+
 // 优先级：数据库 > 环境变量 > 默认值
 const siteName =
   configFromDB?.SiteConfig?.SiteName ||
