@@ -9,6 +9,8 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 import { getConfig } from '@/lib/config';
 import RuntimeConfig from '@/lib/runtime';
 
+import { getStorage } from '@/lib/db';
+import { AdminConfig } from './admin.types';
 import { GlobalErrorIndicator } from '../components/GlobalErrorIndicator';
 import { SiteProvider } from '../components/SiteProvider';
 import { ThemeProvider } from '../components/ThemeProvider';
@@ -30,21 +32,19 @@ export async function generateMetadata(): Promise<Metadata> {
   
   //-------新更改---------
   //let siteName = 'MoonTV'; // 默认值
-  let config = null;
- 
+  //let config = null;
+
+  const storage = getStorage();
+  let config: AdminConfig | null = null;
+  if (storage && typeof (storage as any).getAdminConfig === 'function') {
   try {
-    // 不管什么存储类型，都可以安全调用 getConfig()
-    // getConfig() 内部已处理不同环境下的逻辑（Docker、Serverless、Redis等）
-    config = await getConfig();
- 
-    // 如果成功获取配置，则使用其中的 SiteName
-	// 最终优先级：config > 环境变量 > 默认值
-   // if (config?.SiteConfig?.SiteName) {
-      //siteName = config.SiteConfig.SiteName;
-    //}
-  } catch (e) {
-   // siteName = process.env.SITE_NAME  || 'MoonTV';
-    // 失败时降级：继续检查环境变量
+    //config = await getConfig();原来的
+	// 强制从数据库读取最新配置（跳过内存缓存）
+      // 尝试从数据库获取管理员配置
+        config = await (storage as any).getAdminConfig();
+  } catch (error) {
+      console.warn('获取数据库最新配置失败:', error);
+  }
   }
  
   const siteName =
@@ -111,17 +111,11 @@ export default async function RootLayout({
   
   //-----新更改------
   let configFromDB = null;
- 
-// 判断是否应该尝试从数据库加载配置（避免在不支持的环境调用）
-//if (
-  //process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'd1' ||
-  //process.env.NEXT_PUBLIC_STORAGE_TYPE  === 'upstash'
-//) {
+
   try {
      configFromDB = await getConfig();
   } catch (error) {
-    
-    // 失败时不阻断，降级使用环境变量
+    console.warn('获取数据库最新配置失败:', error);
   }
 //}
  
