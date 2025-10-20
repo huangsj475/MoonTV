@@ -878,6 +878,210 @@ const VideoSourceConfig = ({
 
     await refreshConfig();
   };
+  // 批量启用
+const handleBatchEnable = async () => {
+  if (selectedSources.size === 0) {
+    showError('请先选择要启用的视频源');
+    return;
+  }
+
+  const selectedArray = Array.from(selectedSources);
+  const result = await Swal.fire({
+    title: '确认批量启用',
+    text: `即将启用 ${selectedArray.length} 个视频源`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: '确认启用',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#059669',
+    cancelButtonColor: '#6b7280'
+  });
+
+  if (!result.isConfirmed) return;
+  
+  // 创建独立的进度弹窗
+  const progressSwal = Swal.fire({
+    title: '批量启用中...',
+    html: '准备开始...',
+    showConfirmButton: false,
+    showCancelButton: false,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  let successCount = 0;
+  let errorCount = 0;
+  const errors: string[] = [];
+
+  for (let i = 0; i < selectedArray.length; i++) {
+    const key = selectedArray[i];
+	const sourceName = sources.find(s => s.key === key)?.name || key;
+	// 状态：进行中
+  await Swal.update({
+    title: '批量启用中...',
+    html: `
+      <div class="text-center">
+        <div class="mb-2">🔄 <b>正在启用:</b> ${sourceName}</div>
+        <div class="text-sm text-gray-600">${i + 1} / ${selectedArray.length}</div>
+        <div class="text-xs text-gray-500 mt-2">请稍候...</div>
+      </div>
+    `
+  });
+  await new Promise(resolve => setTimeout(resolve, 100));//稍微延迟
+	
+    try {
+      await callSourceApi({ action: 'enable', key });
+      successCount++;
+      
+    } catch (error) {
+      errorCount++;
+      const sourceName = sources.find(s => s.key === key)?.name || key;
+      errors.push(`${sourceName}: ${error instanceof Error ? error.message : '启用失败'}`);
+    }
+  }
+
+  // 显示启用结果
+  if (errorCount === 0) {
+    showSuccess(`成功启用 ${successCount} 个视频源`);
+    setSelectedSources(new Set()); // 清空选择
+    setBatchMode(false); // 退出批量模式
+  } else {
+    await Swal.fire({
+      title: '启用完成',
+      html: `
+        <div class="text-left">
+          <p class="text-green-600 mb-2">✅ 成功启用: ${successCount} 个</p>
+          <p class="text-red-600 mb-2">❌ 启用失败: ${errorCount} 个</p>
+          ${errors.length > 0 ? `
+            <details class="mt-3">
+              <summary class="cursor-pointer text-gray-600">查看错误详情</summary>
+              <div class="mt-2 text-sm text-gray-500 max-h-32 overflow-y-auto">
+                ${errors.map(err => `<div class="py-1">${err}</div>`).join('')}
+              </div>
+            </details>
+          ` : ''}
+        </div>
+      `,
+      icon: successCount > 0 ? 'warning' : 'error',
+      confirmButtonText: '确定'
+    });
+    
+    // 清空已成功启用的选择项
+    const failedKeys = new Set(
+      errors.map(err => {
+        const keyMatch = err.split(':')[0];
+        return sources.find(s => s.name === keyMatch)?.key;
+      }).filter((key): key is string => Boolean(key))
+    );
+    setSelectedSources(failedKeys);
+  }
+
+  await refreshConfig();
+};
+
+// 批量禁用
+const handleBatchDisable = async () => {
+  if (selectedSources.size === 0) {
+    showError('请先选择要禁用的视频源');
+    return;
+  }
+
+  const selectedArray = Array.from(selectedSources);
+  const result = await Swal.fire({
+    title: '确认批量禁用',
+    text: `即将禁用 ${selectedArray.length} 个视频源`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '确认禁用',
+    cancelButtonText: '取消',
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280'
+  });
+
+  if (!result.isConfirmed) return;
+  
+  // 创建独立的进度弹窗
+  const progressSwal = Swal.fire({
+    title: '批量禁用中...',
+    html: '准备开始...',
+    showConfirmButton: false,
+    showCancelButton: false,
+    allowOutsideClick: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  let successCount = 0;
+  let errorCount = 0;
+  const errors: string[] = [];
+
+  for (let i = 0; i < selectedArray.length; i++) {
+    const key = selectedArray[i];
+	const sourceName = sources.find(s => s.key === key)?.name || key;
+	// 状态：进行中
+  await Swal.update({
+    title: '批量禁用中...',
+    html: `
+      <div class="text-center">
+        <div class="mb-2">🔄 <b>正在禁用:</b> ${sourceName}</div>
+        <div class="text-sm text-gray-600">${i + 1} / ${selectedArray.length}</div>
+        <div class="text-xs text-gray-500 mt-2">请稍候...</div>
+      </div>
+    `
+  });
+  await new Promise(resolve => setTimeout(resolve, 100));//稍微延迟
+    try {
+      await callSourceApi({ action: 'disable', key });
+      successCount++;
+      
+    } catch (error) {
+      errorCount++;
+      const sourceName = sources.find(s => s.key === key)?.name || key;
+      errors.push(`${sourceName}: ${error instanceof Error ? error.message : '禁用失败'}`);
+    }
+  }
+
+  // 显示禁用结果
+  if (errorCount === 0) {
+    showSuccess(`成功禁用 ${successCount} 个视频源`);
+    setSelectedSources(new Set()); // 清空选择
+    setBatchMode(false); // 退出批量模式
+  } else {
+    await Swal.fire({
+      title: '禁用完成',
+      html: `
+        <div class="text-left">
+          <p class="text-green-600 mb-2">✅ 成功禁用: ${successCount} 个</p>
+          <p class="text-red-600 mb-2">❌ 禁用失败: ${errorCount} 个</p>
+          ${errors.length > 0 ? `
+            <details class="mt-3">
+              <summary class="cursor-pointer text-gray-600">查看错误详情</summary>
+              <div class="mt-2 text-sm text-gray-500 max-h-32 overflow-y-auto">
+                ${errors.map(err => `<div class="py-1">${err}</div>`).join('')}
+              </div>
+            </details>
+          ` : ''}
+        </div>
+      `,
+      icon: successCount > 0 ? 'warning' : 'error',
+      confirmButtonText: '确定'
+    });
+    
+    // 清空已成功禁用的选择项
+    const failedKeys = new Set(
+      errors.map(err => {
+        const keyMatch = err.split(':')[0];
+        return sources.find(s => s.name === keyMatch)?.key;
+      }).filter((key): key is string => Boolean(key))
+    );
+    setSelectedSources(failedKeys);
+  }
+
+  await refreshConfig();
+};
 
   // 导出配置
   const handleExportConfig = () => {
@@ -1232,6 +1436,21 @@ const VideoSourceConfig = ({
                 >
                   🗑️ 批量删除
                 </button>
+				<button
+    onClick={handleBatchEnable}
+    disabled={selectedSources.size === 0}
+    className='inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-sm rounded-lg transition-colors'
+  >
+    ✅ 批量启用
+  </button>
+  
+  <button
+    onClick={handleBatchDisable}
+    disabled={selectedSources.size === 0}
+    className='inline-flex items-center px-3 py-1 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white text-sm rounded-lg transition-colors'
+  >
+    ⚠️ 批量禁用
+  </button>
               </div>
             </>
           )}
