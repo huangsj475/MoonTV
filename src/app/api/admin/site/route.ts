@@ -88,6 +88,9 @@ export async function POST(request: NextRequest) {
     if (storage && typeof (storage as any).setAdminConfig === 'function') {
       await (storage as any).setAdminConfig(adminConfig);
     }
+    // 新增：清除缓存
+    const { clearConfigCache } = await import('@/lib/config');
+    clearConfigCache();
 
     return NextResponse.json(
       { ok: true },
