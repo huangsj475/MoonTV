@@ -3,7 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { getAuthInfoFromCookie } from '@/lib/auth';
-import { getConfig,clearConfigCache } from '@/lib/config';
+import { getConfig } from '@/lib/config';
 import { getStorage } from '@/lib/db';
 
 export const runtime = 'edge';
@@ -88,10 +88,7 @@ export async function POST(request: NextRequest) {
     if (storage && typeof (storage as any).setAdminConfig === 'function') {
       await (storage as any).setAdminConfig(adminConfig);
     }
-    
-    // 新增：清除缓存
-    clearConfigCache();
-
+   
     return NextResponse.json(
       { ok: true },
       {
