@@ -48,12 +48,6 @@ export const API_CONFIG = {
 let fileConfig: ConfigFileStruct;
 let cachedConfig: AdminConfig;
 
-// 新增：清除缓存的方法
-export function clearConfigCache() {
-  cachedConfig = null as any;
-  console.log('配置缓存已清除');
-}
-
 async function initConfig() {
 	
   if (cachedConfig) {
@@ -290,6 +284,12 @@ export async function getConfig(): Promise<AdminConfig> {
     await initConfig();
     return cachedConfig;
   }
+	
+	// 如果是 D1 数据库环境，每次都重新获取，不使用缓存
+  if (storageType === 'd1') {
+    cachedConfig = null; // 强制清空缓存
+  }
+	
   // 非 docker 环境且 DB 存储，直接读 db 配置
   const storage = getStorage();
   let adminConfig: AdminConfig | null = null;
