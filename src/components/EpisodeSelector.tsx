@@ -428,21 +428,20 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             })().map((episodeNumber) => {
               const isActive = episodeNumber === value;
 			 {/* -------开始-------正则匹配显示剧集名称 */}
-			  let episodeLabel = "";
-
-  {/*  计算当前集在源 episodes 列表中的索引 */}
-  const episodeIndex = episodeNumber - 1;
-  if (
-    currentSourceObj &&
-    Array.isArray(currentSourceObj.episodes) &&
-    currentSourceObj.episodes.length > episodeIndex
-  ) {
-    const url = currentSourceObj.episodes[episodeIndex];
-    const name = extractEpisodeName(url);
-    
-      episodeLabel = name || `${episodeNumber}`;
-    
+			  let episodeLabel = `${episodeNumber}`;
+  
+const episodeIndex = episodeNumber - 1;
+if (
+  currentSourceObj &&
+  Array.isArray(currentSourceObj.episodes) &&
+  currentSourceObj.episodes.length > episodeIndex
+) {
+  const url = currentSourceObj.episodes[episodeIndex];
+  if (typeof url === 'string' && item.includes('$')) {
+    episodeLabel = item.split('$')[0];
   }
+  
+}
 				{/* -------到这里-------- */}
               return (
                 <button
