@@ -409,12 +409,15 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
           </div>
 
           {/* 集数网格 */}
-         <div
+        <div
   className={`grid ${
-    // 检查当前源是否有任一集匹配 "暴风资源" 路径格式 
-    currentSourceObj?.episodes.some((url)  =>
-      url?.match(/\/video\/[^/]+\/([^/]+)\/index\.m3u8$/)
-    )
+    currentSourceObj?.episodes.some(url => {
+      if (typeof url === 'string' && url.includes('$')) {
+        const episodeLabel = url.split('$')[0];
+        return episodeLabel.length > 5;  // 判断提取的集数名称长度
+      }
+      return false;
+    })
       ? 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))]'
       : 'grid-cols-[repeat(auto-fill,minmax(40px,1fr))]'
   } auto-rows-[40px] gap-x-3 gap-y-3 overflow-y-auto h-full pb-4`}
