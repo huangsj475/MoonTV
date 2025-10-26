@@ -19,14 +19,6 @@ interface VideoInfo {
   pingTime: number;
   hasError?: boolean; // 添加错误状态标识
 }
-// 1. ----正则匹配视频地址，用于显示链接中的集数，如第01集，综艺的20250808-------
-function extractEpisodeName(url: string): string {
-	//-----------只匹配暴风资源，其他资源剧集名称仍用1,2,3----------------
-	
-  const match = url.match(/\/video\/[^/]+\/([^/]+)\/index\.m3u8$/);
-  return match ? match[1] : '';
-	
-}
 
 interface EpisodeSelectorProps {
   /** 总集数 */
