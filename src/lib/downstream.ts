@@ -234,15 +234,7 @@ export async function getDetailFromApi(
     if (playSources.length > 0) {
       const mainSource = playSources[0];
       const episodeList = mainSource.split('#');
-      episodes = episodeList
-        .map((ep: string) => {
-          const parts = ep.split('$');
-          return parts.length > 1 ? parts[1] : '';
-        })
-        .filter(
-          (url: string) =>
-            url && (url.startsWith('http://') || url.startsWith('https://'))
-        );
+      episodes = episodeList;
     }
   }
 
