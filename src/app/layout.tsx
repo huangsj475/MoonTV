@@ -17,7 +17,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 // 动态生成 metadata，支持配置更新后的标题变化
 export async function generateMetadata(): Promise<Metadata> {
-	/*
+	
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
     process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'd1' &&
@@ -26,8 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
-  */
   
+  /*
   //-------新更改---------
   let config = null;
 
@@ -45,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
   process.env.SITE_NAME  ||
   'MoonTV';
 	//-------新更改---------
-	
+	*/
   return {
     title: siteName,
     description: '影视聚合',
@@ -65,7 +65,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-	/*----原来的-----
+	----原来的-----
   let siteName = process.env.SITE_NAME || 'MoonTV';
   let announcement =
     process.env.ANNOUNCEMENT ||
@@ -100,10 +100,10 @@ export default async function RootLayout({
       query: category.query,
     }));
   }
-  */
+  
   //----原来的-----
   
-  
+  /*
   //-----新更改------
   let configFromDB = null;
 
@@ -160,7 +160,7 @@ const customCategories =
   })) ||
   [];
   //-----新更改------
-  
+  */
   
   // 将运行时配置注入到全局 window 对象，供客户端在运行时读取
   const runtimeConfig = {
