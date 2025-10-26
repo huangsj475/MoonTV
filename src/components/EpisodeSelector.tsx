@@ -438,8 +438,9 @@ if (
 ) {
   const url = currentSourceObj.episodes[episodeIndex];
   if (typeof url === 'string' && url.includes('$')) {
-    episodeLabel = item.split('$')[0];
+    episodeLabel = url.split('$')[0];
   }
+  
 }
 				{/* -------到这里-------- */}
               return (
