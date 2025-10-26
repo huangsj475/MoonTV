@@ -57,9 +57,7 @@ export const viewport: Viewport = {
   themeColor: '#000000',
   viewportFit: 'cover',
 };
-// 添加这个来禁用静态生成，确保每次请求都获取最新配置
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+
 export default async function RootLayout({
   children,
 }: {
