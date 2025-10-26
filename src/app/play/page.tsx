@@ -222,22 +222,31 @@ const handleMobileDoubleTap = (e: React.TouchEvent<HTMLDivElement>) => {
 };
   //------------手机端播放双击事件优化----------------
   
-//-----------正则匹配视频地址显示每一集名称（仅暴风资源）---------------
-  // 在组件内部添加这个工具函数
-const extractEpisodeNameFromUrl = (url: string): string | null => {
-  if (!url) return null;
+//-----------正则匹配视频地址显示每一集名称---------------
+// 统一的URL解析函数
+const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: string } => {
+  if (!url) return { episodeName: null, videoUrl: url };
   
   try {
-    // 使用正则表达式匹配URL中的集名称部分
-    const match = url.match(/\/video\/[^/]+\/([^/]+)\/index\.m3u8$/);
-    if (match && match[1]) {
-      return decodeURIComponent(match[1]);
+    // 使用与后端相同的正则逻辑
+    const parts = url.split('$');
+    if (parts.length >= 2) {
+      const episodeName = parts[0].trim();
+      const potentialUrl = parts.slice(1).join('$');
+      
+      // 检查是否是m3u8 URL
+      if (potentialUrl.includes('.m3u8')) {
+        return {
+          episodeName: episodeName,
+          videoUrl: potentialUrl
+        };
+      }
     }
   } catch (error) {
     console.error('解析URL失败:', error);
   }
   
-  return null;
+  return { episodeName: null, videoUrl: url };
 };
 //------------------到这里----------------------------
 
@@ -1360,20 +1369,24 @@ useEffect(() => {
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
     
    if (!isWebkit && artPlayerRef.current) {
-      artPlayerRef.current.switch = videoUrl;
-      artPlayerRef.current.title = `${videoTitle} - ${
-      extractEpisodeNameFromUrl(videoUrl) 
-    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
-    : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-}`;
+      const { videoUrl: realVideoUrl } = parseEpisodeUrl(videoUrl);
+	  artPlayerRef.current.switch = realVideoUrl;
+	  const { episodeName } = parseEpisodeUrl(videoUrl);
+      const showEpisodeName = episodeName && episodeName.length > 5;
+	  artPlayerRef.current.title = `${videoTitle} - ${
+    showEpisodeName 
+      ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+      : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+  }`;
       
       artPlayerRef.current.poster = videoCover;
-      if (artPlayerRef.current?.video) {
-        ensureVideoSource(
-          artPlayerRef.current.video as HTMLVideoElement,
-          videoUrl
-        );
-      }
+		if (artPlayerRef.current?.video) {
+		  const { videoUrl: realVideoUrl } = parseEpisodeUrl(videoUrl);
+		  ensureVideoSource(
+			artPlayerRef.current.video as HTMLVideoElement,
+			realVideoUrl
+		  );
+		}
       return;
     }
     
@@ -1395,7 +1408,7 @@ useEffect(() => {
      
       artPlayerRef.current = new Artplayer({
         container: artRef.current,
-        url: videoUrl,
+        url: parseEpisodeUrl(videoUrl).videoUrl,// 使用真实的视频URL
         poster: videoCover,
         volume: 0.7,
         isLive: false,
@@ -1444,11 +1457,14 @@ useEffect(() => {
         z-index: 13;
         ">${
           videoTitle
-            ? `${videoTitle} - ${
-  				extractEpisodeNameFromUrl(videoUrl) 
-   		    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
-   		 		: `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-				}`
+            ?(() => {
+        const { episodeName } = parseEpisodeUrl(videoUrl);
+        return `${videoTitle} - ${
+          episodeName && episodeName.length > 5 
+            ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+            : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+        }`;
+      })()
             : '影片标题'
         }</div>`,
     },
@@ -1796,12 +1812,13 @@ useEffect(() => {
         saveCurrentPlayProgress();
       });
 
-      if (artPlayerRef.current?.video) {
-        ensureVideoSource(
-          artPlayerRef.current.video as HTMLVideoElement,
-          videoUrl
-        );
-      }
+	  if (artPlayerRef.current?.video) {
+		  const { videoUrl: realVideoUrl } = parseEpisodeUrl(videoUrl);
+		  ensureVideoSource(
+			artPlayerRef.current.video as HTMLVideoElement,
+			realVideoUrl
+		  );
+		}
     } catch (err) {
       console.error('创建播放器失败:', err);
       setError('播放器初始化失败');
@@ -1888,11 +1905,12 @@ return () => {
   function updateTitleLayer(videoTitle: string, currentEpisodeIndex: number,videoUrl: string) {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
-        titleLayer.innerText  = `${videoTitle} - ${
-      extractEpisodeNameFromUrl(videoUrl) 
-    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
-    : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-}`;
+    const { episodeName } = parseEpisodeUrl(videoUrl);
+    titleLayer.innerText = `${videoTitle} - ${
+      episodeName && episodeName.length > 5 
+        ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+        : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+    }`;
     }
 }
   useEffect(() => {
@@ -2082,11 +2100,14 @@ return () => {
             {totalEpisodes > 1 && (
               <span className='text-gray-500 dark:text-gray-400'>
                 {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
-                {` > ${
-      extractEpisodeNameFromUrl(videoUrl) 
-    ? `${extractEpisodeNameFromUrl(videoUrl)} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集` 
-    : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-}`}
+				{` > ${
+				  (() => {
+					const { episodeName } = parseEpisodeUrl(videoUrl);
+					return episodeName && episodeName.length > 5 
+					  ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
+					  : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+				  })()
+				}`}	
               </span>
             )}
           </h1>
