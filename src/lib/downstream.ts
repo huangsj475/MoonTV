@@ -27,7 +27,7 @@ export async function searchFromApi(
 
     // 添加超时处理
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     const response = await fetch(apiUrl, {
       headers: API_CONFIG.search.headers,
@@ -69,8 +69,9 @@ export async function searchFromApi(
 
       episodes = Array.from(new Set(episodes)).map((link: string) => {
         //link = link.substring(1); // 去掉开头的 $
-        const parenIndex = link.indexOf('(');
-        return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+        //const parenIndex = link.indexOf('(');
+        //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+		return link.replace(/[()【】\[\]{}]/g, ''); // 移除多种括号
       });
 
       return {
@@ -142,8 +143,9 @@ export async function searchFromApi(
 
               episodes = Array.from(new Set(episodes)).map((link: string) => {
                 //link = link.substring(1); // 去掉开头的 $
-                const parenIndex = link.indexOf('(');
-                return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+                //const parenIndex = link.indexOf('(');
+                //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+				return link.replace(/[()【】\[\]{}]/g, ''); // 移除多种括号
               });
 
               return {
@@ -242,7 +244,7 @@ export async function getDetailFromApi(
   if (episodes.length === 0 && videoDetail.vod_content) {
     const matches = videoDetail.vod_content.match(M3U8_PATTERN) || [];
     //episodes = matches.map((link: string) => link.replace(/^\$/, ''));
-    episodes = matches.map();
+    episodes = matches;
   }
 
   return {
@@ -299,8 +301,9 @@ async function handleSpecialSourceDetail(
   // 去重并清理链接前缀
   matches = Array.from(new Set(matches)).map((link: string) => {
     //link = link.substring(1); // 去掉开头的 $
-    const parenIndex = link.indexOf('(');
-    return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+    //const parenIndex = link.indexOf('(');
+    //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
+	return link.replace(/[()【】\[\]{}]/g, ''); // 移除多种括号
   });
 
   // 提取标题
