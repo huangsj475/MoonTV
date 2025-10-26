@@ -55,7 +55,7 @@ export async function searchFromApi(
 
       // 使用正则表达式从 vod_play_url 提取 m3u8 链接
       if (item.vod_play_url) {
-        const m3u8Regex = /([^$\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
+        const m3u8Regex = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
         // 先用 $$$ 分割
         const vod_play_url_array = item.vod_play_url.split('$$$');
         // 对每个分片做匹配，取匹配到最多的作为结果
@@ -136,7 +136,7 @@ export async function searchFromApi(
 
               // 使用正则表达式从 vod_play_url 提取 m3u8 链接
               if (item.vod_play_url) {
-                const m3u8Regex = /([^$\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
+                const m3u8Regex = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
                 episodes = item.vod_play_url.match(m3u8Regex) || [];
               }
 
@@ -294,7 +294,7 @@ async function handleSpecialSourceDetail(
 
   if (apiSite.key === 'ffzy') {
     const ffzyPattern =
-      /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
+      /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
     matches = html.match(ffzyPattern) || [];
   }
 
@@ -305,7 +305,7 @@ async function handleSpecialSourceDetail(
 
   // 去重并清理链接前缀
   matches = Array.from(new Set(matches)).map((link: string) => {
-    link = link.substring(1); // 去掉开头的 $
+    //link = link.substring(1); // 去掉开头的 $
     const parenIndex = link.indexOf('(');
     return parenIndex > 0 ? link.substring(0, parenIndex) : link;
   });
