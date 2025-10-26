@@ -428,7 +428,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             })().map((episodeNumber) => {
               const isActive = episodeNumber === value;
 			 {/* -------开始-------正则匹配显示剧集名称 */}
-			  let episodeLabel = `${episodeNumber}`;
+			 let episodeLabel = `${episodeNumber}`;
   
 const episodeIndex = episodeNumber - 1;
 if (
@@ -437,10 +437,9 @@ if (
   currentSourceObj.episodes.length > episodeIndex
 ) {
   const url = currentSourceObj.episodes[episodeIndex];
-  if (typeof url === 'string' && item.includes('$')) {
+  if (typeof url === 'string' && url.includes('$')) {
     episodeLabel = item.split('$')[0];
   }
-  
 }
 				{/* -------到这里-------- */}
               return (
