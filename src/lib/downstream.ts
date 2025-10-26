@@ -188,8 +188,8 @@ export async function searchFromApi(
 }
 
 // 匹配 m3u8 链接的正则
-const M3U8_PATTERN = /(https?:\/\/[^"'\s]+?\.m3u8)/g;
-
+const M3U8_PATTERN = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
+          
 export async function getDetailFromApi(
   apiSite: ApiSite,
   id: string
@@ -249,7 +249,8 @@ export async function getDetailFromApi(
   // 如果播放源为空，则尝试从内容中解析 m3u8
   if (episodes.length === 0 && videoDetail.vod_content) {
     const matches = videoDetail.vod_content.match(M3U8_PATTERN) || [];
-    episodes = matches.map((link: string) => link.replace(/^\$/, ''));
+    //episodes = matches.map((link: string) => link.replace(/^\$/, ''));
+    episodes = matches.map();
   }
 
   return {
