@@ -32,7 +32,10 @@ export async function generateMetadata(): Promise<Metadata> {
   let config = null;
 
   try {
-    config = await getConfig();
+    // 只在需要数据库配置的环境下获取配置
+    if (process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'localstorage') {
+      config = await getConfig();
+    }
   } catch (error) {
       console.warn('获取数据库最新配置失败:', error);
   }
@@ -54,7 +57,9 @@ export const viewport: Viewport = {
   themeColor: '#000000',
   viewportFit: 'cover',
 };
-
+// 添加这个来禁用静态生成，确保每次请求都获取最新配置
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 export default async function RootLayout({
   children,
 }: {
@@ -103,7 +108,10 @@ export default async function RootLayout({
   let configFromDB = null;
 
   try {
-     configFromDB = await getConfig();
+     // 只在需要数据库配置的环境下获取配置
+    if (process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'localstorage') {
+      configFromDB = await getConfig();
+    }
   } catch (error) {
     console.warn('获取数据库最新配置失败:', error);
   }
