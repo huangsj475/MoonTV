@@ -411,7 +411,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
       return false;
     })
       ? 'grid-cols-[repeat(auto-fill,minmax(120px,1fr))]'
-      : 'grid-cols-[repeat(auto-fill,minmax(40px,1fr))]'
+      : 'grid-cols-[repeat(auto-fill,minmax(50px,1fr))]'
   } auto-rows-[40px] gap-x-3 gap-y-3 overflow-y-auto h-full pb-4`}
 		>
             {(() => {
