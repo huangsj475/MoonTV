@@ -65,7 +65,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-	----原来的-----
+	//----原来的-----
   let siteName = process.env.SITE_NAME || 'MoonTV';
   let announcement =
     process.env.ANNOUNCEMENT ||
