@@ -14,12 +14,12 @@ import { SiteProvider } from '../components/SiteProvider';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin'] });
-
+export const runtime = 'edge';
 // 动态生成 metadata，支持配置更新后的标题变化
 
 export async function generateMetadata(): Promise<Metadata> {
 
-	
+	/*
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
     process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'd1' &&
@@ -28,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
-  
+  */
   /*
   //-------新更改---------
   let config = null;
@@ -47,11 +47,30 @@ export async function generateMetadata(): Promise<Metadata> {
   'MoonTV';
 	//-------新更改---------
 	*/
+	/*
   return {
     title: siteName,
     description: '影视聚合',
     manifest: '/manifest.json',
   };
+*/
+  try {
+    const config = await getConfig();
+    const siteName = config?.SiteConfig?.SiteName || process.env.SITE_NAME || 'MoonTV';
+    
+    return {
+      title: siteName,
+      description: '影视聚合',
+      manifest: '/manifest.json',
+    };
+  } catch (error) {
+    // 降级到环境变量
+    return {
+      title: process.env.SITE_NAME || 'MoonTV',
+      description: '影视聚合', 
+      manifest: '/manifest.json',
+    };
+  }
 }
 
 export const viewport: Viewport = {
@@ -108,12 +127,9 @@ export default async function RootLayout({
   let configFromDB = null;
 
   try {
-      if (
-    process.env.NEXT_PUBLIC_STORAGE_TYPE === 'd1' ||
-    process.env.NEXT_PUBLIC_STORAGE_TYPE === 'upstash'
-  ) {
+      
       configFromDB = await getConfig();
-	}
+	
   } catch (error) {
     console.warn('获取数据库最新配置失败:', error);
   }
