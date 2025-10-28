@@ -49,10 +49,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     setNewEpisodeFlags(flags);
 	*/
   };
-  
-  
-   useEffect(() => {
-	   const fetchPlayRecords = async () => {
+  	  const fetchPlayRecords = async () => {
   
       try {
         setLoading(true);
@@ -67,6 +64,9 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         setLoading(false);
       }
     };
+  
+   useEffect(() => {
+
     console.log('加载播放记录。。。');
     fetchPlayRecords();
 	
@@ -180,7 +180,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
  
       // ✅ 3. 重新加载播放记录
       console.log('[  更新剧集] 检测到数据变化,重新加载播放记录');
-      fetchPlayRecords(); // 刷新 UI 数据
+      await fetchPlayRecords(); // 刷新 UI 数据
     } else {
       let messageHtml = '<p>所有剧集已是最新，未发现新增集数。</p>';
       if (updateMessages.length  > 0) {
