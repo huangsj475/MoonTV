@@ -108,9 +108,12 @@ export default async function RootLayout({
   let configFromDB = null;
 
   try {
-      
+      if (
+    process.env.NEXT_PUBLIC_STORAGE_TYPE === 'd1' ||
+    process.env.NEXT_PUBLIC_STORAGE_TYPE === 'upstash'
+  ) {
       configFromDB = await getConfig();
-    
+	}
   } catch (error) {
     console.warn('获取数据库最新配置失败:', error);
   }
