@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 'use client';
 import { useEffect, useState } from 'react';
-//import Swal from 'sweetalert2';
+import Swal from 'sweetalert2';
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
@@ -84,6 +84,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
   }, []);
 
 //------新增更新总集数-----------
+/*
 const handleUpdateAllEpisodes = async () => {
   setRefreshing(true);
   try {
@@ -141,7 +142,8 @@ const handleUpdateAllEpisodes = async () => {
     setRefreshing(false);
   }
 };
-/*
+*/
+
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
   console.log('[  更新剧集] 按钮已点击,开始执行...');
@@ -162,7 +164,7 @@ const handleUpdateAllEpisodes = async () => {
  
   setRefreshing(true);
   const BATCH_SIZE = 5;
-  //let hasChanges = false;
+  let hasChanges = false;
   const updateMessages: string[] = []; // 存储更新信息用于展示
  
   try {
@@ -180,8 +182,8 @@ const handleUpdateAllEpisodes = async () => {
           console.log(`[  更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
  
           try {
-            const videoDetail = await fetchVideoDetail({ source, id });
- 
+            //const videoDetail = await fetchVideoDetail({ source, id });
+			const videoDetail = await fetch(`/api/detail?source=${source}&id=${id}`);
             console.log(`[  更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
 			
             if (!videoDetail?.episodes) {
@@ -274,7 +276,7 @@ const handleUpdateAllEpisodes = async () => {
   }
 };
 //------新增更新总集数-----------
-*/
+
   // 如果没有播放记录，则不渲染组件
   if (!loading && playRecords.length === 0) {
     return null;
