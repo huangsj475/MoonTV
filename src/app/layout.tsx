@@ -19,7 +19,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export async function generateMetadata(): Promise<Metadata> {
 
-	/*
+	
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
     process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'd1' &&
@@ -28,8 +28,8 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
-  */
   
+  /*
   //-------新更改---------
   let config = null;
 
@@ -46,7 +46,7 @@ export async function generateMetadata(): Promise<Metadata> {
   process.env.SITE_NAME  ||
   'MoonTV';
 	//-------新更改---------
-	
+	*/
   return {
     title: siteName,
     description: '影视聚合',
