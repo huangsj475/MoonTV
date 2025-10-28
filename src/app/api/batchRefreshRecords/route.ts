@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
 import { getAllPlayRecords, savePlayRecord } from '@/lib/db.client';
 
+export const runtime = 'edge';
 // 适当调整BATCH_SIZE和每批之间的延时，防止被限流
 const BATCH_SIZE = 5;
 const SLEEP_MS = 500; // 每批之间等待0.5秒
