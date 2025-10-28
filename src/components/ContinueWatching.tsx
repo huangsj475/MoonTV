@@ -240,6 +240,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           继续观看
         </h2>
         {!loading && playRecords.length > 0 && (
+		<>
 		          {/* 更新剧集按钮 */}
           <button
             className={`text-sm px-3 py-1 rounded border transition-colors 
@@ -262,6 +263,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           >
             清空
           </button>
+		  </>
         )}
       </div>
       <ScrollableRow>
