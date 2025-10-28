@@ -104,7 +104,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
  
   setRefreshing(true);
   const BATCH_SIZE = 5;
-  let hasChanges = false;
+  //let hasChanges = false;
   const updateMessages: string[] = []; // 存储更新信息用于展示
  
   try {
