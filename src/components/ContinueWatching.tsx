@@ -84,72 +84,17 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
   }, []);
 
 //------新增更新总集数-----------
-/*
-const handleUpdateAllEpisodes = async () => {
-  setRefreshing(true);
-  try {
-    // 1. 调用后端批量刷新API
-    const res = await fetch('/api/batchRefreshRecords', { method: 'POST' });
-    const result = await res.json();
-
-    // 2. 提示用户结果
-    if (typeof window !== 'undefined') {
-      const Swal = (await import('sweetalert2')).default;
-      if (result.updated > 0) {
-        await Swal.fire({
-          title: '🎉 更新完成',
-          html: `<div style="text-align: left;">
-                  <p><strong>以下剧集发现新集数：</strong></p>
-                  <ul style="list-style-position: inside; margin-left: 10px;">
-                    ${result.messages.map((msg: string) => `<li>${msg}</li>`).join('')}
-                  </ul>
-                </div>`,
-          icon: 'success',
-          confirmButtonText: '确认',
-        });
-      } else {
-        let html = '<p>所有剧集已是最新，未发现新增集数。</p>';
-        if (result.failed > 0) {
-          html += `<p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-            （部分剧集获取失败）</p>`;
-        }
-        await Swal.fire({
-          title: '🔄 检查完成',
-          html,
-          icon: 'info',
-          confirmButtonText: '确认'
-        });
-      }
-    }
-
-    // 3. 检查是否需要刷新播放记录
-    if (result.updated > 0) {
-      const allRecords = await getAllPlayRecords();
-      updatePlayRecords(allRecords);
-    }
-  } catch (error) {
-    console.error('[更新剧集] 批量更新剧集失败:', error);
-    if (typeof window !== 'undefined') {
-      const Swal = (await import('sweetalert2')).default;
-      Swal.fire({
-        title: '❌ 更新过程中发生错误',
-        text: error instanceof Error ? error.message : '未知错误',
-        icon: 'error',
-        confirmButtonText: '确认'
-      });
-    }
-  } finally {
-    setRefreshing(false);
-  }
-};
-*/
-
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
   console.log('[  更新剧集] 按钮已点击,开始执行...');
  
   if (refreshing || playRecords.length  === 0) {
     if (refreshing) {
+		Swal.fire({ 
+        title: '请稍候',
+        text: '当前正在更新中，请勿重复操作',
+        icon: 'info'
+      });
       console.log('[  更新剧集] 当前正在刷新中,跳过本次请求');
     } else if (playRecords.length  === 0) {
       Swal.fire({ 
@@ -163,10 +108,23 @@ const handleUpdateAllEpisodes = async () => {
   }
  
   setRefreshing(true);
-  const BATCH_SIZE = 5;
+  const BATCH_SIZE = 2;
   let hasChanges = false;
   const updateMessages: string[] = []; // 存储更新信息用于展示
- 
+   // 显示进度弹窗 
+  const progressSwal = Swal.fire({ 
+    title: '正在更新剧集',
+    html: `
+      <div style="text-align: center;">
+        <p id="swal-progress-text">准备开始检查...</p>
+      </div>
+    `,
+    allowOutsideClick: false,
+    showConfirmButton: false,
+    willOpen: () => {
+      Swal.showLoading(); 
+    }
+  });
   try {
     console.log(`[  更新剧集] 共有 ${playRecords.length}  条播放记录,将分批处理`);
  
@@ -181,6 +139,9 @@ const handleUpdateAllEpisodes = async () => {
  
           console.log(`[  更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
  
+       // 更新进度文本 
+      const progressText = `正在检查 ${i+1}/${playRecords.length}:  ${title}`;
+      document.getElementById('swal-progress-text')!.textContent  = progressText;
           try {
 			  // 1. 发起请求并验证响应状态
             //const videoDetail = await fetchVideoDetail({ source, id });
@@ -231,7 +192,8 @@ const handleUpdateAllEpisodes = async () => {
         })
       );
     }
-
+    // 关闭进度弹窗 
+    await Swal.close(); 
     // ✅ 1. 使用 Swal 显示更新结果
     if (hasChanges) {
       const messageHtml = `
