@@ -114,14 +114,16 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
    // 显示进度弹窗 
   const progressSwal = Swal.fire({ 
     title: '正在更新剧集',
-	  html: `
-		<div style="text-align: left;">
-		  <div id="concurrent-progress"></div>
-		  <p style="margin-top: 10px; color: #666;">
-			共 ${playRecords.length}  个剧集 
-		  </p>
-		</div>
-	  `,
+      html: `
+        <div style="text-align: left;">
+          <div id="batch-progress">
+            <p>准备开始更新...</p>
+          </div>
+          <p style="margin-top: 10px; color: #666;">
+            共 ${playRecords.length} 个剧集
+          </p>
+        </div>
+      `,
     allowOutsideClick: false,
     showConfirmButton: false,
     willOpen: () => {
@@ -134,16 +136,22 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     for (let i = 0; i < playRecords.length;  i += BATCH_SIZE) {
       const batch = playRecords.slice(i,  i + BATCH_SIZE);
       console.log(`[  更新剧集] 正在处理第 ${Math.floor(i  / BATCH_SIZE) + 1} 批次,包含 ${batch.length}  个视频`);
- 
-       // 更新批次进度标题 
-      Swal.getTitle()!.textContent  = 
-        `正在检查剧集 (${Math.min(i  + BATCH_SIZE, playRecords.length)}/${playRecords.length})`; 
- 
-      // 显示当前批次所有任务 
-      document.getElementById('concurrent-progress')!.innerHTML  = 
-        batch.map((record,  idx) => 
-          `<p>🔄 ${i + idx + 1}/${playRecords.length}:  ${record.title}</p>` 
-        ).join('');
+      // 显示当前批次所有任务
+	 const batchProgressHTML = `
+        <div style="text-align: left;">
+		  <p style="margin-top: 10px; color: #666;">
+            正在检查剧集 (${Math.min(i + BATCH_SIZE, playRecords.length)}/${playRecords.length})
+          </p>
+          <div id="batch-progress">
+            ${batch.map((record, idx) => 
+              `<p>🔄 ${i + idx + 1}/${playRecords.length}: ${record.title}</p>`
+            ).join('')}
+          </div>
+        </div>
+      `;
+	    Swal.update({
+        html: batchProgressHTML
+      });
 		
       await Promise.all( 
         batch.map(async  (record) => {
