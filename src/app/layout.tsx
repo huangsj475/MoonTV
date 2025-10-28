@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-'use client';
+
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 
@@ -16,7 +16,9 @@ import { ThemeProvider } from '../components/ThemeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 // 动态生成 metadata，支持配置更新后的标题变化
+
 export async function generateMetadata(): Promise<Metadata> {
+
 	/*
   let siteName = process.env.SITE_NAME || 'MoonTV';
   if (
@@ -106,10 +108,9 @@ export default async function RootLayout({
   let configFromDB = null;
 
   try {
-     // 只在需要数据库配置的环境下获取配置
-    if (process.env.NEXT_PUBLIC_STORAGE_TYPE !== 'localstorage') {
+      
       configFromDB = await getConfig();
-    }
+    
   } catch (error) {
     console.warn('获取数据库最新配置失败:', error);
   }
