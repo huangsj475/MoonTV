@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 'use client';
 import { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
@@ -23,7 +24,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     (PlayRecord & { key: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
-  //const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
   //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
@@ -82,84 +83,135 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
-  /*const handleUpdateAllEpisodes = async () => {
-	  // 🔹1. 确认函数被调用
-	  console.log('[ 更新剧集] 按钮已点击，开始执行...');
-    if (refreshing || playRecords.length  === 0) {
-		// 🔹2. 检查提前返回的原因
-    if (refreshing) {
-      console.log('[ 更新剧集] 当前正在刷新中，跳过本次请求');
-    } else if (playRecords.length  === 0) {
-      console.log('[ 更新剧集] 当前没有播放记录，无需更新');
-    }
-		return;
-	}
-	
-    setRefreshing(true);
-	// 🔹3. 设置 loading 并确认进入主流程
-  console.log('[ 更新剧集] 开始设置 refreshing = true');
-    //const updatedFlags: Record<string, boolean> = { ...newEpisodeFlags };
+  const handleUpdateAllEpisodes = async () => {
+  console.log('[  更新剧集] 按钮已点击,开始执行...');
  
-    try {
-      // 并发限制：最多同时请求 5 个
-      const BATCH_SIZE = 5;
-	  let hasChanges = false;
-	  console.log(`[ 更新剧集] 共有 ${playRecords.length}  条播放记录，将分批处理`);
-      for (let i = 0; i < playRecords.length;  i += BATCH_SIZE) {
-        const batch = playRecords.slice(i,  i + BATCH_SIZE);
-		console.log(`[ 更新剧集] 正在处理第 ${i / BATCH_SIZE + 1} 批次，包含 ${batch.length}  个视频`);
-        await Promise.all( 
-          batch.map(async  (record) => {
-			   
-            const { key, total_episodes, title } = record;
-			const { source, id } = parseKey(key);
-			 console.log(`[ 更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
-            try {
-              const videoDetail = await fetchVideoDetail({ source, id });
-			  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
-              if (!videoDetail?.episodes) {
-				  console.warn(`[ 更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
-				  return;
-			  }
-              const newTotal = videoDetail.episodes.length; 
-			  console.log(`[ 更新剧集 - ${source}+${id}] 集数对比: 原 ${total_episodes} → 新 ${newTotal}`);
-              if (newTotal > total_episodes) {
-				  console.log(`[ 更新剧集 - ${source}+${id}] 发现新集！正在保存...`);
-                // 更新本地记录
-                await savePlayRecord(source, id, {
-                  ...record,
-                  total_episodes: newTotal,
-                  save_time: Date.now(), 
-                });
-				 hasChanges = true;
-                //updatedFlags[key] = true;
-				
-              }else {
-              console.log(`[ 更新剧集 - ${source}+${id}] 无新增集数，跳过`);
-				}
-            } catch (err) {
-              console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
+  if (refreshing || playRecords.length  === 0) {
+    if (refreshing) {
+      console.log('[  更新剧集] 当前正在刷新中,跳过本次请求');
+    } else if (playRecords.length  === 0) {
+      Swal.fire({ 
+        title: '无播放记录',
+        text: '当前没有播放记录，无需更新。',
+        icon: 'info',
+        confirmButtonText: '确认'
+      });
+    }
+    return;
+  }
+ 
+  setRefreshing(true);
+  const BATCH_SIZE = 5;
+  let hasChanges = false;
+  const updateMessages: string[] = []; // 存储更新信息用于展示
+ 
+  try {
+    console.log(`[  更新剧集] 共有 ${playRecords.length}  条播放记录,将分批处理`);
+ 
+    for (let i = 0; i < playRecords.length;  i += BATCH_SIZE) {
+      const batch = playRecords.slice(i,  i + BATCH_SIZE);
+      console.log(`[  更新剧集] 正在处理第 ${Math.floor(i  / BATCH_SIZE) + 1} 批次,包含 ${batch.length}  个视频`);
+ 
+      await Promise.all( 
+        batch.map(async  (record) => {
+          const { key, total_episodes: oldTotal, title } = record;
+          const { source, id } = parseKey(key);
+ 
+          console.log(`[  更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
+ 
+          try {
+            const videoDetail = await fetchVideoDetail({ source, id });
+ 
+            console.log(`[  更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
+ 
+            if (!videoDetail?.episodes) {
+              console.warn(`[  更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
+              return;
             }
-          })
-        );
+ 
+            const newTotal = videoDetail.episodes.length; 
+            console.log(`[  更新剧集 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
+ 
+            if (newTotal > oldTotal) {
+              console.log(`[  更新剧集 - ${source}+${id}] 发现新集! 正在保存...`);
+ 
+              // ✅ 2. 将新的总集数保存到数据库
+              await savePlayRecord(source, id, {
+                ...record,
+                total_episodes: newTotal,
+                save_time: Date.now(), 
+              });
+ 
+              // 记录更新信息
+              updateMessages.push(`${title}:  ${oldTotal} → ${newTotal}`);
+              hasChanges = true;
+            } else {
+              console.log(`[  更新剧集 - ${source}+${id}] 无新增集数,跳过`);
+            }
+          } catch (err) {
+            console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
+            // 可选择性收集失败信息
+            updateMessages.push(`<span  style="color: #999;">${title}: 获取失败</span>`);
+          }
+        })
+      );
+    }
+ 
+    // ✅ 1. 使用 Swal 显示更新结果
+    if (hasChanges) {
+      const messageHtml = `
+        <div style="text-align: left;">
+          <p><strong>以下剧集发现新集数：</strong></p>
+          <ul style="list-style-position: inside; margin-left: 10px;">
+            ${updateMessages.map(msg  => `<li>${msg}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+ 
+      await Swal.fire({ 
+        title: '🎉 更新完成',
+        html: messageHtml,
+        icon: 'success',
+        confirmButtonText: '确认',
+        didClose: () => {
+          console.log('[  更新剧集] 用户关闭弹窗');
+        }
+      });
+ 
+      // ✅ 3. 重新加载播放记录
+      console.log('[  更新剧集] 检测到数据变化,重新加载播放记录');
+      fetchPlayRecords(); // 刷新 UI 数据
+    } else {
+      let messageHtml = '<p>所有剧集已是最新，未发现新增集数。</p>';
+      if (updateMessages.length  > 0) {
+        messageHtml += `
+          <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+            （部分剧集获取失败）
+          </p>`;
       }
  
-		if (hasChanges) {
-			console.log('[ 更新剧集] 检测到数据变化，重新加载播放记录');
-        fetchPlayRecords();//再次加载一次新的播放记录
-		}else {
-      console.log('[ 更新剧集] 所有剧集已是最新，无需更新');
-		}
-		
-      //setNewEpisodeFlags(updatedFlags);
-    } catch (error) {
-      console.error(' 批量更新剧集失败:', error);
-    } finally {
-	  console.log('[ 更新剧集] 更新流程结束，设置 refreshing = false');
-      setRefreshing(false);
+      await Swal.fire({ 
+        title: '🔄 检查完成',
+        html: messageHtml,
+        icon: 'info',
+        confirmButtonText: '确认'
+      });
     }
-  };
-  */
+  } catch (error) {
+    console.error(' 批量更新剧集失败:', error);
+ 
+    // 错误处理弹窗
+    Swal.fire({ 
+      title: '❌ 更新过程中发生错误',
+      text: error instanceof Error ? error.message  : '未知错误',
+      icon: 'error',
+      confirmButtonText: '确认'
+    });
+  } finally {
+    setRefreshing(false);
+    console.log('[  更新剧集] 更新流程结束,设置 refreshing = false');
+  }
+};
 //------新增更新总集数-----------
 
   // 如果没有播放记录，则不渲染组件
@@ -188,6 +240,19 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           继续观看
         </h2>
         {!loading && playRecords.length > 0 && (
+		          {/* 更新剧集按钮 */}
+          <button
+            className={`text-sm px-3 py-1 rounded border transition-colors 
+              ${refreshing 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800' 
+                : 'text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
+              }`}
+            onClick={handleUpdateAllEpisodes}
+            disabled={refreshing}
+            title={refreshing ? "正在更新..." : "检查是否有新剧集"}
+          >
+            {refreshing ? "更新中..." : "更新剧集"}
+          </button>
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             onClick={async () => {
