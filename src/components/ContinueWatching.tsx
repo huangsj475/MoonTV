@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 'use client';
 import { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
+//import Swal from 'sweetalert2';
 
 import type { PlayRecord } from '@/lib/db.client';
 import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
@@ -24,7 +24,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     (PlayRecord & { key: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  //const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
   //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
@@ -244,7 +244,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         </h2>
         {!loading && playRecords.length > 0 && (
 		<>
-		          {/* 更新剧集按钮 */}
+		  {/* 更新剧集按钮 */}
+		  {/*
           <button
             className={`text-sm px-3 py-1 rounded border transition-colors 
               ${refreshing 
@@ -257,6 +258,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
           >
             {refreshing ? "更新中..." : "更新剧集"}
           </button>
+		  */}
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             onClick={async () => {
@@ -301,7 +303,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                     source_name={record.source_name}
                     progress={getProgress(record)}
                     episodes={record.total_episodes}
-					// 👇 新增字段：是否为新增集数（用于红点）
+					// 新增字段：是否为新增集数（用于红点）
 					//hasNewEpisode={!!newEpisodeFlags[record.key]}
                     currentEpisode={record.index}
                     query={record.search_title}
