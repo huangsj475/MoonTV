@@ -182,15 +182,27 @@ const handleUpdateAllEpisodes = async () => {
           console.log(`[  更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
  
           try {
+			  // 1. 发起请求并验证响应状态
             //const videoDetail = await fetchVideoDetail({ source, id });
-			const videoDetail = await fetch(`/api/detail?source=${source}&id=${id}`);
-            console.log(`[  更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
-			
-            if (!videoDetail?.episodes) {
-              console.warn(`[  更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
-              return;
-            }
- 
+			const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+            
+				  if (!detailResponse.ok)  {
+					throw new Error('获取视频详情失败');
+				  }
+				 
+				  // 2. 解析JSON数据 
+				  const videoDetail = await detailResponse.json(); 
+				  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
+				 
+				  // 3. 数据验证（三重保障）
+				  if (!videoDetail || !Array.isArray(videoDetail.episodes))  {
+					console.warn(`[${source}+${id}]  episodes数据异常`, {
+					  received: videoDetail?.episodes,
+					  expected: "非空数组"
+					});
+					return;
+				  }
+           
             const newTotal = videoDetail.episodes.length; 
             console.log(`[  更新剧集 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
  
