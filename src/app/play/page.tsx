@@ -340,8 +340,16 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
               source.episodes.length > 1
                 ? source.episodes[1]
                 : source.episodes[0];
-            const testResult = await getVideoResolutionFromM3u8(episodeUrl);
+			  // 解析URL获取真实的视频地址
+          const { videoUrl: testUrl } = parseEpisodeUrl(episodeUrl);
+          
+          if (!testUrl) {
+            console.warn(`播放源 ${source.source_name} 的URL解析失败`);
+            return null;
+          }
 
+          const testResult = await getVideoResolutionFromM3u8(testUrl);
+            
             return {
               source,
               testResult,
@@ -525,8 +533,10 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       return;
     }
     const newUrl = detailData?.episodes[episodeIndex] || '';
-    if (newUrl !== videoUrl) {
-      setVideoUrl(newUrl);
+	  // 修复：使用解析后的真实视频URL
+  const { videoUrl: parsedUrl } = parseEpisodeUrl(newUrl);
+    if (parsedUrl !== videoUrl) {
+      setVideoUrl(parsedUrl);
     }
   };
 
