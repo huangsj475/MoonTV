@@ -51,9 +51,10 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
   };
 
   
+
    useEffect(() => {
-  	  const fetchPlayRecords = async () => {
-  
+	   const fetchPlayRecords = async () => {
+
       try {
         setLoading(true);
 
@@ -67,9 +68,10 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         setLoading(false);
       }
     };
+
     console.log('加载播放记录。。。');
     fetchPlayRecords();
-	
+
     // 监听播放记录更新事件
     const unsubscribe = subscribeToDataUpdates(
       'playRecordsUpdated',
