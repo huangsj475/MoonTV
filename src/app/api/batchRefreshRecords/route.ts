@@ -42,10 +42,10 @@ export async function POST(req: NextRequest) {
         }
         const newTotal = detail.episodes.length;
         if (newTotal > oldTotal) {
-          await savePlayRecord(source, id, {
+         /* await savePlayRecord(source, id, {
             ...record,
             total_episodes: newTotal,
-            save_time: Date.now(),
+            save_time: Date.now(),*/
           });
           updateMessages.push(`${title}: ${oldTotal} → ${newTotal}`);
           updated++;
