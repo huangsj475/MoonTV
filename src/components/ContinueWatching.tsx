@@ -9,7 +9,7 @@ import {
   clearAllPlayRecords,
   getAllPlayRecords,
   subscribeToDataUpdates,
-  savePlayRecord,// 关键：用此方法更新数据库
+  savePlayRecord,
 } from '@/lib/db.client';
 
 import ScrollableRow from '@/components/ScrollableRow';
@@ -125,7 +125,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
             const videoDetail = await fetchVideoDetail({ source, id });
  
             console.log(`[  更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
- 
+			/*
             if (!videoDetail?.episodes) {
               console.warn(`[  更新剧集 - ${source}+${id}] 未获取到 episodes 数据`);
               return;
@@ -146,10 +146,11 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
  
               // 记录更新信息
               updateMessages.push(`${title}:  ${oldTotal} → ${newTotal}`);
+			  
               hasChanges = true;
             } else {
               console.log(`[  更新剧集 - ${source}+${id}] 无新增集数,跳过`);
-            }
+            }*/
           } catch (err) {
             console.warn(` 获取视频 ${source}-${id} 详情失败`, err);
             // 可选择性收集失败信息
@@ -158,7 +159,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         })
       );
     }
- 
+ /*
     // ✅ 1. 使用 Swal 显示更新结果
     if (hasChanges) {
       const messageHtml = `
@@ -198,7 +199,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         icon: 'info',
         confirmButtonText: '确认'
       });
-    }
+    }*/
   } catch (error) {
     console.error(' 批量更新剧集失败:', error);
  
