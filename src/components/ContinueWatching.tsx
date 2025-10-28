@@ -24,7 +24,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     (PlayRecord & { key: string })[]
   >([]);
   const [loading, setLoading] = useState(true);
-  //const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
   //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
@@ -82,8 +82,66 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
     return unsubscribe;
   }, []);
-/*
+
 //------新增更新总集数-----------
+const handleUpdateAllEpisodes = async () => {
+  setRefreshing(true);
+  try {
+    // 1. 调用后端批量刷新API
+    const res = await fetch('/api/batchRefreshRecords', { method: 'POST' });
+    const result = await res.json();
+
+    // 2. 提示用户结果
+    if (typeof window !== 'undefined') {
+      const Swal = (await import('sweetalert2')).default;
+      if (result.updated > 0) {
+        await Swal.fire({
+          title: '🎉 更新完成',
+          html: `<div style="text-align: left;">
+                  <p><strong>以下剧集发现新集数：</strong></p>
+                  <ul style="list-style-position: inside; margin-left: 10px;">
+                    ${result.messages.map((msg: string) => `<li>${msg}</li>`).join('')}
+                  </ul>
+                </div>`,
+          icon: 'success',
+          confirmButtonText: '确认',
+        });
+      } else {
+        let html = '<p>所有剧集已是最新，未发现新增集数。</p>';
+        if (result.failed > 0) {
+          html += `<p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+            （部分剧集获取失败）</p>`;
+        }
+        await Swal.fire({
+          title: '🔄 检查完成',
+          html,
+          icon: 'info',
+          confirmButtonText: '确认'
+        });
+      }
+    }
+
+    // 3. 检查是否需要刷新播放记录
+    if (result.updated > 0) {
+      const allRecords = await getAllPlayRecords();
+      updatePlayRecords(allRecords);
+    }
+  } catch (error) {
+    console.error('[更新剧集] 批量更新剧集失败:', error);
+    if (typeof window !== 'undefined') {
+      const Swal = (await import('sweetalert2')).default;
+      Swal.fire({
+        title: '❌ 更新过程中发生错误',
+        text: error instanceof Error ? error.message : '未知错误',
+        icon: 'error',
+        confirmButtonText: '确认'
+      });
+    }
+  } finally {
+    setRefreshing(false);
+  }
+};
+/*
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
   console.log('[  更新剧集] 按钮已点击,开始执行...');
@@ -245,20 +303,18 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
         {!loading && playRecords.length > 0 && (
 		<>
 		  {/* 更新剧集按钮 */}
-		  {/*
           <button
             className={`text-sm px-3 py-1 rounded border transition-colors 
               ${refreshing 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800' 
                 : 'text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
               }`}
-            onClick={}
+            onClick={handleUpdateAllEpisodes}
             disabled={refreshing}
             title={refreshing ? "正在更新..." : "检查是否有新剧集"}
           >
             {refreshing ? "更新中..." : "更新剧集"}
           </button>
-		  */}
           <button
             className='text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             onClick={async () => {
