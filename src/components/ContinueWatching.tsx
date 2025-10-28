@@ -82,7 +82,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
     return unsubscribe;
   }, []);
-
+/*
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
   const handleUpdateAllEpisodes = async () => {
@@ -216,7 +216,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
   }
 };
 //------新增更新总集数-----------
-
+*/
   // 如果没有播放记录，则不渲染组件
   if (!loading && playRecords.length === 0) {
     return null;
@@ -251,7 +251,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800' 
                 : 'text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
               }`}
-            onClick={handleUpdateAllEpisodes}
+            onClick={}
             disabled={refreshing}
             title={refreshing ? "正在更新..." : "检查是否有新剧集"}
           >
