@@ -4,6 +4,8 @@ import { getAvailableApiSites } from '@/lib/config';
 import { getDetailFromApi } from '@/lib/downstream';
 import { getAllPlayRecords, savePlayRecord } from '@/lib/db.client';
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   try {
     const allRecords = await getAllPlayRecords();
