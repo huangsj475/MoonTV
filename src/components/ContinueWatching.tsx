@@ -301,7 +301,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
             className={`px-3 py-1 text-white rounded-lg transition-colors 
               ${refreshing 
                 ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-green-600 hover:bg-green-700'
+                : 'bg-green-500 hover:bg-green-700'
               }`}
             onClick={handleUpdateAllEpisodes}
             disabled={refreshing}
