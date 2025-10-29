@@ -298,7 +298,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 		<>
 		  {/* 更新剧集按钮 */}
           <button
-            className={`px-3 py-1 text-white rounded-lg transition-colors 
+            className={`text-sm px-2 py-1 text-white rounded-lg transition-colors 
               ${refreshing 
                 ? 'bg-gray-400 cursor-not-allowed' 
                 : 'bg-green-500 hover:bg-green-700'
