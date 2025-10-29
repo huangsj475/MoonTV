@@ -298,10 +298,10 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 		<>
 		  {/* 更新剧集按钮 */}
           <button
-            className={`text-sm px-3 py-1 rounded border transition-colors 
+            className={`px-4 py-2 text-white rounded-lg transition-colors 
               ${refreshing 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-gray-800' 
-                : 'text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700'
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700'
               }`}
             onClick={handleUpdateAllEpisodes}
             disabled={refreshing}
