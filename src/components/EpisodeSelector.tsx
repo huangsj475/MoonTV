@@ -129,12 +129,24 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
     }
     const episodeUrl =
       source.episodes.length > 1 ? source.episodes[1] : source.episodes[0];
+		// 解析真实 URL：假设格式为 "LABEL$REAL_URL"
+		let realUrl: string;
+		 
+		if (typeof episodeUrl === 'string' && episodeUrl.includes('$'))  {
+		  realUrl = episodeUrl.split('$',  2)[1]; // 取 $ 后面部分
+		} else {
+		  realUrl = episodeUrl; // 兜底：如果没有 $，就当普通 URL 处理
+		}
+		 
+		if (!realUrl || !realUrl.startsWith('http'))  {
+		  throw new Error('无效URL格式');
+		}
 
     // 标记为已尝试
     setAttemptedSources((prev) => new Set(prev).add(sourceKey));
 
     try {
-      const info = await getVideoResolutionFromM3u8(episodeUrl);
+      const info = await getVideoResolutionFromM3u8(realUrl);
       setVideoInfoMap((prev) => new Map(prev).set(sourceKey, info));
     } catch (error) {
       // 失败时保存错误状态
