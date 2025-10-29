@@ -69,7 +69,7 @@ const CapsuleSwitch: React.FC<CapsuleSwitchProps> = ({
       {/* 滑动的白色背景指示器 */}
       {indicatorStyle.width > 0 && (
         <div
-          className='absolute top-1 bottom-1 bg-white dark:bg-gray-500 rounded-full shadow-sm transition-all duration-300 ease-out'
+          className='absolute top-1 bottom-1 bg-green-400 dark:bg-green-400 rounded-full shadow-sm transition-all duration-300 ease-out'
           style={{
             left: `${indicatorStyle.left}px`,
             width: `${indicatorStyle.width}px`,
