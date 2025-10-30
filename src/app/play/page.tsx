@@ -231,14 +231,14 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     // 使用与后端相同的正则逻辑
     const parts = url.split('$');
     if (parts.length >= 2) {
-      const episodeName = parts[0].trim();
-      const potentialUrl = parts.slice(1).join('$');
+      const partepisodeName = parts[0].trim();
+      const partUrl = parts.slice(1).join('$');
       
       // 检查是否是m3u8 URL
       if (potentialUrl.includes('.m3u8')) {
         return {
-          episodeName: episodeName,
-          videoUrl: potentialUrl
+          episodeName: partepisodeName,
+          videoUrl: partUrl
         };
       }
     }
