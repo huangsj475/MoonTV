@@ -1379,7 +1379,8 @@ useEffect(() => {
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
     
    if (!isWebkit && artPlayerRef.current) {
-      const { videoUrl: realVideoUrl } = parseEpisodeUrl(videoUrl);
+	  const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
+      const { videoUrl: realVideoUrl } = parseEpisodeUrl(originalUrl);
 	  artPlayerRef.current.switch = realVideoUrl;
 	  const { episodeName } = parseEpisodeUrl(videoUrl);
       const showEpisodeName = episodeName && episodeName.length > 5;
@@ -1468,7 +1469,8 @@ useEffect(() => {
         ">${
           videoTitle
             ?(() => {
-        const { episodeName } = parseEpisodeUrl(videoUrl);
+		const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
+        const { episodeName } = parseEpisodeUrl(originalUrl);
         return `${videoTitle} - ${
           episodeName && episodeName.length > 5 
             ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
@@ -1915,7 +1917,8 @@ return () => {
   function updateTitleLayer(videoTitle: string, currentEpisodeIndex: number,videoUrl: string) {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
-    const { episodeName } = parseEpisodeUrl(videoUrl);
+	const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
+    const { episodeName } = parseEpisodeUrl(originalUrl);
     titleLayer.innerText = `${videoTitle} - ${
       episodeName && episodeName.length > 5 
         ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
