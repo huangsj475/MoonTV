@@ -2112,12 +2112,14 @@ return () => {
                 {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
 				{` > ${
 				  (() => {
-					const { episodeName } = parseEpisodeUrl(videoUrl);
-					return episodeName 
+					// 使用原始的URL（detail.episodes中的URL）来解析集名称
+					const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
+					const { episodeName } = parseEpisodeUrl(originalUrl);
+					return episodeName && episodeName.length > 5 
 					  ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-					  : `${videoUrl}第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+					  : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`; // 修复这里的显示逻辑
 				  })()
-				}`}	
+				}`}
               </span>
             )}
           </h1>
