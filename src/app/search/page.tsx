@@ -3,7 +3,8 @@
 
 import { ChevronUp, Search, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+//import { Suspense, useEffect, useMemo, useState } from 'react';
+import React, { startTransition, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   addSearchHistory,
@@ -30,6 +31,7 @@ function SearchPageClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);//新增搜索建议
 
   // 获取默认聚合设置：只读取用户本地设置，默认为 true
   const getDefaultAggregate = () => {
@@ -210,7 +212,38 @@ function SearchPageClient() {
       setIsLoading(false);
     }
   };
+  //-------新增搜索建议------------
+// 输入框内容变化时触发，显示搜索建议
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
 
+    if (value.trim()) {
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  // 搜索框聚焦时触发，显示搜索建议
+  const handleInputFocus = () => {
+    if (searchQuery.trim()) {
+      setShowSuggestions(true);
+    }
+  };
+
+  const handleSuggestionSelect = (suggestion: string) => {
+    setSearchQuery(suggestion);
+    setShowSuggestions(false);
+
+    // 自动执行搜索
+    setIsLoading(true);
+    setShowResults(true);
+
+    router.push(`/search?q=${encodeURIComponent(suggestion)}`);
+    // 其余由 searchParams 变化的 effect 处理
+  };
+  //-------新增搜索建议------------
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = searchQuery.trim().replace(/\s+/g, ' ');
@@ -255,9 +288,48 @@ function SearchPageClient() {
                 id='searchInput'
                 type='text'
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={handleInputChange}
+                onFocus={handleInputFocus}
                 placeholder='搜索电影、电视剧...'
-                className='w-full h-12 rounded-lg bg-gray-50/80 py-3 pl-10 pr-4 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white border border-gray-200/50 shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500 dark:focus:bg-gray-700 dark:border-gray-700'
+                autoComplete="off"
+                className='w-full h-12 rounded-lg bg-gray-50/80 py-3 pl-10 pr-12 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white border border-gray-200/50 shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500 dark:focus:bg-gray-700 dark:border-gray-700'
+              />
+
+              {/* 清除按钮 */}
+              {searchQuery && (
+                <button
+                  type='button'
+                  onClick={() => {
+                    setSearchQuery('');
+                    setShowSuggestions(false);
+                    document.getElementById('searchInput')?.focus();
+                  }}
+                  className='absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-500 dark:hover:text-gray-300'
+                  aria-label='清除搜索内容'
+                >
+                  <X className='h-5 w-5' />
+                </button>
+              )}
+
+              {/* 搜索建议 */}
+              <SearchSuggestions
+                query={searchQuery}
+                isVisible={showSuggestions}
+                onSelect={handleSuggestionSelect}
+                onClose={() => setShowSuggestions(false)}
+                onEnterKey={() => {
+                  // 当用户按回车键时，使用搜索框的实际内容进行搜索
+                  const trimmed = searchQuery.trim().replace(/\s+/g, ' ');
+                  if (!trimmed) return;
+
+                  // 回显搜索框
+                  setSearchQuery(trimmed);
+                  setIsLoading(true);
+                  setShowResults(true);
+                  setShowSuggestions(false);
+
+                  router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+                }}
               />
             </div>
           </form>
