@@ -4,7 +4,7 @@
 import { ChevronUp, Search, X } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 //import { Suspense, useEffect, useMemo, useState } from 'react';
-import React, { startTransition, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useMemo, useState } from 'react';
 
 import {
   addSearchHistory,
@@ -395,7 +395,7 @@ function SearchPageClient() {
                       >
                         <VideoCard
                           id={item.id}
-                          title={item.title + ' ' + item.type_name}
+                          title={item.title}
                           poster={item.poster}
                           episodes={item.episodes.length}
                           source={item.source}
