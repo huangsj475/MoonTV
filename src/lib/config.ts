@@ -530,7 +530,7 @@ export async function getAvailableApiSites(user?: string): Promise<ApiSite[]> {
   if (!userConfig) {
     return allApiSites;
   }
-
+/*
   // 优先根据用户自己的 enabledApis 配置查找
   if (userConfig.enabledApis && userConfig.enabledApis.length > 0) {
     const userApiSitesSet = new Set(userConfig.enabledApis);
@@ -541,7 +541,8 @@ export async function getAvailableApiSites(user?: string): Promise<ApiSite[]> {
       detail: s.detail,
     }));
   }
-
+*/
+/*	
   // 如果没有 enabledApis 配置，则根据 tags 查找
   if (userConfig.tags && userConfig.tags.length > 0 && config.UserConfig.Tags) {
     const enabledApisFromTags = new Set<string>();
@@ -563,7 +564,7 @@ export async function getAvailableApiSites(user?: string): Promise<ApiSite[]> {
       }));
     }
   }
-
+*/
   // 如果都没有配置，返回所有可用的 API 站点
   return allApiSites;
 }
