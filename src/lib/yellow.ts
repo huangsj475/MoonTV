@@ -5,7 +5,6 @@ export const yellowWords = [
   '门事件',
   '萝莉少女',
   '制服诱惑',
-  '国产传媒',
   'cosplay',
   '黑丝诱惑',
   '无码',
