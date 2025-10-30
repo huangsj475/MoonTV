@@ -2113,9 +2113,9 @@ return () => {
 				{` > ${
 				  (() => {
 					const { episodeName } = parseEpisodeUrl(videoUrl);
-					return episodeName && episodeName.length > 5 
+					return episodeName 
 					  ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-					  : `${episodeName ? episodeName.length : 0}第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+					  : `${videoUrl}第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
 				  })()
 				}`}	
               </span>
