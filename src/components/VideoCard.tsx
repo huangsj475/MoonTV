@@ -235,6 +235,7 @@ export default function VideoCard({
         showCheckCircle: true,
         showDoubanLink: false,
         showRating: false,
+        showYear: false,
       },
       favorite: {
         showSourceName: true,
@@ -244,6 +245,7 @@ export default function VideoCard({
         showCheckCircle: false,
         showDoubanLink: false,
         showRating: false,
+        showYear: false,
       },
       search: {
         showSourceName: true,
@@ -253,6 +255,7 @@ export default function VideoCard({
         showCheckCircle: false,
         showDoubanLink: !!actualDoubanId,
         showRating: false,
+        showYear: true,
       },
       douban: {
         showSourceName: false,
@@ -262,6 +265,7 @@ export default function VideoCard({
         showCheckCircle: false,
         showDoubanLink: true,
         showRating: !!rate,
+        showYear: false,
       },
     };
     return configs[from] || configs.search;
@@ -323,7 +327,14 @@ export default function VideoCard({
             )}
           </div>
         )}
-
+          {/* 年份徽章 */}
+          {config.showYear && actualYear && actualYear !== 'unknown' && actualYear.trim() !== '' && (
+            <div
+              className="absolute top-2 bg-black/50 text-white text-xs font-medium px-2 py-1 rounded backdrop-blur-sm shadow-sm transition-all duration-300 ease-out group-hover:opacity-90 left-2"
+            >
+              {actualYear}
+            </div>
+          )}
         {/* 徽章 */}
         {config.showRating && rate && (
           <div className='absolute top-2 right-2 bg-pink-500 text-white text-xs font-bold w-7 h-7 rounded-full flex items-center justify-center shadow-md transition-all duration-300 ease-out group-hover:scale-110'>
