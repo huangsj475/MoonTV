@@ -235,7 +235,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       const partUrl = parts.slice(1).join('$');
       
       // 检查是否是m3u8 URL
-      if (potentialUrl.includes('.m3u8')) {
+      if (partUrl.includes('.m3u8')) {
         return {
           episodeName: partepisodeName,
           videoUrl: partUrl
