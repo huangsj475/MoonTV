@@ -1666,7 +1666,7 @@ useEffect(() => {
   {
     position: 'left',
     index: 32,
-    html: '<i class="art-icon flex"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 7v4l-4-4v4H3V7H1v8h2v-4h4v4l4-4V7h2z" fill="currentColor"/><path d="M18 7v4l-4-4v4h-2V7h-2v8h2v-4h4v4l4-4V7h2z" fill="currentColor"/></svg></i>',
+    html: '<i class="art-icon flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></i>',
     tooltip: '快退10秒',
     click: function () {
       if (artPlayerRef.current && artPlayerRef.current.currentTime > 5) {
@@ -1679,7 +1679,7 @@ useEffect(() => {
   {
     position: 'left',
     index: 33,
-    html: '<i class="art-icon flex"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 7v4l4-4v4h2V7h2v8h-2v-4h-4v4l-4-4V7h2z" fill="currentColor"/><path d="M4 7v4l4-4v4h2V7h2v8H8v-4H4v4l-4-4V7h4z" fill="currentColor"/></svg></i>',
+    html: '<i class="art-icon flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg></i>',
     tooltip: '快进10秒',
     click: function () {
       if (artPlayerRef.current) {
