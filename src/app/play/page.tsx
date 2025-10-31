@@ -1662,6 +1662,35 @@ useEffect(() => {
         ],
         // 控制栏配置
         controls: [
+			  // 快退10秒按钮
+  {
+    position: 'left',
+    index: 32,
+    html: '<i class="art-icon flex"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 7v4l-4-4v4H3V7H1v8h2v-4h4v4l4-4V7h2z" fill="currentColor"/><path d="M18 7v4l-4-4v4h-2V7h-2v8h2v-4h4v4l4-4V7h2z" fill="currentColor"/></svg></i>',
+    tooltip: '快退10秒',
+    click: function () {
+      if (artPlayerRef.current && artPlayerRef.current.currentTime > 5) {
+        artPlayerRef.current.currentTime = Math.max(artPlayerRef.current.currentTime - 10, 0);
+        artPlayerRef.current.notice.show = '快退10秒';
+      }
+    },
+  },
+  // 快进10秒按钮
+  {
+    position: 'left',
+    index: 33,
+    html: '<i class="art-icon flex"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M11 7v4l4-4v4h2V7h2v8h-2v-4h-4v4l-4-4V7h2z" fill="currentColor"/><path d="M4 7v4l4-4v4h2V7h2v8H8v-4H4v4l-4-4V7h4z" fill="currentColor"/></svg></i>',
+    tooltip: '快进10秒',
+    click: function () {
+      if (artPlayerRef.current) {
+        artPlayerRef.current.currentTime = Math.min(
+          artPlayerRef.current.currentTime + 10,
+          artPlayerRef.current.duration || artPlayerRef.current.currentTime + 10
+        );
+        artPlayerRef.current.notice.show = '快进10秒';
+      }
+    },
+  },
           {
             position: 'left',
             index: 13,
