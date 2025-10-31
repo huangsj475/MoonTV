@@ -185,6 +185,17 @@ div[data-media-provider] video {
   .art-control-volume {
     display: none !important;
   }
-  
-  
+}
+/* 隐藏所有端的快进快退按钮（默认全隐藏） */
+.art-control-custom-rewind,
+.art-control-custom-forward {
+  display: none !important;
+}
+
+/* 手机端横屏时显示快进快退按钮 */
+@media (max-height: 768px) and (orientation: landscape) {
+  .art-control-custom-rewind,
+  .art-control-custom-forward {
+    display: flex !important;
+  }
 }
