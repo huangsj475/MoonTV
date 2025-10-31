@@ -59,19 +59,14 @@ async function generateSuggestions(config: AdminConfig, query: string): Promise<
     // 取第一个可用的数据源进行搜索
     const firstSite = apiSites[0];
     const results = await searchFromApi(firstSite, query);
-
-    realKeywords = Array.from(
-      new Set(
-        results
-          .filter((r: any) => config.SiteConfig.DisableYellowFilter || !yellowWords.some((word: string) => (r.type_name || '').includes(word)))
-          .map((r: any) => r.title)
-          .filter(Boolean)
-          .flatMap((title: string) => title.split(/[ -:：·、-]/))
-          .filter(
-            (w: string) => w.length > 1 && w.toLowerCase().includes(queryLower)
-          )
-      )
-    ).slice(0, 8);
+	realKeywords = Array.from(
+	  new Set(
+		results
+		  .filter((r: any) => config.SiteConfig.DisableYellowFilter || !yellowWords.some((word: string) => (r.type_name || '').includes(word)))
+		  .map(r => r.title)
+		  .filter(title => title && title.toLowerCase().includes(queryLower))
+	  )
+	).slice(0, 8);
   }
 
   // 根据关键词与查询的匹配程度计算分数，并动态确定类型
