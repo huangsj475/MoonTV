@@ -198,4 +198,12 @@ div[data-media-provider] video {
   .art-control-custom-forward {
     display: flex !important;
   }
+   /* 调整两个按钮之间的间距 */
+  .art-control-custom-rewind {
+    margin-right: 10px !important;
+  }
+  
+  .art-control-custom-forward {
+    margin-left: 10px !important;
+  }
 }
