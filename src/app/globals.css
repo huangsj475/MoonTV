@@ -200,6 +200,7 @@ div[data-media-provider] video {
   }
    /* 调整两个按钮之间的间距 */
   .art-control-custom-rewind {
+    margin-left: 10px !important;
     margin-right: 10px !important;
   }
   
