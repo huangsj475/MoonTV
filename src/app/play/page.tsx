@@ -1666,7 +1666,7 @@ useEffect(() => {
   {
     position: 'left',
     index: 32,
-    html: '<i class="art-icon flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></i>',
+    html: '<i class="art-icon flex art-control-custom-rewind"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="11 19 2 12 11 5 11 19"></polygon><polygon points="22 19 13 12 22 5 22 19"></polygon></svg></i>',
     tooltip: '快退10秒',
     click: function () {
       if (artPlayerRef.current && artPlayerRef.current.currentTime > 5) {
@@ -1679,7 +1679,7 @@ useEffect(() => {
   {
     position: 'left',
     index: 33,
-    html: '<i class="art-icon flex"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg></i>',
+    html: '<i class="art-icon flex art-control-custom-forward"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg></i>',
     tooltip: '快进10秒',
     click: function () {
       if (artPlayerRef.current) {
