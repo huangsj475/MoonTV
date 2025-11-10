@@ -141,50 +141,6 @@ function PlayPageClient() {
     videoYear,
   ]);
 
-  //新增---------手势监听（滑动调节音量，亮度）-------------
-    // 实现音量调节函数
-  const adjustVolume = (delta: number) => {
-  if (!artPlayerRef.current)  return;
-  let newVolume = artPlayerRef.current.volume  + delta;
-  newVolume = Math.min(1,  Math.max(0,  newVolume));
-  artPlayerRef.current.volume  = newVolume;
-  artPlayerRef.current.notice.show  = `音量: ${(newVolume * 100).toFixed(0)}%`;
-};
-    // 实现亮度调节函数
-  
-    // -----添加 屏幕滑动 事件处理逻辑-----
-const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-  if (!isMobile()) return;
- 
-  const rect = artRef.current?.getBoundingClientRect(); 
-  if (!rect) return;
- 
-  const touch = e.changedTouches[0]; 
-  const x = touch.clientX  - rect.left; 
-  const area = x / rect.width; 
- 
-  if (!artPlayerRef.current)  return;
- 
-  // 判断是否在左侧或右侧区域
-  const isLeftSide = area < 0.33;
-  const isRightSide = area > 0.66;
- 
-  if (e.touches.length  === 1) {
-    if (touchStartY.current  === null) {
-    touchStartY.current  = touch.clientY;   // 记录起始Y坐标
-  } else {
-      const deltaY = touchStartY.current  - touch.clientY; 
-      if (Math.abs(deltaY)  > 10) {
-         if (isRightSide) {
-          // 右侧：调节音量
-          adjustVolume(deltaY * 0.01);
-        }
-        // 更新起始位置（实现连续滑动）
-      touchStartY.current  = touch.clientY; 
-      }
-    }
-  }
-};
   //------------手机端播放双击事件优化----------------
   
   //左边快退，中间暂停，右边快进
@@ -2216,7 +2172,6 @@ return () => {
               <div className='relative w-full h-[300px] lg:h-full'>
                 <div
                   ref={artRef}
-                  onTouchMove={handleTouchMove}
                   className='bg-black w-full h-full rounded-xl overflow-hidden shadow-lg'
                  
                       onDoubleClick={isMobile() ? undefined : (e) => {/*PC原双击逻辑*/}}
@@ -2306,7 +2261,7 @@ return () => {
 
         <div>
           <span className="text-gray-500 dark:text-gray-400">快捷键说明：1.电脑端：上下键=音量+/-，左右键=快退/进10秒，空格=播放/暂停，F键=切换全屏，Alt+左箭头=上一集，Alt+右箭头=下一集<br />
-2.移动端：屏幕双击-&gt;左右侧=快退/进10秒，中间=播放/暂停，右侧上下滑动=音量+/-
+2.移动端：屏幕双击-&gt;左右侧=快退/进10秒，中间=播放/暂停
           </span>
           </div>
         {/* 详情展示 */}
