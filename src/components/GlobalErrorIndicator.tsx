@@ -86,7 +86,7 @@ export function GlobalErrorIndicator() {
     <div className='fixed top-4 right-4 z-[2000]'>
       {/* 错误卡片 */}
       <div
-        className={`${getBackgroundColor()} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between max-w-md transition-all duration-300 ${
+        className={`${getBackgroundColor()} text-white px-4 py-2 rounded-lg shadow-lg flex items-center justify-between max-w-md transition-all duration-300 ${
           isReplacing ? 'scale-105 opacity-80' : 'scale-100'
         } animate-fade-in`}
       >
