@@ -25,6 +25,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
   >([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
+  const [recordsReady, setRecordsReady] = useState(false);//新增：播放记录准备就绪状态
+  const hasShownReadyMessage = useRef(false);//新增：显示准备就绪信息，确保只显示一次
   //const [newEpisodeFlags, setNewEpisodeFlags] = useState<Record<string, boolean>>({});
 
   // 处理播放记录数据更新的函数
@@ -41,13 +43,15 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     );
 
     setPlayRecords(sortedRecords);
-	// 初始化 flags
-    /*const flags: Record<string, boolean> = {};
-    sortedRecords.forEach(({  key }) => {
-      flags[key] = false;
-    });
-    setNewEpisodeFlags(flags);
-	*/
+	
+	// 检查所有记录是否都有必要的字段
+    const allRecordsValid = sortedRecords.every(record => 
+      record.key && record.title && record.cover
+    );
+    
+    if (allRecordsValid && sortedRecords.length > 0) {
+      setRecordsReady(true);
+    }
   };
 
   
@@ -57,6 +61,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
       try {
         setLoading(true);
+		setRecordsReady(false);
+        hasShownReadyMessage.current = false;
 
         // 从缓存或API获取所有播放记录
         const allRecords = await getAllPlayRecords();
@@ -82,6 +88,23 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
     return unsubscribe;
   }, []);
+  
+    // 新增：当记录准备就绪时显示提示
+  useEffect(() => {
+    if (recordsReady && !loading && playRecords.length > 0 && !hasShownReadyMessage.current) {
+      // 延迟显示，确保所有卡片都已渲染
+      setTimeout(() => {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(
+            new CustomEvent('globalError', {
+              detail: { message: `播放记录加载完成，共 ${playRecords.length} 个视频` },
+            })
+          );
+        }
+        hasShownReadyMessage.current = true;
+      }, 500);
+    }
+  }, [recordsReady, loading, playRecords.length]);
 
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
