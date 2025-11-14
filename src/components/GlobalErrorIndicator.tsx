@@ -6,6 +6,7 @@ interface ErrorInfo {
   id: string;
   message: string;
   timestamp: number;
+  type?: 'error' | 'success' | 'info'; // 新增：扩展类型支持
 }
 
 export function GlobalErrorIndicator() {
@@ -18,11 +19,12 @@ export function GlobalErrorIndicator() {
   useEffect(() => {
     // 监听自定义错误事件
     const handleError = (event: CustomEvent) => {
-      const { message } = event.detail;
+      const { message, type = 'error' } = event.detail;
       const newError: ErrorInfo = {
         id: Date.now().toString(),
         message,
         timestamp: Date.now(),
+		type,
       };
 
       // 如果已有错误，开始替换动画
@@ -67,13 +69,25 @@ export function GlobalErrorIndicator() {
   if (!isVisible || !currentError) {
     return null;
   }
+    // 新增：根据类型设置不同的背景色
+  const getBackgroundColor = () => {
+    switch (currentError.type) {
+      case 'success':
+        return 'bg-green-500';
+      case 'info':
+        return 'bg-blue-500';
+      case 'error':
+      default:
+        return 'bg-red-500';
+    }
+  };
 
   return (
     <div className='fixed top-4 right-4 z-[2000]'>
       {/* 错误卡片 */}
       <div
-        className={`bg-red-500 text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between min-w-[300px] max-w-[400px] transition-all duration-300 ${
-          isReplacing ? 'scale-105 bg-red-400' : 'scale-100 bg-red-500'
+        className={`${getBackgroundColor()} text-white px-4 py-3 rounded-lg shadow-lg flex items-center justify-between min-w-[300px] max-w-[400px] transition-all duration-300 ${
+          isReplacing ? 'scale-105 opacity-80' : 'scale-100'
         } animate-fade-in`}
       >
         <span className='text-sm font-medium flex-1 mr-3'>
@@ -104,11 +118,11 @@ export function GlobalErrorIndicator() {
 }
 
 // 全局错误触发函数
-export function triggerGlobalError(message: string) {
+export function triggerGlobalError(message: string, type: 'error' | 'success' | 'info' = 'error') {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(
       new CustomEvent('globalError', {
-        detail: { message },
+        detail: { message, type },
       })
     );
   }
