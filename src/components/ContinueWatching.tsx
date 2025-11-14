@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Swal from 'sweetalert2';
 
 import type { PlayRecord } from '@/lib/db.client';
