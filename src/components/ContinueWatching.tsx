@@ -42,7 +42,8 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       window.dispatchEvent(
         new CustomEvent('globalError', {
           detail: { 
-            message: `${count}个视频加载完成`
+            message: `${count}个视频加载完成`,
+            type: 'success'
           },
         })
       );
