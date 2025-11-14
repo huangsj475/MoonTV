@@ -413,8 +413,8 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 
 
   return (
-    <section className={`mb-8 ${className || ''}`}>
-      <div className='mb-4 flex items-center justify-between'>
+    <section className={`mb-5 ${className || ''}`}>
+      <div className='mb-3 flex items-center justify-between'>
         <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
           继续观看
         </h2>
