@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 'use client';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Swal from 'sweetalert2';
 
 import type { PlayRecord } from '@/lib/db.client';
@@ -42,8 +42,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
       window.dispatchEvent(
         new CustomEvent('globalError', {
           detail: { 
-            message: `${count}个视频加载完成`,
-            type: 'success'
+            message: `${count}个视频加载完成`
           },
         })
       );
@@ -107,6 +106,105 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     return unsubscribe;
   }, [updatePlayRecords]);// 新增：updatePlayRecords依赖
   
+  //------新增更新单个视频剧集--------
+const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) => {
+  const { key, title, total_episodes: oldTotal } = record;
+  const { source, id } = parseKey(key);
+
+  // 如果已经在批量更新中，则不允许单独更新
+  if (refreshing) {
+    Swal.fire({ 
+      title: '请稍候',
+      text: '当前正在批量更新中，请勿重复操作',
+      icon: 'info'
+    });
+    return;
+  }
+
+  console.log(`[单独更新] 开始更新 ${source}+${id} "${title}"`);
+
+  setRefreshing(true);
+
+  try {
+    // 显示加载中弹窗
+    const progressSwal = Swal.fire({
+      title: '正在检查更新',
+      html: `正在检查 <strong>${title}</strong> 的剧集信息...`,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      willOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // 获取视频详情
+    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+    
+    if (!detailResponse.ok) {
+      throw new Error('获取视频详情失败');
+    }
+
+    const videoDetail = await detailResponse.json();
+    
+    if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
+      throw new Error('获取到的数据格式不正确');
+    }
+
+    const newTotal = videoDetail.episodes.length;
+    console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
+
+    // 关闭进度弹窗
+    await Swal.close();
+
+    if (newTotal > oldTotal) {
+      // 更新数据库中的记录
+      await savePlayRecord(source, id, {
+        ...record,
+        total_episodes: newTotal,
+        save_time: Date.now(),
+      });
+
+      // 显示成功消息
+      await Swal.fire({
+        title: '发现新剧集！',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>${title}</strong></p>
+            <p>集数更新: ${oldTotal} → ${newTotal}</p>
+          </div>
+        `,
+        icon: 'success',
+        confirmButtonText: '确认'
+      });
+
+      console.log(`[单独更新 - ${source}+${id}] 更新成功`);
+    } else {
+      await Swal.fire({
+        title: '已是最新',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>${title}</strong></p>
+            <p>当前已是最新版本，未发现新增集数。</p>
+          </div>
+        `,
+        icon: 'info',
+        confirmButtonText: '确认'
+      });
+    }
+  } catch (error) {
+    console.error(`[单独更新 - ${source}+${id}] 更新失败:`, error);
+    
+    await Swal.fire({
+      title: '更新失败',
+      text: error instanceof Error ? error.message : '未知错误',
+      icon: 'error',
+      confirmButtonText: '确认'
+    });
+  } finally {
+    setRefreshing(false);
+  }
+};
+  //------新增更新单个视频剧集--------
 
 //------新增更新总集数-----------
 // 检查所有视频是否更新了剧集
@@ -378,8 +476,6 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                     source_name={record.source_name}
                     progress={getProgress(record)}
                     episodes={record.total_episodes}
-					// 新增字段：是否为新增集数（用于红点）
-					//hasNewEpisode={!!newEpisodeFlags[record.key]}
                     currentEpisode={record.index}
                     query={record.search_title}
                     from='playrecord'
@@ -390,6 +486,24 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
                     }
                     type={record.total_episodes > 1 ? 'tv' : ''}
                   />
+                {/* 新增：单独更新按钮 */}
+                <div className="mt-2 flex justify-center">
+                  <button
+                    className={`text-xs px-2 py-1 rounded transition-colors ${
+                      refreshing
+                        ? 'bg-gray-400 cursor-not-allowed text-gray-200'
+                        : 'bg-blue-500 hover:bg-blue-600 text-white'
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleUpdateSingleEpisode(record);
+                    }}
+                    disabled={refreshing}
+                    title={refreshing ? "正在更新..." : "检查该视频是否有新剧集"}
+                  >
+                    {refreshing ? "更新中..." : "更新剧集"}
+                  </button>
+                </div>
                 </div>
               );
             })}
