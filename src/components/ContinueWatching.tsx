@@ -185,7 +185,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
         html: `
           <div style="text-align: left;">
             <p><strong>${title}</strong></p>
-            <p>当前已是最新版本，未发现新增集数。</p>
+            <p>当前已是最新剧集，未发现新增集数。</p>
           </div>
         `,
         icon: 'info',
