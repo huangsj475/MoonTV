@@ -1554,7 +1554,7 @@ useEffect(() => {
 					name: '跳过片头片尾',
 					html: '跳过片头片尾',
 					switch: skipConfigRef.current.enable,
-					onSwitch: function (item) {
+					onSwitch: function (item: any) {
 					  const newConfig = {
 						...skipConfigRef.current,
 						enable: !item.switch,
