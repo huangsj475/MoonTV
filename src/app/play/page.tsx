@@ -1549,6 +1549,12 @@ useEffect(() => {
           },
 		  {
 			html: '跳过设置',
+			  icon: `
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				  <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+				  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+				</svg>
+			  `,
 			children: [
 				  {
 					name: '跳过片头片尾',
