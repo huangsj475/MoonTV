@@ -1563,13 +1563,13 @@ useEffect(() => {
 			  {
 				html: '删除跳过配置',
 				icon: `
-				  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-					<path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-					<path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-					<path d="M3 7H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-					<path d="M8 7V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V7" stroke="currentColor" stroke-width="2"/>
-				  </svg>
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					  <path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7" stroke="white" stroke-width="2" stroke-linecap="round"/>
+					  <path d="M10 11V17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+					  <path d="M14 11V17" stroke="white" stroke-width="2" stroke-linecap="round"/>
+					  <path d="M3 7H21" stroke="white" stroke-width="2" stroke-linecap="round"/>
+					  <path d="M8 7V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V7" stroke="white" stroke-width="2"/>
+					</svg>
 				`,
 				tooltip: '删除跳过配置',
 				onClick: function () {
