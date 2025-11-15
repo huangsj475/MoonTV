@@ -1547,74 +1547,89 @@ useEffect(() => {
               return newVal ? '当前开启' : '当前关闭';
             },
           },
-          {
-            name: '跳过片头片尾',
-            html: '跳过片头片尾',
-            switch: skipConfigRef.current.enable,
-            onSwitch: function (item) {
-              const newConfig = {
-                ...skipConfigRef.current,
-                enable: !item.switch,
-              };
-              handleSkipConfigChange(newConfig);
-              return !item.switch;
-            },
-          },
-          {
-            html: '删除跳过配置',
-            onClick: function () {
-              handleSkipConfigChange({
-                enable: false,
-                intro_time: 0,
-                outro_time: 0,
-              });
-              return '';
-            },
-          },
-          {
-            name: '设置片头',
-            html: '设置片头',
-            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="2" fill="#ffffff"/><path d="M9 12L17 12" stroke="#ffffff" stroke-width="2"/><path d="M17 6L17 18" stroke="#ffffff" stroke-width="2"/></svg>',
-            tooltip:
-              skipConfigRef.current.intro_time === 0
-                ? '设置片头时间'
-                : `${formatTime(skipConfigRef.current.intro_time)}`,
-            onClick: function () {
-              const currentTime = artPlayerRef.current?.currentTime || 0;
-              if (currentTime > 0) {
-                const newConfig = {
-                  ...skipConfigRef.current,
-                  intro_time: currentTime,
-                };
-                handleSkipConfigChange(newConfig);
-                return `${formatTime(currentTime)}`;
-              }
-            },
-          },
-          {
-            name: '设置片尾',
-            html: '设置片尾',
-            icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
-            tooltip:
-              skipConfigRef.current.outro_time >= 0
-                ? '设置片尾时间'
-                : `-${formatTime(-skipConfigRef.current.outro_time)}`,
-            onClick: function () {
-              const outroTime =
-                -(
-                  artPlayerRef.current?.duration -
-                  artPlayerRef.current?.currentTime
-                ) || 0;
-              if (outroTime < 0) {
-                const newConfig = {
-                  ...skipConfigRef.current,
-                  outro_time: outroTime,
-                };
-                handleSkipConfigChange(newConfig);
-                return `-${formatTime(-outroTime)}`;
-              }
-            },
-          },
+		  {
+			html: '跳过设置',
+			children: [
+				  {
+					name: '跳过片头片尾',
+					html: '跳过片头片尾',
+					switch: skipConfigRef.current.enable,
+					onSwitch: function (item) {
+					  const newConfig = {
+						...skipConfigRef.current,
+						enable: !item.switch,
+					  };
+					  handleSkipConfigChange(newConfig);
+					  return !item.switch;
+					},
+				  },
+				  {
+					html: '删除跳过配置',
+					icon: `
+					  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+						<path d="M10 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+						<path d="M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+						<path d="M3 7H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+						<path d="M8 7V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V7" stroke="currentColor" stroke-width="2"/>
+					  </svg>
+					`,
+					tooltip: '删除跳过配置',
+					onClick: function () {
+					  handleSkipConfigChange({
+						enable: false,
+						intro_time: 0,
+						outro_time: 0,
+					  });
+					  return '';
+					},
+				  },
+				  {
+					name: '设置片头',
+					html: '设置片头',
+					icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="2" fill="#ffffff"/><path d="M9 12L17 12" stroke="#ffffff" stroke-width="2"/><path d="M17 6L17 18" stroke="#ffffff" stroke-width="2"/></svg>',
+					tooltip:
+					  skipConfigRef.current.intro_time === 0
+						? '设置片头时间'
+						: `${formatTime(skipConfigRef.current.intro_time)}`,
+					onClick: function () {
+					  const currentTime = artPlayerRef.current?.currentTime || 0;
+					  if (currentTime > 0) {
+						const newConfig = {
+						  ...skipConfigRef.current,
+						  intro_time: currentTime,
+						};
+						handleSkipConfigChange(newConfig);
+						return `${formatTime(currentTime)}`;
+					  }
+					},
+				  },
+				  {
+					name: '设置片尾',
+					html: '设置片尾',
+					icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
+					tooltip:
+					  skipConfigRef.current.outro_time >= 0
+						? '设置片尾时间'
+						: `-${formatTime(-skipConfigRef.current.outro_time)}`,
+					onClick: function () {
+					  const outroTime =
+						-(
+						  artPlayerRef.current?.duration -
+						  artPlayerRef.current?.currentTime
+						) || 0;
+					  if (outroTime < 0) {
+						const newConfig = {
+						  ...skipConfigRef.current,
+						  outro_time: outroTime,
+						};
+						handleSkipConfigChange(newConfig);
+						return `-${formatTime(-outroTime)}`;
+					  }
+					},
+				  },
+			],
+		  },
         ],
         // 控制栏配置
         controls: [
