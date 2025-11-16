@@ -60,7 +60,6 @@ export default function VideoCard({
   const [favorited, setFavorited] = useState<boolean | null>(null);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
   const [tooltip, setTooltip] = useState('');
-  const [statusSource, setStatusSource] = useState<'none' | 'check' | 'listener'>('none');
 
 
   const isAggregate = from === 'search' && !!items?.length;
@@ -123,7 +122,6 @@ export default function VideoCard({
 	  
 	  if (favorited === null && !checkingFavorite) {
 		setCheckingFavorite(true);
-		setStatusSource('check'); // 标记来自检查
 		setTooltip('检查收藏...');
 		
 		try {
@@ -138,17 +136,9 @@ export default function VideoCard({
 		}
 	  }else if (favorited !== null) {
 		// 如果已经知道状态，只显示提示，不重复检查
-		//setTooltip(favorited ? '?已收藏' : '?未收藏');
-		    // 根据状态来源显示不同的提示
-			if (statusSource === 'listener') {
-			  setTooltip('已收藏lis'); // 监听器同步的状态
-			} else if (statusSource === 'check') {
-			  setTooltip('✅已收藏');   // 自己检查的状态
-			} else {
-			  setTooltip(favorited ? '已收藏了' : '未收藏');
-			}
+		setTooltip(favorited ? '✅已收藏' : '❌未收藏');
 	  }
-	}, [favorited, statusSource, actualSource, actualId, checkingFavorite, from]);
+	}, [favorited, actualSource, actualId, checkingFavorite, from]);
 	//----改动：鼠标悬停，划过获取收藏状态--------
 
   // 获取收藏状态
@@ -196,7 +186,6 @@ export default function VideoCard({
         // 检查当前项目是否在新的收藏列表中
         const isNowFavorited = !!newFavorites[storageKey];
         setFavorited(isNowFavorited);
-		setStatusSource('listener'); // 标记来自监听器
       }
     );
 
