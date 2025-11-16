@@ -1,10 +1,9 @@
 /* eslint-disable no-console */
 'use client';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
 import type { PlayRecord } from '@/lib/db.client';
-import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
 import {
   clearAllPlayRecords,
   getAllPlayRecords,
@@ -25,33 +24,9 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
   >([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false); // 区分初始加载与刷新
-  const [allDataReady, setAllDataReady] = useState(false);//新增：播放记录准备就绪状态
-  const hasShownReady = useRef(false);//新增：显示准备就绪信息，确保只显示一次
 
-  // 新增：检查所有记录的数据就绪状态
-  const checkAllDataReady = useCallback((records: (PlayRecord & { key: string })[]) => {
-    return records.length > 0 && records.every(record => {
-      const [source, id] = record.key.split('+');
-      return source && id && record.title && record.cover;
-    });
-  }, []);
-    // 新增：显示就绪提示
-  const showReadyMessage = useCallback((count: number) => {
-    if (!hasShownReady.current) {
-      hasShownReady.current = true;
-      window.dispatchEvent(
-        new CustomEvent('globalError', {
-          detail: { 
-            message: `${count}个视频加载完成`,
-            type: 'success'
-          },
-        })
-      );
-    }
-  }, []);
-  
   // 处理播放记录数据更新的函数
-  const updatePlayRecords = useCallback((allRecords: Record<string, PlayRecord>) => {
+  const updatePlayRecords = (allRecords: Record<string, PlayRecord>) => {
     // 将记录转换为数组并根据 save_time 由近到远排序
     const recordsArray = Object.entries(allRecords).map(([key, record]) => ({
       ...record,
@@ -65,22 +40,13 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
     setPlayRecords(sortedRecords);
 	
-    // 新增：检查数据就绪状态
-    if (checkAllDataReady(sortedRecords)) {
-      setAllDataReady(true);
-      showReadyMessage(sortedRecords.length);
-    }
-  }, [checkAllDataReady, showReadyMessage]);
-
-  
+  };
 
    useEffect(() => {
 	const fetchPlayRecords = async () => {
 
       try {
         setLoading(true);
-        setAllDataReady(false);
-        hasShownReady.current = false;
 
         // 从缓存或API获取所有播放记录
         const allRecords = await getAllPlayRecords();
@@ -105,7 +71,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     );
 
     return unsubscribe;
-  }, [updatePlayRecords]);// 新增：updatePlayRecords依赖
+  }, []);
   
   //------新增更新单个视频剧集--------
 const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) => {
@@ -286,7 +252,6 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
  
           try {
 			  // 1. 发起请求并验证响应状态
-            //const videoDetail = await fetchVideoDetail({ source, id });
 			const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
             
 				  if (!detailResponse.ok)  {
