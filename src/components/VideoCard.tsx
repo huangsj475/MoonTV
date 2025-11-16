@@ -139,7 +139,6 @@ export default function VideoCard({
 		  const endTime = Date.now();
 		  const duration = endTime - startTime;
 		  console.warn(`❌ [收藏状态] 检查失败: ${cardKey}`, {
-			错误: err.message,
 			耗时: `${duration}ms`,
 			标题: actualTitle
 		  });
