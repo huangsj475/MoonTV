@@ -117,13 +117,32 @@ export default function VideoCard({
     if (from === 'douban' || !actualSource || !actualId) return;
 
     const fetchFavoriteStatus = async () => {
+		//调试
+		const startTime = Date.now();
+		const cardKey = `${actualSource}-${actualId}`;
+		console.log(`🔄 [收藏状态] 开始检查: ${cardKey}`, actualTitle);
 		//新增：setTimeout延迟
 		setTimeout(async () => {
 		try {
 		  const fav = await isFavorited(actualSource, actualId);
 		  setFavorited(fav);
+		  //调试
+		const endTime = Date.now();
+		const duration = endTime - startTime;
+		console.log(`✅ [收藏状态] 检查完成: ${cardKey}`, {
+        状态: fav ? '已收藏' : '未收藏',
+        耗时: `${duration}ms`,
+        标题: actualTitle
+      });
 		} catch (err) {
 		  console.warn('检查收藏状态失败');
+		  const endTime = Date.now();
+		  const duration = endTime - startTime;
+		  console.warn(`❌ [收藏状态] 检查失败: ${cardKey}`, {
+			错误: err.message,
+			耗时: `${duration}ms`,
+			标题: actualTitle
+		  });
 		}
 	  }, 0);
     };
