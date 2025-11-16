@@ -136,7 +136,7 @@ export default function VideoCard({
 		}
 	  }else if (favorited !== null) {
 		// 如果已经知道状态，只显示提示，不重复检查
-		setTooltip(favorited ? '已收藏' : '未收藏');
+		setTooltip(favorited ? '✅已收藏' : '❌未收藏');
 	  }
 	}, [favorited, actualSource, actualId, checkingFavorite, from]);
 	//----改动：鼠标悬停，划过获取收藏状态--------
