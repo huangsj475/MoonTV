@@ -56,8 +56,11 @@ export default function VideoCard({
   type = '',
 }: VideoCardProps) {
   const router = useRouter();
-  const [favorited, setFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [favorited, setFavorited] = useState<boolean | null>(null);
+  const [checkingFavorite, setCheckingFavorite] = useState(false);
+  const [tooltip, setTooltip] = useState('');
+
 
   const isAggregate = from === 'search' && !!items?.length;
 
@@ -112,10 +115,34 @@ export default function VideoCard({
       : 'tv'
     : type;
 
+	//----改动：鼠标悬停，划过获取收藏状态--------
+	const handleMouseEnter = useCallback(async () => {
+	  // 排除不支持收藏状态的卡片
+	  if (from === 'douban' || !actualSource || !actualId) return;
+	  
+	  if (favorited === null && !checkingFavorite) {
+		setCheckingFavorite(true);
+		setTooltip('检查收藏状态中...');
+		
+		try {
+		  const fav = await isFavorited(actualSource, actualId);
+		  setFavorited(fav);
+		  setTooltip(fav ? '已收藏' : '未收藏');
+		} catch (err) {
+		  setFavorited(false);
+		  setTooltip('检查收藏状态失败');
+		} finally {
+		  setCheckingFavorite(false);
+		}
+	  }
+	}, [favorited, actualSource, actualId, checkingFavorite, from]);
+	//----改动：鼠标悬停，划过获取收藏状态--------
+
   // 获取收藏状态
   useEffect(() => {
+	  
     if (from === 'douban' || !actualSource || !actualId) return;
-
+	/*
     const fetchFavoriteStatus = async () => {
 		//调试
 		const startTime = Date.now();
@@ -147,7 +174,7 @@ export default function VideoCard({
     };
 
     fetchFavoriteStatus();
-
+	*/
     // 监听收藏状态更新事件
     const storageKey = generateStorageKey(actualSource, actualId);
     const unsubscribe = subscribeToDataUpdates(
@@ -160,7 +187,7 @@ export default function VideoCard({
     );
 
     return unsubscribe;
-  }, [from, actualSource, actualId]);
+  }, [from,actualSource, actualId]);
 
   const handleToggleFavorite = useCallback(
     async (e: React.MouseEvent) => {
@@ -296,6 +323,8 @@ export default function VideoCard({
     <div
       className='group relative w-full rounded-lg bg-transparent cursor-pointer transition-all duration-300 ease-in-out hover:scale-[1.05] hover:z-[500]'
       onClick={handleClick}
+	  onMouseEnter={handleMouseEnter}
+	  onMouseLeave={() => setTooltip('')}
     >
       {/* 海报容器 */}
       <div className='relative aspect-[2/3] overflow-hidden rounded-lg'>
@@ -336,15 +365,27 @@ export default function VideoCard({
               />
             )}
             {config.showHeart && (
+			  <div className="relative">
               <Heart
                 onClick={handleToggleFavorite}
                 size={20}
-                className={`transition-all duration-300 ease-out ${
-                  favorited
-                    ? 'fill-red-600 stroke-red-600'
-                    : 'fill-transparent stroke-white hover:stroke-red-400'
-                } hover:scale-[1.1]`}
+				  className={`transition-all duration-300 ease-out ${
+					checkingFavorite
+					  ? 'stroke-yellow-400 animate-pulse'
+					  : favorited === true
+					  ? 'fill-red-600 stroke-red-600'
+					  : favorited === false
+					  ? 'fill-transparent stroke-white hover:stroke-red-400'
+					  : 'stroke-gray-400 opacity-60'
+				  } hover:scale-[1.1]`}
               />
+				{tooltip && (
+				  <div className="absolute bottom-8 right-0 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50">
+					{tooltip}
+					<div className="absolute -bottom-1 right-2 w-2 h-2 bg-gray-800 transform rotate-45"></div>
+				  </div>
+				)}
+			   </div>
             )}
           </div>
         )}
