@@ -325,7 +325,7 @@ export default function VideoCard({
       onClick={handleClick}
 	  onMouseEnter={handleMouseEnter}
 	  onMouseLeave={() => setTooltip('')}
-	  onTouchStart={handleShowTooltip}      // 移动端
+	  onTouchStart={handleMouseEnter}      // 移动端
       onTouchEnd={() => setTooltip('')}
     >
       {/* 海报容器 */}
