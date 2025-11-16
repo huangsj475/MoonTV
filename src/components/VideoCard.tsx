@@ -57,7 +57,7 @@ export default function VideoCard({
 }: VideoCardProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [favorited, setFavorited] = useState<boolean | null>(false);
+  const [favorited, setFavorited] = useState<boolean | null>(null);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
   const [tooltip, setTooltip] = useState('');
 
