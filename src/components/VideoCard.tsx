@@ -325,6 +325,8 @@ export default function VideoCard({
       onClick={handleClick}
 	  onMouseEnter={handleMouseEnter}
 	  onMouseLeave={() => setTooltip('')}
+	  onTouchStart={handleShowTooltip}      // 移动端
+      onTouchEnd={() => setTooltip('')}
     >
       {/* 海报容器 */}
       <div className='relative aspect-[2/3] overflow-hidden rounded-lg'>
