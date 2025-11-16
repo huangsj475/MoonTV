@@ -117,12 +117,15 @@ export default function VideoCard({
     if (from === 'douban' || !actualSource || !actualId) return;
 
     const fetchFavoriteStatus = async () => {
-      try {
-        const fav = await isFavorited(actualSource, actualId);
-        setFavorited(fav);
-      } catch (err) {
-        throw new Error('检查收藏状态失败');
-      }
+		//新增：setTimeout延迟
+		setTimeout(async () => {
+		try {
+		  const fav = await isFavorited(actualSource, actualId);
+		  setFavorited(fav);
+		} catch (err) {
+		  console.warn('检查收藏状态失败');
+		}
+	  }, 0);
     };
 
     fetchFavoriteStatus();
