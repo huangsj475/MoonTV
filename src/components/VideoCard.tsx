@@ -60,6 +60,7 @@ export default function VideoCard({
   const [favorited, setFavorited] = useState<boolean | null>(null);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
   const [tooltip, setTooltip] = useState('');
+  const [statusSource, setStatusSource] = useState<'none' | 'check' | 'listener'>('none');
 
 
   const isAggregate = from === 'search' && !!items?.length;
@@ -122,6 +123,7 @@ export default function VideoCard({
 	  
 	  if (favorited === null && !checkingFavorite) {
 		setCheckingFavorite(true);
+		setStatusSource('check'); // 标记来自检查
 		setTooltip('检查收藏...');
 		
 		try {
@@ -136,7 +138,15 @@ export default function VideoCard({
 		}
 	  }else if (favorited !== null) {
 		// 如果已经知道状态，只显示提示，不重复检查
-		setTooltip(favorited ? '✅已收藏' : '❌未收藏');
+		//setTooltip(favorited ? '?已收藏' : '?未收藏');
+		    // 根据状态来源显示不同的提示
+			if (statusSource === 'listener') {
+			  setTooltip('已收藏lis'); // 监听器同步的状态
+			} else if (statusSource === 'check') {
+			  setTooltip('✅已收藏');   // 自己检查的状态
+			} else {
+			  setTooltip(favorited ? '已收藏了' : '未收藏');
+			}
 	  }
 	}, [favorited, actualSource, actualId, checkingFavorite, from]);
 	//----改动：鼠标悬停，划过获取收藏状态--------
@@ -150,7 +160,7 @@ export default function VideoCard({
 		//调试
 		const startTime = Date.now();
 		const cardKey = `${actualSource}-${actualId}`;
-		console.log(`🔄 [收藏状态] 开始检查: ${cardKey}`, actualTitle);
+		console.log(`?? [收藏状态] 开始检查: ${cardKey}`, actualTitle);
 		//新增：setTimeout延迟
 		setTimeout(async () => {
 		try {
@@ -159,7 +169,7 @@ export default function VideoCard({
 		  //调试
 		const endTime = Date.now();
 		const duration = endTime - startTime;
-		console.log(`✅ [收藏状态] 检查完成: ${cardKey}`, {
+		console.log(`? [收藏状态] 检查完成: ${cardKey}`, {
         状态: fav ? '已收藏' : '未收藏',
         耗时: `${duration}ms`,
         标题: actualTitle
@@ -168,7 +178,7 @@ export default function VideoCard({
 		  console.warn('检查收藏状态失败');
 		  const endTime = Date.now();
 		  const duration = endTime - startTime;
-		  console.warn(`❌ [收藏状态] 检查失败: ${cardKey}`, {
+		  console.warn(`? [收藏状态] 检查失败: ${cardKey}`, {
 			耗时: `${duration}ms`,
 			标题: actualTitle
 		  });
