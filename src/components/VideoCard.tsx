@@ -3,7 +3,7 @@
 import { Trash2, Heart, Link, PlayCircleIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 
 import {
   deleteFavorite,
@@ -116,13 +116,17 @@ export default function VideoCard({
     : type;
 
 	//----改动：鼠标悬停，划过获取收藏状态--------
+	// 使用 ref 来获取最新的 favorited 值
+	const favoritedRef = useRef<boolean | null>(null);
+	favoritedRef.current = favorited;
+	
 	const handleMouseEnter = useCallback(async () => {
 	  // 排除不支持收藏状态的卡片
 	  if (from === 'douban' || !actualSource || !actualId) return;
 	  
-	  if (favorited === null && !checkingFavorite) {
+	  if (favoritedRef.current === null && !checkingFavorite) {
 		setCheckingFavorite(true);
-		setTooltip('检查收藏状态中...');
+		setTooltip('检查收藏...');
 		
 		try {
 		  const fav = await isFavorited(actualSource, actualId);
@@ -134,9 +138,9 @@ export default function VideoCard({
 		} finally {
 		  setCheckingFavorite(false);
 		}
-	  }else if (favorited !== null) {
+	  }else if (favoritedRef.current !== null) {
 		// 如果已经知道状态，只显示提示，不重复检查
-		setTooltip(favorited ? '✅已收藏' : '❌未收藏');
+		setTooltip(favoritedRef.current ? '✅已收藏' : '❌未收藏');
 	  }
 	}, [actualSource, actualId, checkingFavorite, from]);
 	//----改动：鼠标悬停，划过获取收藏状态--------
