@@ -3,7 +3,7 @@
 import { Trash2, Heart, Link, PlayCircleIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState} from 'react';
 
 import {
   deleteFavorite,
@@ -57,7 +57,7 @@ export default function VideoCard({
 }: VideoCardProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [favorited, setFavorited] = useState<boolean | null>(null);
+  const [favorited, setFavorited] = useState<boolean | null>(false);
   const [checkingFavorite, setCheckingFavorite] = useState(false);
   const [tooltip, setTooltip] = useState('');
 
@@ -115,16 +115,12 @@ export default function VideoCard({
       : 'tv'
     : type;
 
-	//----改动：鼠标悬停，划过获取收藏状态--------
-	// 使用 ref 来获取最新的 favorited 值
-	const favoritedRef = useRef<boolean | null>(null);
-	favoritedRef.current = favorited;
-	
+	//----改动：鼠标悬停，划过获取收藏状态--------	
 	const handleMouseEnter = useCallback(async () => {
 	  // 排除不支持收藏状态的卡片
-	  if (from === 'douban' || !actualSource || !actualId) return;
+	  if (from === 'douban' || !actualSource || !actualId ) return;
 	  
-	  if (favoritedRef.current === null && !checkingFavorite) {
+	  if (favorited === null && !checkingFavorite) {
 		setCheckingFavorite(true);
 		setTooltip('检查收藏...');
 		
@@ -138,11 +134,11 @@ export default function VideoCard({
 		} finally {
 		  setCheckingFavorite(false);
 		}
-	  }else if (favoritedRef.current !== null) {
+	  }else if (favorited !== null) {
 		// 如果已经知道状态，只显示提示，不重复检查
-		setTooltip(favoritedRef.current ? '✅已收藏' : '❌未收藏');
+		setTooltip(favorited ? '✅已收藏' : '❌未收藏');
 	  }
-	}, [actualSource, actualId, checkingFavorite, from]);
+	}, [favorited, actualSource, actualId, checkingFavorite, from]);
 	//----改动：鼠标悬停，划过获取收藏状态--------
 
   // 获取收藏状态
