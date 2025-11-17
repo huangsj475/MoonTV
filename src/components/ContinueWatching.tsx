@@ -416,7 +416,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
             Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className='min-w-[96px] w-24 sm:min-w-[180px] sm:w-44'
+                className='min-w-[120px] w-30 sm:min-w-[180px] sm:w-44'
               >
                 <div className='relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-gray-200 animate-pulse dark:bg-gray-800'>
                   <div className='absolute inset-0 bg-gray-300 dark:bg-gray-700'></div>
@@ -431,7 +431,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
               return (
                 <div
                   key={record.key}
-                  className='min-w-[96px] w-24 sm:min-w-[180px] sm:w-44'
+                  className='min-w-[120px] w-30 sm:min-w-[180px] sm:w-44'
                 >
                   <VideoCard
                     id={id}
