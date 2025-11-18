@@ -545,6 +545,8 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 		if (skipMode) {
 		  continue;
 		}
+		 // 正常内容，则保留
+		filteredLines.push(line);
 		/*
       // 只过滤#EXT-X-DISCONTINUITY标识
       if (!line.includes('#EXT-X-DISCONTINUITY')) {
