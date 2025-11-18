@@ -523,14 +523,34 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     // 按行分割M3U8内容
     const lines = m3u8Content.split('\n');
     const filteredLines = [];
+	//新增：跳过（不保留）和EXT-X-DISCONTINUITY计数
+	let skipMode = false;
+	let discontinuityCount = 0;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
+		//去除EXT-X-DISCONTINUITY之间的广告
+		if (line.includes('#EXT-X-DISCONTINUITY')) {
+		  discontinuityCount++;     
+		  // 第一个 DISCONTINUITY：正常，不进入跳过模式
+		  // 第二个、第四个、第六个...（偶数个）：开始跳过模式
+		  // 第三个、第五个、第七个...（奇数个）：结束跳过模式
+		  if (discontinuityCount > 1) {
+			skipMode = !skipMode;
+		  }
+		  continue; // 跳过所有 DISCONTINUITY 标签
+		}
+		// 如果在跳过模式（广告块中），跳过这行
+		if (skipMode) {
+		  continue;
+		}
+		/*
       // 只过滤#EXT-X-DISCONTINUITY标识
       if (!line.includes('#EXT-X-DISCONTINUITY')) {
         filteredLines.push(line);
       }
+	  */
     }
 
     return filteredLines.join('\n');
