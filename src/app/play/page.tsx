@@ -1495,7 +1495,7 @@ useEffect(() => {
             }
             
             const hls = new Hls({
-			  forceKeyFrameOnDiscontinuity: true, // 新增：防止跨 discontinuity 渲染旧帧
+			
               debug: false, // 关闭日志
               enableWorker: true, // WebWorker 解码，降低主线程压力
               lowLatencyMode: true, // 开启低延迟 LL-HLS
