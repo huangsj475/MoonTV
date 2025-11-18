@@ -524,12 +524,13 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     const lines = m3u8Content.split('\n');
     const filteredLines = [];
 	//新增：跳过（不保留）和EXT-X-DISCONTINUITY计数
-	let skipMode = false;
-	let discontinuityCount = 0;
+	//let skipMode = false;
+	//let discontinuityCount = 0;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
 
+		/*
 		//去除EXT-X-DISCONTINUITY之间的广告
 		if (line.includes('#EXT-X-DISCONTINUITY')) {
 		  discontinuityCount++;     
@@ -547,12 +548,13 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 		}
 		 // 正常内容，则保留
 		filteredLines.push(line);
-		/*
+		*/
+		
       // 只过滤#EXT-X-DISCONTINUITY标识
       if (!line.includes('#EXT-X-DISCONTINUITY')) {
         filteredLines.push(line);
       }
-	  */
+	  
     }
 
     return filteredLines.join('\n');
