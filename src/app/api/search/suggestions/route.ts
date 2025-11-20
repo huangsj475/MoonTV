@@ -66,7 +66,7 @@ async function generateSuggestions(config: AdminConfig, query: string): Promise<
 		  .map(r => r.title)
 		  .filter(title => title && title.toLowerCase().includes(queryLower))
 	  )
-	).slice(0, 8);
+	).slice(0, 5);
   }
 
   // 根据关键词与查询的匹配程度计算分数，并动态确定类型
