@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
+import { getDetailFromApi } from '@/lib/downstream';
 import type { PlayRecord } from '@/lib/db.client';
 import {
   clearAllPlayRecords,
@@ -105,10 +106,10 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+    const detailResponse = await getDetailFromApi(apiSite, id);
     
     if (!detailResponse.ok) {
-      throw new Error('获取视频详情失败');
+      throw new Error('获取视频详情失败');  
     }
 
     const videoDetail = await detailResponse.json();
@@ -252,7 +253,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
  
           try {
 			  // 1. 发起请求并验证响应状态
-			const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+			const detailResponse = await getDetailFromApi(apiSite, id);
             
 				  if (!detailResponse.ok)  {
 					throw new Error('获取视频详情失败');
