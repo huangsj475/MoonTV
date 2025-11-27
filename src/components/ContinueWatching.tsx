@@ -72,7 +72,30 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
     return unsubscribe;
   }, []);
-  
+  //------新增特殊站点资源匹配--------
+  //特殊站点资源获取新剧集数的匹配
+  // ffzy剧集数量提取函数
+	const handleSpecialApiEpisodes = (videoDetail: any): number => {
+	  if (!videoDetail.episodes || !Array.isArray(videoDetail.episodes)) {
+		return 0;
+	  }
+	  
+	  // 合并所有episodes内容（包含HTML乱码）
+	  const fullText = videoDetail.episodes.join('');
+	  
+	  // 使用与播放页相同的正则模式提取有效剧集
+	  const ffzyPattern = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
+	  const matches = fullText.match(ffzyPattern) || [];
+	  
+	  console.log('🔍 ffzy解析详情:', {
+		原始数据长度: videoDetail.episodes.length,
+		解析出的有效剧集数: matches.length,
+		样本: matches.slice(0, 2)
+	  });
+	  
+	  return matches.length;
+	};
+  //------新增特殊站点资源匹配--------
   //------新增更新单个视频剧集--------
 const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) => {
   const { key, title, total_episodes: oldTotal } = record;
@@ -117,7 +140,14 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
       throw new Error('获取到的数据格式不正确');
     }
 
-    const newTotal = videoDetail.episodes.length;
+	let newTotal = 0;
+	// ffzy特殊处理
+    if (source === 'ffzy') {
+      newTotal = handleSpecialApiEpisodes(videoDetail);
+    } else {
+      newTotal = videoDetail.episodes?.length || 0;
+    }
+    //const newTotal = videoDetail.episodes.length;
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
     // 关闭进度弹窗
@@ -271,7 +301,14 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 					return;
 				  }
            
-            const newTotal = videoDetail.episodes.length; 
+			let newTotal = 0;
+			// ffzy特殊处理
+		    if (source === 'ffzy') {
+		      newTotal = handleSpecialApiEpisodes(videoDetail);
+		    } else {
+		      newTotal = videoDetail.episodes?.length || 0;
+		    }
+		    //const newTotal = videoDetail.episodes.length;
             console.log(`[  更新剧集 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
  
             if (newTotal > oldTotal) {
