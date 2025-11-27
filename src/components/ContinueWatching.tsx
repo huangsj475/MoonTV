@@ -87,14 +87,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	  const ffzyPattern = /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
 	  const matches = fullText.match(ffzyPattern) || [];
 	  const uniqueMatches = Array.from(new Set(matches));
-	  
-	  console.log('🔍 ffzy解析详情:', {
-		原始数据长度: videoDetail.episodes.length,
-		去重后匹配: uniqueMatches,
-		解析出的有效剧集数: uniqueMatches.length,
-		样本: uniqueMatches.slice(0, 3)
-	  });
-	  
+
 	  return uniqueMatches.length;
 	};
   //------新增特殊站点资源匹配--------
