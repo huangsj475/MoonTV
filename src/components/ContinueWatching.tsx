@@ -106,13 +106,13 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const detailResponse = await getDetailFromApi(apiSite, id);
+    const detailResponse = await getDetailFromApi(source, id);
     
     if (!detailResponse.ok) {
       throw new Error('获取视频详情失败');  
     }
 
-    const videoDetail = await detailResponse.json();
+    const videoDetail = await detailResponse.json();  
     
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
@@ -253,7 +253,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
  
           try {
 			  // 1. 发起请求并验证响应状态
-			const detailResponse = await getDetailFromApi(apiSite, id);
+			const detailResponse = await getDetailFromApi(source, id);
             
 				  if (!detailResponse.ok)  {
 					throw new Error('获取视频详情失败');
@@ -266,7 +266,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 				  // 3. 数据验证（三重保障）
 				  if (!videoDetail || !Array.isArray(videoDetail.episodes))  {
 					console.warn(`[${source}+${id}]  episodes数据异常`, {
-					  received: videoDetail?.episodes,
+					  received: videoDetail?.episodes,  
 					  expected: "非空数组"
 					});
 					return;
