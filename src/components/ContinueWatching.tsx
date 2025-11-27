@@ -112,13 +112,13 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
       throw new Error('获取视频详情失败');
     }*/
 
-    const videoDetail = await detailResponse.json();
+    /*const videoDetail = await detailResponse.json();
     
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
-    }
+    }*/
 
-    const newTotal = videoDetail.episodes.length;
+    const newTotal = detailResponse.episodes.length;
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
     // 关闭进度弹窗
@@ -260,7 +260,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 				  }*/
 				 
 				  // 2. 解析JSON数据 
-				  const videoDetail = await detailResponse.json(); 
+				  /*const videoDetail = await detailResponse.json(); 
 				  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
 				 
 				  // 3. 数据验证（三重保障）
@@ -270,9 +270,9 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 					  expected: "非空数组"
 					});
 					return;
-				  }
+				  }*/
            
-            const newTotal = videoDetail.episodes.length; 
+            const newTotal = detailResponse.episodes.length; 
             console.log(`[  更新剧集 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
  
             if (newTotal > oldTotal) {
