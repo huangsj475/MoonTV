@@ -112,7 +112,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
       throw new Error('获取视频详情失败');
     }
 
-    const videoDetail = await detailResponse.json();  
+    const videoDetail = await detailResponse.json();
     
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
