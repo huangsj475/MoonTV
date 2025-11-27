@@ -86,14 +86,16 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	  // 使用与播放页相同的正则模式提取有效剧集
 	  const ffzyPattern = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
 	  const matches = fullText.match(ffzyPattern) || [];
+	  const uniqueMatches = [...new Set(urls)];
 	  
 	  console.log('🔍 ffzy解析详情:', {
 		原始数据长度: videoDetail.episodes.length,
-		解析出的有效剧集数: matches.length,
-		样本: matches.slice(0, 2)
+		去重后匹配: uniqueMatches,
+		解析出的有效剧集数: uniqueMatches.length,
+		样本: uniqueMatches.slice(0, 3)
 	  });
 	  
-	  return matches.length;
+	  return uniqueMatches.length;
 	};
   //------新增特殊站点资源匹配--------
   //------新增更新单个视频剧集--------
