@@ -84,7 +84,7 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	  const fullText = videoDetail.episodes.join('');
 	  
 	  // 使用与播放页相同的正则模式提取有效剧集
-	  const ffzyPattern = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
+	  const ffzyPattern = /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
 	  const matches = fullText.match(ffzyPattern) || [];
 	  const uniqueMatches = Array.from(new Set(matches));
 	  
