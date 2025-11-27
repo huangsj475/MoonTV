@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
-import { fetchVideoDetail } from '@/lib/fetchVideoDetail';
 import type { PlayRecord } from '@/lib/db.client';
 import {
   clearAllPlayRecords,
@@ -106,19 +105,19 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const detailResponse = await fetchVideoDetail({ source, id });
-    /*
+    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+    
     if (!detailResponse.ok) {
       throw new Error('获取视频详情失败');
-    }*/
+    }
 
-    /*const videoDetail = await detailResponse.json();
+    const videoDetail = await detailResponse.json();
     
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
-    }*/
+    }
 
-    const newTotal = detailResponse.episodes.length;
+    const newTotal = videoDetail.episodes.length;
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
     // 关闭进度弹窗
@@ -253,14 +252,14 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
  
           try {
 			  // 1. 发起请求并验证响应状态
-			const detailResponse = await fetchVideoDetail({ source, id });
-                   /*
+			const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+                   
 				  if (!detailResponse.ok)  {
 					throw new Error('获取视频详情失败');
-				  }*/
+				  }
 				 
 				  // 2. 解析JSON数据 
-				  /*const videoDetail = await detailResponse.json(); 
+				  const videoDetail = await detailResponse.json(); 
 				  console.log(`[ 更新剧集 - ${source}+${id}] 获取详情成功`, videoDetail);
 				 
 				  // 3. 数据验证（三重保障）
@@ -270,9 +269,9 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 					  expected: "非空数组"
 					});
 					return;
-				  }*/
+				  }
            
-            const newTotal = detailResponse.episodes.length; 
+            const newTotal = videoDetail.episodes.length; 
             console.log(`[  更新剧集 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
  
             if (newTotal > oldTotal) {
