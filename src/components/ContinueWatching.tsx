@@ -107,10 +107,10 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 
     // 获取视频详情
     const detailResponse = await fetchVideoDetail({ source, id });
-    
+    /*
     if (!detailResponse.ok) {
       throw new Error('获取视频详情失败');
-    }
+    }*/
 
     const videoDetail = await detailResponse.json();
     
@@ -254,10 +254,10 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
           try {
 			  // 1. 发起请求并验证响应状态
 			const detailResponse = await fetchVideoDetail({ source, id });
-            
+                   /*
 				  if (!detailResponse.ok)  {
 					throw new Error('获取视频详情失败');
-				  }
+				  }*/
 				 
 				  // 2. 解析JSON数据 
 				  const videoDetail = await detailResponse.json(); 
