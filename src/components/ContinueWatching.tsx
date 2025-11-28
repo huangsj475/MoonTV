@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
-import { SearchResult } from '@/lib/types';
 import type { PlayRecord } from '@/lib/db.client';
 import {
   clearAllPlayRecords,
@@ -106,17 +105,25 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+    const detailResponse = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
     if (!detailResponse.ok) {
       throw new Error('获取视频详情失败');
     }
-    const videoDetail = (await detailResponse.json()) as SearchResult;  //  类型断言
-
-    if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
-      throw new Error('获取到的数据格式不正确');
+    const videoDetail = await detailResponse.json();
+    // 从搜索结果中找到对应的源
+    const targetResult = videoDetail.results?.find(
+      (result: any) => result.source === source && result.id === id
+    );
+    
+    if (!targetResult) {
+      throw new Error('未找到对应的视频源');
     }
 
-    const newTotal = videoDetail.episodes?.length || 0;
+    /*if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
+      throw new Error('获取到的数据格式不正确');
+    }*/
+
+    const newTotal = targetResult.episodes?.length || 0;
 
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
