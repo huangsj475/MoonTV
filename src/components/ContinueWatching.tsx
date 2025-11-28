@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
-import { getAvailableApiSites } from '@/lib/config';
+import { SearchResult } from '@/lib/types';
 import type { PlayRecord } from '@/lib/db.client';
 import {
   clearAllPlayRecords,
@@ -110,13 +110,8 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     if (!detailResponse.ok) {
       throw new Error('获取视频详情失败');
     }
-    const detailData = (await detailResponse.json()) as SearchResult;  //  类型断言
-    const results = [detailData];  //  包装成数组
-    if (results.length === 0) {
-      throw new Error('未找到视频详情');
-    }
-    // 取第一个元素，和播放页一样
-    const videoDetail = results[0];
+    const videoDetail = (await detailResponse.json()) as SearchResult;  //  类型断言
+
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
     }
@@ -261,12 +256,8 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 			    if (!detailResponse.ok) {
 			      throw new Error('获取视频详情失败');
 			    }
-			    const detailData = (await detailResponse.json()) as SearchResult;
-			    const results = [detailData];
-			    if (results.length === 0) {
-			      throw new Error('未找到视频详情');
-			    }
-			  	const videoDetail = results[0];
+			    const videoDetail = (await detailResponse.json()) as SearchResult;
+
 			    if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
 			      throw new Error('获取到的数据格式不正确');
 			    }
