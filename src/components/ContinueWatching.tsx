@@ -83,11 +83,12 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 	  // 合并所有episodes内容（包含HTML乱码）
 	  const fullText = videoDetail.episodes.join('');
 	  
-	  // 使用与播放页相同的正则模式提取有效剧集
+	  if (source.includes('ffzy')) {
 	  const ffzyPattern = /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
 	  const matches = fullText.match(ffzyPattern) || [];
 	  const uniqueMatches = Array.from(new Set(matches));
-
+	  }
+		
 	  return uniqueMatches.length;
 	};
   //------新增特殊站点资源匹配--------
@@ -137,7 +138,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 
 	let newTotal = 0;
 	// ffzy特殊处理
-    if (source === 'ffzy') {
+    if (source.includes('ffzy')) {
       newTotal = handleSpecialApiEpisodes(videoDetail);
     } else {
       newTotal = videoDetail.episodes?.length || 0;
@@ -298,7 +299,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
            
 			let newTotal = 0;
 			// ffzy特殊处理
-		    if (source === 'ffzy') {
+		    if (source.includes('ffzy')) {
 		      newTotal = handleSpecialApiEpisodes(videoDetail);
 		    } else {
 		      newTotal = videoDetail.episodes?.length || 0;
