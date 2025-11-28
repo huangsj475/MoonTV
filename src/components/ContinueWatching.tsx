@@ -145,7 +145,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     // 关闭进度弹窗
     await Swal.close();
 
-    if (newTotal > oldTotal) {  
+    if (newTotal > oldTotal) {
       // 更新数据库中的记录
       await savePlayRecord(source, id, {
         ...record,
