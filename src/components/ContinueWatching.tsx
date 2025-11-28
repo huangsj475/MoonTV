@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 
+import { getAvailableApiSites } from '@/lib/config';
 import type { PlayRecord } from '@/lib/db.client';
 import {
   clearAllPlayRecords,
@@ -72,24 +73,33 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
 
     return unsubscribe;
   }, []);
-  //------新增特殊站点资源匹配--------
-  //特殊站点资源获取新剧集数的匹配
-  // ffzy剧集数量提取函数
-	const handleSpecialApiEpisodes = (videoDetail: any): number => {
-	  if (!videoDetail.episodes || !Array.isArray(videoDetail.episodes)) {
-		return 0;
-	  }
-	  
-	  // 合并所有episodes内容（包含HTML乱码）
-	  const fullText = videoDetail.episodes.join('');
-	  
-	  const ffzyPattern = /\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g;
-	  const matches = fullText.match(ffzyPattern) || [];
-	  const uniqueMatches = Array.from(new Set(matches));
-	  		
-	  return uniqueMatches.length;
-	};
-  //------新增特殊站点资源匹配--------
+	
+  //------新增获取视频详情函数--------
+const fetchVideoDetail = async (source: string, id: string) => {
+  try {
+    // 获取所有可用的API站点配置
+    const apiSites = await getAvailableApiSites();
+    // 找到对应的apiSite配置
+    const apiSite = apiSites.find((site) => site.key === source);    
+    if (!apiSite) {
+      throw new Error(`未找到视频源配置: ${source}`);
+    }
+    // 使用播放页相同的方式获取详情
+    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+    
+    if (!detailResponse.ok) {
+      throw new Error(`获取详情失败: ${detailResponse.status}`);
+    }
+    
+    const detailData = await detailResponse.json();
+   
+    return detailData;
+  } catch (error) {
+    console.error('更新剧集获取详情失败:', error);
+    throw error;
+  }
+};
+  //------新增获取视频详情函数--------
   //------新增更新单个视频剧集--------
 const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) => {
   const { key, title, total_episodes: oldTotal } = record;
@@ -122,26 +132,13 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
-    
-    if (!detailResponse.ok) {
-      throw new Error('获取视频详情失败');
-    }
-
-    const videoDetail = await detailResponse.json();
-    
+    const videoDetail = await fetchVideoDetail(source, id);
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
     }
 
-	let newTotal = 0;
-	// ffzy特殊处理
-    if (source.includes('ffzy')) {
-      newTotal = handleSpecialApiEpisodes(videoDetail);
-    } else {
-      newTotal = videoDetail.episodes?.length || 0;
-    }
-    //const newTotal = videoDetail.episodes.length;
+    const newTotal = videoDetail.episodes.length;
+
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
     // 关闭进度弹窗
@@ -275,8 +272,15 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
           console.log(`[  更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
  
           try {
-			  // 1. 发起请求并验证响应状态
-			const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+				// 获取视频详情
+			    const videoDetail = await fetchVideoDetail(source, id);
+			    if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
+			      throw new Error('获取到的数据格式不正确');
+			    }
+			
+			    const newTotal = videoDetail.episodes.length;
+			  	/*// 1. 发起请求并验证响应状态
+				const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
                    
 				  if (!detailResponse.ok)  {
 					throw new Error('获取视频详情失败');
@@ -293,16 +297,8 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 					  expected: "非空数组"
 					});
 					return;
-				  }
-           
-			let newTotal = 0;
-			// ffzy特殊处理
-		    if (source.includes('ffzy')) {
-		      newTotal = handleSpecialApiEpisodes(videoDetail);
-		    } else {
-		      newTotal = videoDetail.episodes?.length || 0;
-		    }
-		    //const newTotal = videoDetail.episodes.length;
+				  }*/
+
             console.log(`[  更新剧集 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
  
             if (newTotal > oldTotal) {
