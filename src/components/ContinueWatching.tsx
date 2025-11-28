@@ -265,7 +265,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 			    }
 			    const videoDetail = await detailResponse.json();
 			    // 从搜索结果中找到对应的源
-			    const targetResult = searchData.results?.find(
+			    const targetResult = videoDetail.results?.find(
 			      (result: any) => result.source === source && result.id === id
 			    );
 			    
