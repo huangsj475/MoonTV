@@ -106,7 +106,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 
     // 获取视频详情
 	let newTotal = 0;
-
+    let episodes: any[] = [];
     // 非ffzy源：使用快速的详情API
     if (!source.includes('ffzy')) {
       const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
@@ -117,7 +117,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 		if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
 	      throw new Error('获取到的数据格式不正确');
 	    }
-      newTotal = videoDetail.episodes?.length || 0;
+      episodes = videoDetail.episodes;
     } 
     // ffzy源：使用搜索API获取正确数据
     else {
@@ -135,15 +135,17 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
         throw new Error('未找到对应的视频源');
       }
       
-      newTotal = targetResult.episodes?.length || 0;
+      episodes = targetResult.episodes || [];
     }
-
+    // 进行去重处理
+    const uniqueEpisodes = Array.from(new Set(episodes.map(ep => ep.split('$')[1] || ep)));
+    newTotal = uniqueEpisodes.length;
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
     // 关闭进度弹窗
     await Swal.close();
 
-    if (newTotal > oldTotal) {
+    if (newTotal > oldTotal) {  
       // 更新数据库中的记录
       await savePlayRecord(source, id, {
         ...record,
@@ -273,7 +275,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
           try {
 			    // 获取视频详情
 				let newTotal = 0;
-			
+			    let episodes: any[] = [];
 			    // 非ffzy源：使用快速的详情API
 			    if (!source.includes('ffzy')) {
 			      const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
@@ -284,7 +286,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 					if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
 				      throw new Error('获取到的数据格式不正确');
 				    }
-			      newTotal = videoDetail.episodes?.length || 0;
+			      episodes = videoDetail.episodes;
 			    } 
 			    // ffzy源：使用搜索API获取正确数据
 			    else {
@@ -302,8 +304,11 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 			        throw new Error('未找到对应的视频源');
 			      }
 			      
-			      newTotal = targetResult.episodes?.length || 0;
+			      episodes = targetResult.episodes || [];
 			    }
+			    // 进行去重处理
+                const uniqueEpisodes = Array.from(new Set(episodes.map(ep => ep.split('$')[1] || ep)));
+                newTotal = uniqueEpisodes.length;
 			  	/*// 1. 发起请求并验证响应状态
 				const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
                    
