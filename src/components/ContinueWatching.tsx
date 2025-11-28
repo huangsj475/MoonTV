@@ -105,25 +105,38 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const detailResponse = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
-    if (!detailResponse.ok) {
-      throw new Error('获取视频详情失败');
-    }
-    const videoDetail = await detailResponse.json();
-    // 从搜索结果中找到对应的源
-    const targetResult = videoDetail.results?.find(
-      (result: any) => result.source === source && result.id === id
-    );
-    
-    if (!targetResult) {
-      throw new Error('未找到对应的视频源');
-    }
+	let newTotal = 0;
 
-    /*if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
-      throw new Error('获取到的数据格式不正确');
-    }*/
-
-    const newTotal = targetResult.episodes?.length || 0;
+    // 非ffzy源：使用快速的详情API
+    if (!source.includes('ffzy')) {
+      const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+      if (!detailResponse.ok) {
+        throw new Error('获取视频详情失败');
+      }
+      const videoDetail = await detailResponse.json();
+		if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
+	      throw new Error('获取到的数据格式不正确');
+	    }
+      newTotal = videoDetail.episodes?.length || 0;
+    } 
+    // ffzy源：使用搜索API获取正确数据
+    else {
+      const searchResponse = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
+      if (!searchResponse.ok) {
+        throw new Error('搜索视频详情失败');
+      }
+      
+      const searchData = await searchResponse.json();
+      const targetResult = searchData.results?.find(
+        (result: any) => result.source === source && result.id === id
+      );
+      
+      if (!targetResult) {
+        throw new Error('未找到对应的视频源');
+      }
+      
+      newTotal = targetResult.episodes?.length || 0;
+    }
 
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
@@ -258,26 +271,39 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
           console.log(`[  更新剧集 - ${source}+${id}] 开始检查 "${title}" 的最新信息`);
  
           try {
-				// 获取视频详情
-			    const detailResponse = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
-			    if (!detailResponse.ok) {
-			      throw new Error('获取视频详情失败');
+			    // 获取视频详情
+				let newTotal = 0;
+			
+			    // 非ffzy源：使用快速的详情API
+			    if (!source.includes('ffzy')) {
+			      const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+			      if (!detailResponse.ok) {
+			        throw new Error('获取视频详情失败');
+			      }
+			      const videoDetail = await detailResponse.json();
+					if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
+				      throw new Error('获取到的数据格式不正确');
+				    }
+			      newTotal = videoDetail.episodes?.length || 0;
+			    } 
+			    // ffzy源：使用搜索API获取正确数据
+			    else {
+			      const searchResponse = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
+			      if (!searchResponse.ok) {
+			        throw new Error('搜索视频详情失败');
+			      }
+			      
+			      const searchData = await searchResponse.json();
+			      const targetResult = searchData.results?.find(
+			        (result: any) => result.source === source && result.id === id
+			      );
+			      
+			      if (!targetResult) {
+			        throw new Error('未找到对应的视频源');
+			      }
+			      
+			      newTotal = targetResult.episodes?.length || 0;
 			    }
-			    const videoDetail = await detailResponse.json();
-			    // 从搜索结果中找到对应的源
-			    const targetResult = videoDetail.results?.find(
-			      (result: any) => result.source === source && result.id === id
-			    );
-			    
-			    if (!targetResult) {
-			      throw new Error('未找到对应的视频源');
-			    }
-
-			    /*if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
-			      throw new Error('获取到的数据格式不正确');
-			    }*/
-
-			    const newTotal = targetResult.episodes?.length || 0;
 			  	/*// 1. 发起请求并验证响应状态
 				const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
                    
