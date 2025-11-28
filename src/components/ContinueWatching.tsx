@@ -259,17 +259,25 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
  
           try {
 				// 获取视频详情
-			    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+			    const detailResponse = await fetch(`/api/search?q=${encodeURIComponent(title)}`);
 			    if (!detailResponse.ok) {
 			      throw new Error('获取视频详情失败');
 			    }
-			    const videoDetail = (await detailResponse.json()) as SearchResult;
-
-			    if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
-			      throw new Error('获取到的数据格式不正确');
+			    const videoDetail = await detailResponse.json();
+			    // 从搜索结果中找到对应的源
+			    const targetResult = searchData.results?.find(
+			      (result: any) => result.source === source && result.id === id
+			    );
+			    
+			    if (!targetResult) {
+			      throw new Error('未找到对应的视频源');
 			    }
 
-			    const newTotal = videoDetail.episodes?.length || 0;
+			    /*if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
+			      throw new Error('获取到的数据格式不正确');
+			    }*/
+
+			    const newTotal = targetResult.episodes?.length || 0;
 			  	/*// 1. 发起请求并验证响应状态
 				const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
                    
