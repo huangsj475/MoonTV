@@ -74,32 +74,6 @@ export default function ContinueWatching({ className }: ContinueWatchingProps) {
     return unsubscribe;
   }, []);
 	
-  //------新增获取视频详情函数--------
-const fetchVideoDetail = async (source: string, id: string) => {
-  try {
-    // 获取所有可用的API站点配置
-    const apiSites = await getAvailableApiSites();
-    // 找到对应的apiSite配置
-    const apiSite = apiSites.find((site) => site.key === source);    
-    if (!apiSite) {
-      throw new Error(`未找到视频源配置: ${source}`);
-    }
-    // 使用播放页相同的方式获取详情
-    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
-    
-    if (!detailResponse.ok) {
-      throw new Error(`获取详情失败: ${detailResponse.status}`);
-    }
-    
-    const detailData = await detailResponse.json();
-   
-    return detailData;
-  } catch (error) {
-    console.error('更新剧集获取详情失败:', error);
-    throw error;
-  }
-};
-  //------新增获取视频详情函数--------
   //------新增更新单个视频剧集--------
 const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) => {
   const { key, title, total_episodes: oldTotal } = record;
@@ -132,12 +106,22 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     });
 
     // 获取视频详情
-    const videoDetail = await fetchVideoDetail(source, id);
+    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+    if (!detailResponse.ok) {
+      throw new Error('获取视频详情失败');
+    }
+    const detailData = (await detailResponse.json()) as SearchResult;  //  类型断言
+    const results = [detailData];  //  包装成数组
+    if (results.length === 0) {
+      throw new Error('未找到视频详情');
+    }
+    // 取第一个元素，和播放页一样
+    const videoDetail = results[0];
     if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
       throw new Error('获取到的数据格式不正确');
     }
 
-    const newTotal = videoDetail.episodes.length;
+    const newTotal = videoDetail.episodes?.length || 0;
 
     console.log(`[单独更新 - ${source}+${id}] 集数对比: 原 ${oldTotal} → 新 ${newTotal}`);
 
@@ -273,12 +257,21 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
  
           try {
 				// 获取视频详情
-			    const videoDetail = await fetchVideoDetail(source, id);
+			    const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
+			    if (!detailResponse.ok) {
+			      throw new Error('获取视频详情失败');
+			    }
+			    const detailData = (await detailResponse.json()) as SearchResult;
+			    const results = [detailData];
+			    if (results.length === 0) {
+			      throw new Error('未找到视频详情');
+			    }
+			  	const videoDetail = results[0];
 			    if (!videoDetail || !Array.isArray(videoDetail.episodes)) {
 			      throw new Error('获取到的数据格式不正确');
 			    }
-			
-			    const newTotal = videoDetail.episodes.length;
+
+			    const newTotal = videoDetail.episodes?.length || 0;
 			  	/*// 1. 发起请求并验证响应状态
 				const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
                    
