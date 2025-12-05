@@ -14,7 +14,21 @@ interface ApiSearchItem {
   vod_douban_id?: number;
   type_name?: string;
 }
-
+   //新增：Unicode解码函数
+const decodeUnicodeIfNeeded = (value: any): any => {
+  if (value === null || value === undefined) return value;
+  if (typeof value === 'string' && value.includes('\\u')) {
+    try {
+      return JSON.parse(`"${value}"`);
+    } catch {
+      // 备用解码方法
+      return value.replace(/\\u([\d\w]{4})/gi, (match, grp) => 
+        String.fromCharCode(parseInt(grp, 16))
+      );
+    }
+  }
+  return value;
+};
 export async function searchFromApi(
   apiSite: ApiSite,
   query: string
@@ -53,11 +67,12 @@ export async function searchFromApi(
     const results = data.list.map((item: ApiSearchItem) => {
       let episodes: string[] = [];
 
+	  const decodedPlayUrl = decodeUnicodeIfNeeded(item.vod_play_url);
       // 使用正则表达式从 vod_play_url 提取 m3u8 链接
-      if (item.vod_play_url) {
+      if (decodedPlayUrl) {
         const m3u8Regex = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
         // 先用 $$$ 分割
-        const vod_play_url_array = item.vod_play_url.split('$$$');
+        const vod_play_url_array = decodedPlayUrl.split('$$$');
         // 对每个分片做匹配，取匹配到最多的作为结果
         vod_play_url_array.forEach((url: string) => {
           const matches = url.match(m3u8Regex) || [];
@@ -74,19 +89,21 @@ export async function searchFromApi(
 		return link.replace(/[()【】]/g, ''); // 移除多种括号
       });
 
+      const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
+      const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
       return {
-        id: item.vod_id.toString(),
-        title: item.vod_name.trim().replace(/\s+/g, ' '),
-        poster: item.vod_pic,
+        id: String(decodeUnicodeIfNeeded(item.vod_id)),
+        title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
+        poster: decodeUnicodeIfNeeded(item.vod_pic),
         episodes,
         source: apiSite.key,
         source_name: apiName,
-        class: item.vod_class,
-        year: item.vod_year
-          ? item.vod_year.match(/\d{4}/)?.[0] || ''
+        class: decodeUnicodeIfNeeded(item.vod_class),
+        year: decodedYear
+          ? String(decodedYear).match(/\d{4}/)?.[0] || ''
           : 'unknown',
-        desc: cleanHtmlTags(item.vod_content || ''),
-        type_name: item.type_name,
+        desc: cleanHtmlTags(decodedContent || ''),
+        type_name: decodeUnicodeIfNeeded(item.type_name),
         douban_id: item.vod_douban_id,
       };
     });
@@ -135,10 +152,11 @@ export async function searchFromApi(
             return pageData.list.map((item: ApiSearchItem) => {
               let episodes: string[] = [];
 
+			  const decodedPlayUrl = decodeUnicodeIfNeeded(item.vod_play_url);
               // 使用正则表达式从 vod_play_url 提取 m3u8 链接
-              if (item.vod_play_url) {
+              if (decodedPlayUrl) {
                 const m3u8Regex = /([^$#\n]+)\$(https?:\/\/[^"'\s]+?\.m3u8)/g;
-                episodes = item.vod_play_url.match(m3u8Regex) || [];
+                episodes = decodedPlayUrl.match(m3u8Regex) || [];
               }
 
               episodes = Array.from(new Set(episodes)).map((link: string) => {
@@ -148,19 +166,21 @@ export async function searchFromApi(
 				return link.replace(/[()【】]/g, ''); // 移除多种括号
               });
 
+              const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
+              const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
               return {
-                id: item.vod_id.toString(),
-                title: item.vod_name.trim().replace(/\s+/g, ' '),
-                poster: item.vod_pic,
+                id: String(decodeUnicodeIfNeeded(item.vod_id)),
+                title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
+                poster: decodeUnicodeIfNeeded(item.vod_pic),
                 episodes,
                 source: apiSite.key,
                 source_name: apiName,
-                class: item.vod_class,
-                year: item.vod_year
-                  ? item.vod_year.match(/\d{4}/)?.[0] || ''
+                class: decodeUnicodeIfNeeded(item.vod_class),
+                year: decodedYear
+                  ? String(decodedYear).match(/\d{4}/)?.[0] || ''
                   : 'unknown',
-                desc: cleanHtmlTags(item.vod_content || ''),
-                type_name: item.type_name,
+                desc: cleanHtmlTags(decodedContent || ''),
+                type_name: decodeUnicodeIfNeeded(item.type_name),
                 douban_id: item.vod_douban_id,
               };
             });
@@ -229,10 +249,14 @@ export async function getDetailFromApi(
 
   const videoDetail = data.list[0];
   let episodes: string[] = [];
+  
+  const decodedPlayUrl = decodeUnicodeIfNeeded(videoDetail.vod_play_url);
+  const decodedContent = decodeUnicodeIfNeeded(videoDetail.vod_content);
+  const decodedYear = decodeUnicodeIfNeeded(videoDetail.vod_year);
 
   // 处理播放源拆分
-  if (videoDetail.vod_play_url) {
-    const playSources = videoDetail.vod_play_url.split('$$$');
+  if (decodedPlayUrl) {
+    const playSources = decodedPlayUrl.split('$$$');
     if (playSources.length > 0) {
       const mainSource = playSources[0];
       const episodeList = mainSource.split('#');
@@ -241,25 +265,25 @@ export async function getDetailFromApi(
   }
 
   // 如果播放源为空，则尝试从内容中解析 m3u8
-  if (episodes.length === 0 && videoDetail.vod_content) {
-    const matches = videoDetail.vod_content.match(M3U8_PATTERN) || [];
+  if (episodes.length === 0 && decodedContent) {
+    const matches = decodedContent.match(M3U8_PATTERN) || [];
     //episodes = matches.map((link: string) => link.replace(/^\$/, ''));
     episodes = matches;
   }
 
   return {
-    id: id.toString(),
-    title: videoDetail.vod_name,
-    poster: videoDetail.vod_pic,
+    id: String(id),
+    title: decodeUnicodeIfNeeded(videoDetail.vod_name),
+    poster: decodeUnicodeIfNeeded(videoDetail.vod_pic),
     episodes,
     source: apiSite.key,
     source_name: apiSite.name,
-    class: videoDetail.vod_class,
-    year: videoDetail.vod_year
-      ? videoDetail.vod_year.match(/\d{4}/)?.[0] || ''
+    class: decodeUnicodeIfNeeded(videoDetail.vod_class),
+    year: decodedYear
+      ? String(decodedYear).match(/\d{4}/)?.[0] || ''
       : 'unknown',
-    desc: cleanHtmlTags(videoDetail.vod_content),
-    type_name: videoDetail.type_name,
+    desc: cleanHtmlTags(decodedContent),
+    type_name: decodeUnicodeIfNeeded(videoDetail.type_name),
     douban_id: videoDetail.vod_douban_id,
   };
 }
