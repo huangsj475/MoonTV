@@ -1674,7 +1674,7 @@ const CategoryConfig = ({
     });
   };
 
-  const handleDelete = (query: string, type: 'movie' | 'tv') => {
+  const handleDeleteCategory = (query: string, type: 'movie' | 'tv') => {
     callCategoryApi({ action: 'delete', query, type }).catch(() => {
       console.error('操作失败', 'delete', query, type);
     });
@@ -1798,7 +1798,7 @@ const CategoryConfig = ({
           </button>
           {category.from !== 'config' ? (
             <button
-              onClick={() => handleDelete(category.query, category.type)}
+              onClick={() => handleDeleteCategory(category.query, category.type)}
               className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700/40 dark:hover:bg-gray-700/60 dark:text-gray-200 transition-colors'
             >
               删除
