@@ -10,7 +10,7 @@ import { IStorage } from '@/lib/types';
 export const runtime = 'edge';
 
 // 支持的操作类型
-type Action = 'add' | 'disable' | 'enable' | 'delete' | 'sort';
+type Action = 'add' | 'disable' | 'enable' | 'delete' | 'sort' | 'update';
 
 interface BaseBody {
   action?: Action;
@@ -79,6 +79,31 @@ export async function POST(request: NextRequest) {
           from: 'custom',
           disabled: false,
         });
+        break;
+      }
+      // 新增：update 操作
+      case 'update': {
+        const { key, name, api, detail } = body as {
+          key?: string;
+          name?: string;
+          api?: string;
+          detail?: string;
+        };
+        
+        if (!key) {
+          return NextResponse.json({ error: '缺少 key 参数' }, { status: 400 });
+        }
+        
+        const entry = adminConfig.SourceConfig.find((s) => s.key === key);
+        if (!entry) {
+          return NextResponse.json({ error: '源不存在' }, { status: 404 });
+        }
+        
+        // 更新字段（只更新提供的字段）
+        if (name !== undefined) entry.name = name;
+        if (api !== undefined) entry.api = api;
+        if (detail !== undefined) entry.detail = detail;
+        
         break;
       }
       case 'disable': {
