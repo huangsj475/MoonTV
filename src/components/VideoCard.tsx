@@ -290,6 +290,7 @@ export default function VideoCard({
         showDoubanLink: false,
         showRating: false,
         showYear: false,
+		showRemarks: true,
       },
       favorite: {
         showSourceName: true,
@@ -300,6 +301,7 @@ export default function VideoCard({
         showDoubanLink: false,
         showRating: false,
         showYear: false,
+		showRemarks: false,
       },
       search: {
         showSourceName: true,
@@ -310,6 +312,7 @@ export default function VideoCard({
         showDoubanLink: !!actualDoubanId,
         showRating: false,
         showYear: true,
+		showRemarks: false,
       },
       douban: {
         showSourceName: false,
@@ -320,6 +323,7 @@ export default function VideoCard({
         showDoubanLink: true,
         showRating: !!rate,
         showYear: false,
+		showRemarks: false,
       },
     };
     return configs[from] || configs.search;
@@ -362,7 +366,7 @@ export default function VideoCard({
           </div>
         )}
 		{/* 更新信息 - 左下角显示，hover时淡出 */}
-		{actualRemarks && (
+		{config.showRemarks && actualRemarks && (
 		  <div className="absolute bottom-2 left-2 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out">
 		    <div className="max-w-[80%] bg-black/70 text-white px-2 py-1 rounded">
 		      <div className="truncate max-w-[120px] sm:max-w-[150px] text-[0.65rem] sm:text-xs leading-tight">
