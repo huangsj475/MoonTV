@@ -1165,6 +1165,7 @@ useEffect(() => {
         total_time: Math.floor(duration),
         save_time: Date.now(),
         search_title: searchTitle,
+		remarks: detailRef.current?.remarks || '',
       });
 
       lastSaveTimeRef.current = Date.now();
