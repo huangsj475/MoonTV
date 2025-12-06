@@ -107,7 +107,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
     // 获取视频详情
 	let newTotal = 0;
     let episodes: any[] = [];
-	let remakrs = '';
+	let remarks = '';
     // 非ffzy源：使用快速的详情API
     if (!source.includes('ffzy')) {
       const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
@@ -119,7 +119,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 	      throw new Error('获取到的数据格式不正确');
 	    }
       episodes = videoDetail.episodes;
-	  remakrs = videoDetail.remarks || '';
+	  remarks = videoDetail.remarks || '';
     } 
     // ffzy源：使用搜索API获取正确数据
     else {
@@ -138,7 +138,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
       }
       
       episodes = targetResult.episodes || [];
-	  remakrs = targetResult.remakrs || '';
+	  remarks = targetResult.remarks || '';
     }
     // 进行去重处理
     const uniqueEpisodes = Array.from(new Set(episodes.map(ep => ep.split('$')[1] || ep)));
@@ -154,7 +154,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
         ...record,
         total_episodes: newTotal,
         save_time: Date.now(),
-		remarks: remakrs || '',
+		remarks: remarks || '',
       });
 
       // 显示成功消息
