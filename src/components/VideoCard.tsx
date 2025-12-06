@@ -312,7 +312,7 @@ export default function VideoCard({
         showDoubanLink: !!actualDoubanId,
         showRating: false,
         showYear: true,
-		showRemarks: false,
+		showRemarks: true,
       },
       douban: {
         showSourceName: false,
