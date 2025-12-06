@@ -635,7 +635,6 @@ const VideoSourceConfig = ({
   const [sources, setSources] = useState<DataSource[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [orderChanged, setOrderChanged] = useState(false);
-  const [batchMode, setBatchMode] = useState(false);//新增
   const [selectedSources, setSelectedSources] = useState<Set<string>>(new Set());//新增
   const [newSource, setNewSource] = useState<DataSource>({
     name: '',
@@ -733,9 +732,9 @@ const VideoSourceConfig = ({
   };
 //--------批量操作，导入导出----------
 // 批量操作相关函数
-  const handleToggleBatchMode = () => {
-    setBatchMode(!batchMode);
-    setSelectedSources(new Set()); // 切换模式时清空选择
+  // 清除所有选中项
+  const handleClearSelection = () => {
+    setSelectedSources(new Set());
   };
 
   const handleSelectSource = (key: string, checked: boolean) => {
@@ -843,7 +842,6 @@ const VideoSourceConfig = ({
     if (errorCount === 0) {
       showSuccess(`成功删除 ${successCount} 个视频源`);
       setSelectedSources(new Set()); // 清空选择
-      setBatchMode(false); // 退出批量模式
     } else {
       await Swal.fire({
         title: '删除完成',
@@ -946,7 +944,6 @@ const handleBatchEnable = async () => {
   if (errorCount === 0) {
     showSuccess(`成功启用 ${successCount} 个视频源`);
     setSelectedSources(new Set()); // 清空选择
-    setBatchMode(false); // 退出批量模式
   } else {
     await Swal.fire({
       title: '启用完成',
@@ -1049,7 +1046,6 @@ const handleBatchDisable = async () => {
   if (errorCount === 0) {
     showSuccess(`成功禁用 ${successCount} 个视频源`);
     setSelectedSources(new Set()); // 清空选择
-    setBatchMode(false); // 退出批量模式
   } else {
     await Swal.fire({
       title: '禁用完成',
@@ -1314,7 +1310,6 @@ const handleBatchDisable = async () => {
           <GripVertical size={16} />
         </td>
 		 {/* 批量选择复选框 */}
-        {batchMode && (
           <td className='px-4 py-4 whitespace-nowrap'>
             <input
               type='checkbox'
@@ -1324,7 +1319,6 @@ const handleBatchDisable = async () => {
               className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50'
             />
           </td>
-        )}
 		<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           <div className="flex items-center space-x-2">
             <span>{source.name}</span>
@@ -1406,86 +1400,69 @@ const handleBatchDisable = async () => {
           视频源列表
         </h4>
 		<div className='flex items-center gap-2 flex-wrap'>
-          {/* 批量操作区域 */}
-          {!batchMode ? (
-            <>
-              {/* 普通模式按钮 */}
+          {/* 批量操作区域 - 只在选中时显示 */}
+          {selectedSources.size > 0 ? (
+            <div className='flex items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2'>
               <button
-                onClick={handleToggleBatchMode}
-                className='inline-flex items-center px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition-colors'
+                onClick={handleClearSelection}
+                className='inline-flex items-center px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors'
               >
-                ☑️ 批量选择
+                ❌ 清除选中
               </button>
               
-              {/* 导入导出按钮 */}
-              <div className='flex items-center gap-1 border-l border-gray-300 dark:border-gray-600 pl-2'>
-                <label className='relative'>
-                  <input
-                    type='file'
-                    accept='.json'
-                    onChange={handleImportConfig}
-                    className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
-                  />
-                  <span className='inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors cursor-pointer'>
-                    📂 导入
-                  </span>
-                </label>
-                
-                <button
-                  onClick={handleExportConfig}
-                  className='inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors'
-                >
-                  📤 导出
-                </button>
-              </div>
+              <span className='text-xs text-gray-700 dark:text-gray-300'>
+                已选 {selectedSources.size} 个
+              </span>
               
-              {/* 添加视频源按钮 */}
+              <button
+                onClick={handleBatchDelete}
+                className='inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors'
+              >
+                🗑️ 批量删除
+              </button>
+              
+              <button
+                onClick={handleBatchEnable}
+                className='inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors'
+              >
+                ✅ 批量启用
+              </button>
+              
+              <button
+                onClick={handleBatchDisable}
+                className='inline-flex items-center px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-sm rounded-lg transition-colors'
+              >
+                ⚠️ 批量禁用
+              </button>
+            </div>
+          ) : (
+            <div className='flex items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2'>
+              <label className='relative'>
+                <input
+                  type='file'
+                  accept='.json'
+                  onChange={handleImportConfig}
+                  className='absolute inset-0 w-full h-full opacity-0 cursor-pointer'
+                />
+                <span className='inline-flex items-center px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors cursor-pointer'>
+                  📂 导入
+                </span>
+              </label>
+              
+              <button
+                onClick={handleExportConfig}
+                className='inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors'
+              >
+                📤 导出
+              </button>
+              
               <button
                 onClick={() => setShowAddForm(!showAddForm)}
                 className='px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition-colors'
               >
                 {showAddForm ? '取消' : '➕ 添加'}
               </button>
-            </>
-          ) : (
-            <>
-              {/* 批量模式按钮 */}
-              <button
-                onClick={handleToggleBatchMode}
-                className='inline-flex items-center px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors'
-              >
-                ❌ 退出批量
-              </button>
-              
-              <div className='flex items-center gap-1 border-l border-gray-300 dark:border-gray-600 pl-2'>
-                <span className='text-xs text-gray-500 dark:text-gray-400'>
-                  已选 {selectedSources.size} 个
-                </span>
-                
-                <button
-                  onClick={handleBatchDelete}
-                  disabled={selectedSources.size === 0}
-                  className='inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white text-sm rounded-lg transition-colors'
-                >
-                  🗑️ 批量删除
-                </button>
-				<button
-    onClick={handleBatchEnable}
-    disabled={selectedSources.size === 0}
-    className='inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white text-sm rounded-lg transition-colors'
-  >
-    ✅ 批量启用
-  </button>
-  
-  <button
-    onClick={handleBatchDisable}
-    disabled={selectedSources.size === 0}
-    className='inline-flex items-center px-3 py-1 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white text-sm rounded-lg transition-colors'
-  >
-    ⚠️ 批量禁用
-  </button>
-              </div>
-            </>
+            </div>
           )}
         </div>
 		
@@ -1551,7 +1528,6 @@ const handleBatchDisable = async () => {
 			{/* 拖拽手柄列 */}
               <th className='w-8' />
 			  {/* 批量选择列 */}
-              {batchMode && (
                 <th className='w-12 px-4 py-3'>
                   <input
                     type='checkbox'
@@ -1560,7 +1536,6 @@ const handleBatchDisable = async () => {
                     className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
                   />
                 </th>
-              )}
               <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider'>
                 名称
               </th>
