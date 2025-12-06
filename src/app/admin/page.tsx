@@ -644,6 +644,17 @@ const VideoSourceConfig = ({
     disabled: false,
     from: 'config',
   });
+  // 新增：编辑状态管理
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{
+    name: string;
+    api: string;
+    detail: string;
+  }>({
+    name: '',
+    api: '',
+    detail: '',
+  });
 
   // dnd-kit 传感器
   const sensors = useSensors(
@@ -690,7 +701,56 @@ const VideoSourceConfig = ({
       throw err; // 向上抛出方便调用处判断
     }
   };
+//----新增：编辑，保存，取消，按键取消保存----
+  // 编辑相关函数
+  const handleEdit = (source: DataSource) => {
+    setEditingKey(source.key);
+    setEditForm({
+      name: source.name,
+      api: source.api,
+      detail: source.detail || '',
+    });
+  };
 
+  const handleSaveEdit = async () => {
+    if (!editingKey) return;
+    
+    // 验证必填字段
+    if (!editForm.name.trim() || !editForm.api.trim()) {
+      showError('名称和API地址不能为空');
+      return;
+    }
+    
+    try {
+      await callSourceApi({
+        action: 'update',
+        key: editingKey,
+        name: editForm.name.trim(),
+        api: editForm.api.trim(),
+        detail: editForm.detail.trim() || '',
+      });
+      
+      // 清除编辑状态
+      setEditingKey(null);
+      setEditForm({ name: '', api: '', detail: '' });
+    } catch (err) {
+      console.error('保存编辑失败:', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingKey(null);
+    setEditForm({ name: '', api: '', detail: '' });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, key: string) => {
+    if (e.key === 'Escape') {
+      handleCancelEdit();
+    } else if (e.key === 'Enter' && e.ctrlKey) {
+      handleSaveEdit();
+    }
+  };
+//----新增：编辑，保存，取消，按键取消保存----
   const handleToggleEnable = (key: string) => {
     const target = sources.find((s) => s.key === key);
     if (!target) return;
@@ -1295,11 +1355,14 @@ const handleBatchDisable = async () => {
       transition,
     } as React.CSSProperties;
 
+	const isEditing = editingKey === source.key;//新增：正在编辑当前key视频源的状态
     return (
       <tr
         ref={setNodeRef}
         style={style}
-        className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors select-none'
+        className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors select-none ${
+          isEditing ? 'bg-blue-50 dark:bg-blue-900/10 border-l-3 border-blue-500' : ''
+        }`}
       >
         <td
           className='px-2 py-4 cursor-grab text-gray-400'
@@ -1321,7 +1384,18 @@ const handleBatchDisable = async () => {
           </td>
 		<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           <div className="flex items-center space-x-2">
-            <span>{source.name}</span>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                onKeyDown={(e) => handleKeyDown(e, source.key)}
+                className="w-full px-2 py-1 border border-blue-300 rounded bg-white dark:bg-gray-800"
+                autoFocus
+              />
+            ) : (
+              <span>{source.name}</span>
+            )}
             {source.from === 'config' && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-300">
                 示例源
@@ -1337,13 +1411,38 @@ const handleBatchDisable = async () => {
           className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[12rem] truncate'
           title={source.api}
         >
-          {source.api}
+          {isEditing ? (
+            <input
+              type="text"
+              value={editForm.api}
+              onChange={(e) => setEditForm({...editForm, api: e.target.value})}
+              onKeyDown={(e) => handleKeyDown(e, source.key)}
+              className="w-full px-2 py-1 border border-blue-300 rounded bg-white dark:bg-gray-800"
+            />
+          ) : (
+            <span>
+              {source.api}
+            </span>
+          )}
         </td>
         <td
           className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[8rem] truncate'
           title={source.detail || '-'}
         >
-          {source.detail || '-'}
+          {isEditing ? (
+            <input
+              type="text"
+              value={editForm.detail}
+              onChange={(e) => setEditForm({...editForm, detail: e.target.value})}
+              onKeyDown={(e) => handleKeyDown(e, source.key)}
+              className="w-full px-2 py-1 border border-blue-300 rounded bg-white dark:bg-gray-800"
+              placeholder="选填"
+            />
+          ) : (
+            <span>
+              {source.detail || '-'}
+            </span>
+          )}
         </td>
         <td className='px-6 py-4 whitespace-nowrap max-w-[1rem]'>
           <span
@@ -1357,6 +1456,31 @@ const handleBatchDisable = async () => {
           </span>
         </td>
         <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
+          {isEditing ? (
+            <>
+              <button
+                onClick={handleSaveEdit}
+                className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 hover:bg-green-200 dark:hover:bg-green-900/60 transition-colors'
+              >
+                保存
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700/40 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700/60 transition-colors'
+              >
+                取消
+              </button>
+            </>
+          ) : (
+            <>
+              {source.from !== 'config' && (
+                <button
+                  onClick={() => handleEdit(source)}
+                  className='inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors'
+                >
+                  编辑
+                </button>
+              )}
           <button
             onClick={() => handleToggleEnable(source.key)}
             className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium ${
@@ -1379,6 +1503,8 @@ const handleBatchDisable = async () => {
               不可删除
             </span>
           )}
+          </>
+        )}
         </td>
       </tr>
     );
