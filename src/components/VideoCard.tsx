@@ -368,8 +368,8 @@ export default function VideoCard({
 		{/* 更新信息 - 左下角显示，hover时淡出 */}
 		{config.showRemarks && actualRemarks && (
 		  <div className="absolute bottom-2 left-2 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out">
-		    <div className="max-w-[80%] bg-black/70 text-white px-2 py-1 rounded">
-		      <div className="truncate max-w-[120px] sm:max-w-[150px] text-[0.65rem] sm:text-xs leading-tight">
+		    <div className="bg-black/70 text-white px-2 py-1 rounded max-w-[calc(100%-1rem)] overflow-hidden">
+		      <div className="truncate whitespace-nowrap text-[0.65rem] sm:text-xs leading-tight">
 		        {actualRemarks}
 		      </div>
 		    </div>
