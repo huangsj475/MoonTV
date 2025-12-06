@@ -77,6 +77,7 @@ export class D1Storage implements IStorage {
         total_time: result.total_time,
         save_time: result.save_time,
         search_title: result.search_title || undefined,
+        remarks: result.remarks || undefined,
       };
     } catch (err) {
       console.error('Failed to get play record:', err);
@@ -95,8 +96,8 @@ export class D1Storage implements IStorage {
         .prepare(
           `
           INSERT OR REPLACE INTO play_records 
-          (username, key, title, source_name, cover, year, index_episode, total_episodes, play_time, total_time, save_time, search_title)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (username, key, title, source_name, cover, year, index_episode, total_episodes, play_time, total_time, save_time, search_title, remarks)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `
         )
         .bind(
@@ -111,7 +112,8 @@ export class D1Storage implements IStorage {
           record.play_time,
           record.total_time,
           record.save_time,
-          record.search_title || null
+          record.search_title || null,
+          record.remarks || null
         )
         .run();
     } catch (err) {
@@ -146,6 +148,7 @@ export class D1Storage implements IStorage {
           total_time: row.total_time,
           save_time: row.save_time,
           search_title: row.search_title || undefined,
+          remarks: row.remarks || undefined,
         };
       });
 
