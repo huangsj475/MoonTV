@@ -13,7 +13,6 @@ interface ApiSearchItem {
   vod_content?: string;
   vod_douban_id?: number;
   type_name?: string;
-  vod_remarks?: string;  // 新增：更新信息字段
 }
    //新增：Unicode解码函数
 const decodeUnicodeIfNeeded = (value: any): any => {
