@@ -1654,7 +1654,7 @@ const handleBatchDisable = async () => {
 			{/* 拖拽手柄列 */}
               <th className='w-8' />
 			  {/* 批量选择列 */}
-                <th className='w-12 px-4 py-3'>
+                <th className='w-8 px-4 py-3'>
                   <input
                     type='checkbox'
                     checked={selectedSources.size > 0 && selectedSources.size === sources.length}
