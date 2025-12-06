@@ -151,6 +151,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
         ...record,
         total_episodes: newTotal,
         save_time: Date.now(),
+		remarks: videoDetail.remarks || '',
       });
 
       // 显示成功消息
@@ -160,6 +161,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
           <div style="text-align: left;">
             <p><strong>${title}</strong></p>
             <p>集数更新: ${oldTotal} → ${newTotal}</p>
+			<p>${remarks}</p>
           </div>
         `,
         icon: 'success',
@@ -276,6 +278,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 			    // 获取视频详情
 				let newTotal = 0;
 			    let episodes: any[] = [];
+			  	let remarks = '';
 			    // 非ffzy源：使用快速的详情API
 			    if (!source.includes('ffzy')) {
 			      const detailResponse = await fetch(`/api/detail?source=${source}&id=${id}`);
@@ -287,6 +290,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 				      throw new Error('获取到的数据格式不正确');
 				    }
 			      episodes = videoDetail.episodes;
+				  remarks = videoDetail.remarks || '',
 			    } 
 			    // ffzy源：使用搜索API获取正确数据
 			    else {
@@ -305,6 +309,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
 			      }
 			      
 			      episodes = targetResult.episodes || [];
+				  remarks = targetResult.remarks || '',
 			    }
 			    // 进行去重处理
                 const uniqueEpisodes = Array.from(new Set(episodes.map(ep => ep.split('$')[1] || ep)));
@@ -339,6 +344,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
                 ...record,
                 total_episodes: newTotal,
                 save_time: Date.now(), 
+				remarks: remarks || '',
               });
  
               // 记录更新信息
