@@ -35,6 +35,7 @@ interface VideoCardProps {
   rate?: string;
   items?: SearchResult[];
   type?: string;
+  remarks?: string;// 新增 更新信息
 }
 
 export default function VideoCard({
@@ -54,6 +55,7 @@ export default function VideoCard({
   rate,
   items,
   type = '',
+  remarks = '', // 新增
 }: VideoCardProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -114,7 +116,8 @@ export default function VideoCard({
       ? 'movie'
       : 'tv'
     : type;
-
+  const actualRemarks = aggregateData?.first.remarks ?? remarks; // 新增
+	
 	//----改动：鼠标悬停，划过获取收藏状态--------	
 	const handleMouseEnter = useCallback(async () => {
 	  // 排除不支持收藏状态的卡片
@@ -358,7 +361,16 @@ export default function VideoCard({
             />
           </div>
         )}
-
+		{/* 更新信息 - 左下角显示，hover时淡出 */}
+		{actualRemarks && (
+		  <div className="absolute bottom-2 left-2 z-10 opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out">
+		    <div className="max-w-[80%] bg-black/70 text-white px-2 py-1 rounded">
+		      <div className="truncate max-w-[120px] sm:max-w-[150px] text-[0.65rem] sm:text-xs leading-tight">
+		        {actualRemarks}
+		      </div>
+		    </div>
+		  </div>
+		)}
         {/* 操作按钮 */}
         {(config.showHeart || config.showCheckCircle) && (
           <div className='absolute bottom-3 right-3 flex gap-3 opacity-0 translate-y-2 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:translate-y-0'>
