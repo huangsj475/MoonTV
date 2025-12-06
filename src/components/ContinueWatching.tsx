@@ -510,6 +510,7 @@ const handleUpdateSingleEpisode = async (record: PlayRecord & { key: string }) =
                     episodes={record.total_episodes}
                     currentEpisode={record.index}
                     query={record.search_title}
+					remarks={record.remarks}
                     from='playrecord'
                     onDelete={() =>
                       setPlayRecords((prev) =>
