@@ -367,7 +367,7 @@ export default function VideoCard({
         )}
 		{/* 更新信息 - 左下角显示，hover时淡出 */}
 		{config.showRemarks && actualRemarks && (
-		  <div className="absolute bottom-1 left-1 z-10 bg-black/70 text-white px-2 py-1 rounded overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out text-[0.65rem] sm:text-xs leading-tight">
+		  <div className="absolute bottom-1 left-1 z-10 bg-black/70 text-white px-2 py-1 rounded overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out text-[0.7rem] sm:text-xs leading-tight">
 		    {actualRemarks}
 		  </div>
 		)}
