@@ -94,6 +94,7 @@ export interface SearchResult {
   desc?: string;
   type_name?: string;
   douban_id?: number;
+  remarks?: string;
 }
 
 // 豆瓣数据结构
