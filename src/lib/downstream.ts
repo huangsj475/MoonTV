@@ -13,6 +13,7 @@ interface ApiSearchItem {
   vod_content?: string;
   vod_douban_id?: number;
   type_name?: string;
+  vod_remarks?: string;  // 新增：更新信息字段
 }
    //新增：Unicode解码函数
 const decodeUnicodeIfNeeded = (value: any): any => {
@@ -91,6 +92,7 @@ export async function searchFromApi(
 
       const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
       const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
+	  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks); 
       return {
         id: String(decodeUnicodeIfNeeded(item.vod_id)),
         title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
@@ -105,6 +107,7 @@ export async function searchFromApi(
         desc: cleanHtmlTags(decodedContent || ''),
         type_name: decodeUnicodeIfNeeded(item.type_name),
         douban_id: item.vod_douban_id,
+		remarks: decodedRemarks || '',
       };
     });
 
@@ -168,6 +171,7 @@ export async function searchFromApi(
 
               const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
               const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
+			  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks); 
               return {
                 id: String(decodeUnicodeIfNeeded(item.vod_id)),
                 title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
@@ -182,6 +186,7 @@ export async function searchFromApi(
                 desc: cleanHtmlTags(decodedContent || ''),
                 type_name: decodeUnicodeIfNeeded(item.type_name),
                 douban_id: item.vod_douban_id,
+				remarks: decodedRemarks || '',
               };
             });
           } catch (error) {
@@ -285,6 +290,7 @@ export async function getDetailFromApi(
     desc: cleanHtmlTags(decodedContent),
     type_name: decodeUnicodeIfNeeded(videoDetail.type_name),
     douban_id: videoDetail.vod_douban_id,
+	remarks: decodeUnicodeIfNeeded(videoDetail.vod_remarks) || '',
   };
 }
 
