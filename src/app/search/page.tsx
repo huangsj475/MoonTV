@@ -407,6 +407,7 @@ function SearchPageClient() {
                               : ''
                           }
                           year={item.year}
+                          remarks={item.remarks}
                           from='search'
                           type={item.episodes.length > 1 ? 'tv' : 'movie'}
                         />
