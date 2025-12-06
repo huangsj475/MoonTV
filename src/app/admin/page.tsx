@@ -517,10 +517,10 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                         key={user.username}
                         className='hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors'
                       >
-                        <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100'>
+                        <td className='px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100'>
                           {user.username}
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap'>
+                        <td className='px-3 py-4 whitespace-nowrap'>
                           <span
                             className={`px-2 py-1 text-xs rounded-full ${
                               user.role === 'owner'
@@ -537,7 +537,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                               : '普通用户'}
                           </span>
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap'>
+                        <td className='px-3 py-4 whitespace-nowrap'>
                           <span
                             className={`px-2 py-1 text-xs rounded-full ${
                               !user.banned
@@ -548,7 +548,7 @@ const UserConfig = ({ config, role, refreshConfig }: UserConfigProps) => {
                             {!user.banned ? '正常' : '已封禁'}
                           </span>
                         </td>
-                        <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
+                        <td className='px-3 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
                           {/* 修改密码按钮 */}
                           {canChangePassword && (
                             <button
@@ -1382,7 +1382,7 @@ const handleBatchDisable = async () => {
               className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50'
             />
           </td>
-		<td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+		<td className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           <div className="flex items-center space-x-2">
             {isEditing ? (
               <input
@@ -1404,11 +1404,11 @@ const handleBatchDisable = async () => {
           </div>
         </td>
         
-        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+        <td className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           {source.key}
         </td>
         <td
-          className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[12rem] truncate'
+          className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[12rem] truncate'
           title={source.api}
         >
           {isEditing ? (
@@ -1426,7 +1426,7 @@ const handleBatchDisable = async () => {
           )}
         </td>
         <td
-          className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[8rem] truncate'
+          className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[8rem] truncate'
           title={source.detail || '-'}
         >
           {isEditing ? (
@@ -1444,7 +1444,7 @@ const handleBatchDisable = async () => {
             </span>
           )}
         </td>
-        <td className='px-6 py-4 whitespace-nowrap max-w-[1rem]'>
+        <td className='px-3 py-4 whitespace-nowrap max-w-[1rem]'>
           <span
             className={`px-2 py-1 text-xs rounded-full ${
               !source.disabled
@@ -1455,7 +1455,7 @@ const handleBatchDisable = async () => {
             {!source.disabled ? '启用中' : '已禁用'}
           </span>
         </td>
-        <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
+        <td className='px-3 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
           {isEditing ? (
             <>
               <button
@@ -1877,10 +1877,10 @@ const CategoryConfig = ({
         >
           <GripVertical size={16} />
         </td>
-        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+        <td className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           {category.name || '-'}
         </td>
-        <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
+        <td className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100'>
           <span
             className={`px-2 py-1 text-xs rounded-full ${
               category.type === 'movie'
@@ -1892,12 +1892,12 @@ const CategoryConfig = ({
           </span>
         </td>
         <td
-          className='px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[12rem] truncate'
+          className='px-3 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100 max-w-[12rem] truncate'
           title={category.query}
         >
           {category.query}
         </td>
-        <td className='px-6 py-4 whitespace-nowrap max-w-[1rem]'>
+        <td className='px-3 py-4 whitespace-nowrap max-w-[1rem]'>
           <span
             className={`px-2 py-1 text-xs rounded-full ${
               !category.disabled
@@ -1908,7 +1908,7 @@ const CategoryConfig = ({
             {!category.disabled ? '启用中' : '已禁用'}
           </span>
         </td>
-        <td className='px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
+        <td className='px-3 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2'>
           <button
             onClick={() =>
              handleToggleEnable(category.query, category.type)
