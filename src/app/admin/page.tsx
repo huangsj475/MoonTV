@@ -1444,7 +1444,7 @@ const handleBatchDisable = async () => {
             </span>
           )}
         </td>
-        <td className='px-3 py-4 whitespace-nowrap max-w-[1rem]'>
+        <td className='px-3 py-4 whitespace-nowrap'>
           <span
             className={`px-2 py-1 text-xs rounded-full ${
               !source.disabled
