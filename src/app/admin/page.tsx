@@ -1528,7 +1528,7 @@ const handleBatchDisable = async () => {
 		<div className='flex items-center gap-2 flex-wrap'>
           {/* 批量操作区域 - 只在选中时显示 */}
           {selectedSources.size > 0 ? (
-            <div className='flex items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2'>
+            <div className='flex flex-wrap items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2'>
               <button
                 onClick={handleClearSelection}
                 className='inline-flex items-center px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors'
@@ -1562,7 +1562,7 @@ const handleBatchDisable = async () => {
               </button>
             </div>
           ) : (
-            <div className='flex items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2'>
+            <div className='flex flex-wrap items-center gap-1 border-r border-gray-300 dark:border-gray-600 pr-2'>
               <label className='relative'>
                 <input
                   type='file'
