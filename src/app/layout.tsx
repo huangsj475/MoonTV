@@ -2,7 +2,6 @@
 
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
-import { unstable_noStore as noStore } from 'next/cache';
 
 import './globals.css';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -15,7 +14,7 @@ import { SiteProvider } from '../components/SiteProvider';
 import { ThemeProvider } from '../components/ThemeProvider';
 
 const inter = Inter({ subsets: ['latin'] });
-
+export const dynamic = 'force-dynamic';
 // 动态生成 metadata，支持配置更新后的标题变化
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -123,7 +122,7 @@ export default async function RootLayout({
   
   //----原来的-----
   */
-  noStore(); 
+  
   //-----新更改------
   let configFromDB = null;
 
