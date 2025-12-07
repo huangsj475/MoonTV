@@ -2,6 +2,7 @@
 
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
+import { unstable_noStore as noStore } from 'next/cache';
 
 import './globals.css';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -122,7 +123,7 @@ export default async function RootLayout({
   
   //----原来的-----
   */
-  
+  noStore(); 
   //-----新更改------
   let configFromDB = null;
 
