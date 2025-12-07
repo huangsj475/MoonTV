@@ -372,7 +372,7 @@ export default function VideoCard({
 		  </div>
 		)}
         {/* 操作按钮 */}
-        {(config.showHeart || config.showCheckCircle) && (  
+        {(config.showHeart || config.showCheckCircle) && (
           <div className='absolute bottom-3 right-3 flex gap-3 opacity-0 translate-y-2 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:translate-y-0'>
             {config.showCheckCircle && (
               <Trash2
