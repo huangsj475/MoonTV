@@ -365,14 +365,14 @@ export default function VideoCard({
             />
           </div>
         )}
-		{/* 更新信息 - 左下角显示，hover时淡出 */}
+		{/* 更新信息 - 左下角显示，hover时隐藏 */}
 		{config.showRemarks && actualRemarks && (
-		  <div className="absolute bottom-1 left-1 z-10 bg-black/70 text-white px-1.5 py-1 rounded overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out text-[0.7rem] sm:text-sm leading-tight">
+		  <div className="absolute bottom-1 left-1 bg-black/70 text-white px-1.5 py-1 rounded overflow-hidden opacity-100 group-hover:opacity-0 transition-opacity duration-300 ease-in-out text-[0.7rem] sm:text-sm leading-tight">
 		    {actualRemarks}
 		  </div>
 		)}
         {/* 操作按钮 */}
-        {(config.showHeart || config.showCheckCircle) && (
+        {(config.showHeart || config.showCheckCircle) && (  
           <div className='absolute bottom-3 right-3 flex gap-3 opacity-0 translate-y-2 transition-all duration-300 ease-in-out group-hover:opacity-100 group-hover:translate-y-0'>
             {config.showCheckCircle && (
               <Trash2
