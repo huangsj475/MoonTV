@@ -165,7 +165,7 @@ export async function POST(req: NextRequest) {
     const config = await getConfig();
     const user = config.UserConfig.Users.find((u) => u.username === username);
     if (user && user.banned) {
-      return NextResponse.json({ error: '用户被封禁' }, { status: 401 });
+      return NextResponse.json({ error: '用户被封禁' }, { status: 403 });
     }
 
     // 校验用户密码
