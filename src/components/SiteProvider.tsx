@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { createContext, ReactNode, useContext, useEffect, useState, useRef } from 'react';
 
 // 扩展 Context 类型以支持更新函数
 interface SiteContextType {
@@ -29,31 +29,29 @@ export function SiteProvider({
   const [siteName, setSiteName] = useState(initialSiteName);
   const [announcement, setAnnouncement] = useState(initialAnnouncement || '');
   const [isLoading, setIsLoading] = useState(false);
+  const mountedRef = useRef(true);
     // 在客户端获取最新配置
   useEffect(() => {
-	  let mounted = true;
+	  
     const fetchLatestConfig = async () => {
-	  if (!mounted) return;
+	  if (!mountedRef.current) return;
 	  setIsLoading(true);
       try {
         const response = await fetch('/api/site/config', {
           cache: 'no-store',
         });
-        if (response.ok && mounted) {
+        if (response.ok && mountedRef.current) {
           const result = await response.json();
           if (result.success) {
-            if (result.data.siteName !== siteName) {
-              setSiteName(result.data.siteName);
-            }
-            if (result.data.announcement !== announcement) {
-              setAnnouncement(result.data.announcement);
-            }
+            // 使用函数式更新避免依赖
+            setSiteName(prev => result.data.siteName !== prev ? result.data.siteName : prev);
+            setAnnouncement(prev => result.data.announcement !== prev ? result.data.announcement : prev);
           }
         }
       } catch (error) {
 
       }finally {
-        if (mounted) {
+        if (mountedRef.current) {
           setIsLoading(false);
         }
       }
