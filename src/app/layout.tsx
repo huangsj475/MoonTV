@@ -28,49 +28,12 @@ export async function generateMetadata(): Promise<Metadata> {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
   }
-  
-  /*
-  //-------新更改---------
-  let config = null;
-
-  try {
-    
-      config = await getConfig();
-    
-  } catch (error) {
-      console.warn('获取数据库最新配置失败:', error);
-  }
-  
-  const siteName =
-  config?.SiteConfig?.SiteName ||
-  process.env.SITE_NAME  ||
-  'MoonTV';
-	//-------新更改---------
-	*/
-	
+ 
   return {
     title: siteName,
     description: '影视聚合',
     manifest: '/manifest.json',
   };
-
-  /*try {
-    const config = await getConfig();
-    const siteName = config?.SiteConfig?.SiteName || process.env.SITE_NAME || 'MoonTV';
-    
-    return {
-      title: siteName,
-      description: '影视聚合',
-      manifest: '/manifest.json',
-    };
-  } catch (error) {
-    // 降级到环境变量
-    return {
-      title: process.env.SITE_NAME || 'MoonTV',
-      description: '影视聚合', 
-      manifest: '/manifest.json',
-    };
-  }*/
 }
 
 export const viewport: Viewport = {
@@ -84,7 +47,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
 	
-	//----原来的-----
   let siteName = process.env.SITE_NAME || 'MoonTV';
   let announcement =
     process.env.ANNOUNCEMENT ||
@@ -119,67 +81,7 @@ export default async function RootLayout({
       query: category.query,
     }));
   }
-  
-  //----原来的-----
-  
-  
-  //-----新更改------
-  /*let configFromDB = null;
 
-  try {
-      
-      configFromDB = await getConfig();
-	
-  } catch (error) {
-    console.warn('获取数据库最新配置失败:', error);
-  }
-
-// 优先级：数据库 > 环境变量 > 默认值
-const siteName =
-  configFromDB?.SiteConfig?.SiteName ||
-  process.env.SITE_NAME  ||
-  'MoonTV';
- 
-const announcement =
-  configFromDB?.SiteConfig?.Announcement ||
-  process.env.ANNOUNCEMENT  ||
-  '本网站仅提供影视信息搜索服务，所有内容均来自第三方网站。本站不存储任何视频资源，不对任何内容的准确性、合法性、完整性负责。';
- 
-const enableRegister =
-  configFromDB?.UserConfig?.AllowRegister ??
-  (process.env.NEXT_PUBLIC_ENABLE_REGISTER  === 'true');
- 
-const imageProxy =
-  configFromDB?.SiteConfig?.ImageProxy ||
-  process.env.NEXT_PUBLIC_IMAGE_PROXY  ||
-  '';
- 
-const doubanProxy =
-  configFromDB?.SiteConfig?.DoubanProxy ||
-  process.env.NEXT_PUBLIC_DOUBAN_PROXY  ||
-  '';
- 
-const disableYellowFilter =
-  configFromDB?.SiteConfig?.DisableYellowFilter ??
-  (process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER  === 'true');
- 
-const customCategories =
-  configFromDB?.CustomCategories?.filter((c: any) => !c.disabled).map( 
-    (category: any) => ({
-      name: category.name  || '',
-      type: category.type, 
-      query: category.query, 
-    })
-  ) ||
-  (RuntimeConfig as any)?.custom_category?.map((category: any) => ({
-    name: 'name' in category ? category.name  : '',
-    type: category.type, 
-    query: category.query, 
-  })) ||
-  [];
-  //-----新更改------*/
-  
-  
   // 将运行时配置注入到全局 window 对象，供客户端在运行时读取
   const runtimeConfig = {
     STORAGE_TYPE: process.env.NEXT_PUBLIC_STORAGE_TYPE || 'localstorage',
