@@ -52,10 +52,11 @@ export function SiteProvider({
         }
       } catch (error) {
 
-      } finally {
+      }finally {
         if (mounted) {
           setIsLoading(false);
         }
+      }
     };
     // 立即获取一次
     fetchConfig();
