@@ -19,12 +19,12 @@ export const useSite = () => useContext(SiteContext);
 
 export function SiteProvider({
   children,
-  initialSiteName,
-  initialAnnouncement,
+  siteName,
+  announcement,
 }: {
   children: ReactNode;
-  initialSiteName: string;
-  initialAnnouncement?: string;
+  siteName: string;
+  announcement?: string;
 }) {
   const [siteName, setSiteName] = useState(initialSiteName);
   const [announcement, setAnnouncement] = useState(initialAnnouncement || '');
