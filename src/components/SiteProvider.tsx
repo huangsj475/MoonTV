@@ -37,7 +37,7 @@ export function SiteProvider({
 	  if (!mountedRef.current) return;
 	  setIsLoading(true);
       try {
-        const response = await fetch('/api/site/config', {
+        const response = await fetch('/api/site-config', {
           cache: 'no-store',
         });
         if (response.ok && mountedRef.current) {
@@ -49,7 +49,7 @@ export function SiteProvider({
           }
         }
       } catch (error) {
-
+		// 静默失败
       }finally {
         if (mountedRef.current) {
           setIsLoading(false);
@@ -57,7 +57,7 @@ export function SiteProvider({
       }
     };
     // 立即获取一次
-    fetchConfig();
+    fetchLatestConfig();
 
   }, []); // 只在组件挂载时执行一次
 
