@@ -110,7 +110,9 @@ function LoginPageClient() {
         const redirect = searchParams.get('redirect') || '/';
         router.replace(redirect);
       } else if (res.status === 401) {
-        setError('密码错误');
+        setError('用户名或密码错误！');
+      } else if (res.status === 403) {
+        setError('用户被封禁！');
       } else {
         const data = await res.json().catch(() => ({}));
         setError(data.error ?? '服务器错误');
