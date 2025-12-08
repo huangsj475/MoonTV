@@ -61,15 +61,7 @@ export function SiteProvider({
     fetchConfig();
 
   }, []); // 只在组件挂载时执行一次
-    // 更新配置的函数
-  const updateSiteConfig = (config: { siteName?: string; announcement?: string }) => {
-    if (config.siteName !== undefined) {
-      setSiteName(config.siteName);
-    }
-    if (config.announcement !== undefined) {
-      setAnnouncement(config.announcement);
-    }
-  };
+
   return (
     <SiteContext.Provider value={{ siteName, announcement, isLoading }}>
       {children}
