@@ -222,11 +222,14 @@ function DoubanPageClient() {
   const getRequestParams = useCallback(
     (pageStart: number) => {
       // 当type为tv或show时，kind统一为'tv'，category使用type本身
+      
+     // 为非自定义模式提供默认的 type 值
+    const typeParam = type === 'custom' ? secondarySelection : 'all';
       if (type === 'tv' || type === 'show') {
         return {
           kind: 'tv' as const,
           category: type,
-          type: secondarySelection,
+          type: typeParam,
           pageLimit: 25,
           pageStart,
         };
@@ -236,7 +239,7 @@ function DoubanPageClient() {
       return {
         kind: type as 'tv' | 'movie',
         category: primarySelection,
-        type: secondarySelection,
+        type: typeParam,
         pageLimit: 25,
         pageStart,
       };
