@@ -606,6 +606,9 @@ function DoubanPageClient() {
             setPrimarySelection(value);
             setSecondarySelection(firstCategory.query);
           } else {
+            setPrimarySelection(value);
+          }
+        } else {
           // 电视剧和综艺切换到"最近热门"时，重置二级分类为第一个选项
           if ((type === 'tv' || type === 'show') && value === '最近热门') {
             setPrimarySelection(value);
