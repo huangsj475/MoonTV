@@ -52,12 +52,14 @@ function DoubanPageClient() {
     if (type === 'anime') return '每日放送';
     return '';
   });
-  const [secondarySelection, setSecondarySelection] = useState<string>(() => {
+  
+  const [secondarySelection, setSecondarySelection] = useState<string>('');
+  /*const [secondarySelection, setSecondarySelection] = useState<string>(() => {
     if (type === 'movie') return '全部';
     if (type === 'tv') return 'tv';
     if (type === 'show') return 'show';
     return '全部';
-  });
+  });*/
 
     // MultiLevelSelector 状态
   const [multiLevelValues, setMultiLevelValues] = useState<
@@ -146,19 +148,19 @@ function DoubanPageClient() {
       // 原有逻辑
       if (type === 'movie') {
         setPrimarySelection('热门');
-        setSecondarySelection('全部');
+        //setSecondarySelection('全部');
       } else if (type === 'tv') {
         setPrimarySelection('最近热门');
-        setSecondarySelection('tv');
+        //setSecondarySelection('tv');
       } else if (type === 'show') {
         setPrimarySelection('最近热门');
-        setSecondarySelection('show');
+        //setSecondarySelection('show');
       } else if (type === 'anime') {
         setPrimarySelection('每日放送');
-        setSecondarySelection('全部');
+        //setSecondarySelection('全部');
       } else {
         setPrimarySelection('');
-        setSecondarySelection('全部');
+        //setSecondarySelection('全部');
       }
     }
 
@@ -206,7 +208,7 @@ function DoubanPageClient() {
       return (
         snapshot1.type === snapshot2.type &&
         snapshot1.primarySelection === snapshot2.primarySelection &&
-        snapshot1.secondarySelection === snapshot2.secondarySelection &&
+        (snapshot1.type === 'custom' ? snapshot1.secondarySelection === snapshot2.secondarySelection : true) &&
         snapshot1.selectedWeekday === snapshot2.selectedWeekday &&
         snapshot1.currentPage === snapshot2.currentPage &&
         JSON.stringify(snapshot1.multiLevelSelection) ===
@@ -435,8 +437,7 @@ function DoubanPageClient() {
             // 自定义分类模式：根据选中的一级和二级选项获取对应的分类
             const selectedCategory = customCategories.find(
               (cat) =>
-                cat.type === primarySelection &&
-                cat.query === secondarySelection
+                cat.type === primarySelection && cat.query === secondarySelection
             );
 
             if (selectedCategory) {
@@ -613,9 +614,9 @@ function DoubanPageClient() {
           if ((type === 'tv' || type === 'show') && value === '最近热门') {
             setPrimarySelection(value);
             if (type === 'tv') {
-              setSecondarySelection('tv');
+              //setSecondarySelection('tv');
             } else if (type === 'show') {
-              setSecondarySelection('show');
+              //setSecondarySelection('show');
             }
           } else {
             setPrimarySelection(value);
@@ -728,9 +729,7 @@ function DoubanPageClient() {
               <DoubanSelector
                 type={type as 'movie' | 'tv' | 'show' | 'anime'}
                 primarySelection={primarySelection}
-                secondarySelection={secondarySelection}
                 onPrimaryChange={handlePrimaryChange}
-                onSecondaryChange={handleSecondaryChange}
                 onMultiLevelChange={handleMultiLevelChange}
                 onWeekdayChange={handleWeekdayChange}
               />
