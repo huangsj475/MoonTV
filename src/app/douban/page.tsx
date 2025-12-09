@@ -53,13 +53,12 @@ function DoubanPageClient() {
     return '';
   });
   
-  const [secondarySelection, setSecondarySelection] = useState<string>('');
-  /*const [secondarySelection, setSecondarySelection] = useState<string>(() => {
+ const [secondarySelection, setSecondarySelection] = useState<string>(() => {
     if (type === 'movie') return '全部';
     if (type === 'tv') return 'tv';
     if (type === 'show') return 'show';
     return '全部';
-  });*/
+  });
 
     // MultiLevelSelector 状态
   const [multiLevelValues, setMultiLevelValues] = useState<
@@ -224,7 +223,9 @@ function DoubanPageClient() {
       // 当type为tv或show时，kind统一为'tv'，category使用type本身
       
      // 为非自定义模式提供默认的 type 值
-    const typeParam = type === 'custom' ? secondarySelection : 'all';
+    const typeParam = type === 'custom' 
+      ? secondarySelection 
+      : (type === 'tv' ? 'tv' : type === 'show' ? 'show' : '全部');
       if (type === 'tv' || type === 'show') {
         return {
           kind: 'tv' as const,
