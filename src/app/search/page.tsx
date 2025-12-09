@@ -343,8 +343,15 @@ function SearchPageClient() {
           return !yellowWords.some((word: string) => typeName.includes(word));
         });
       }
+    // 计算唯一视频源数量
+    const uniqueSources = new Set<string>();
+    results.forEach((item: SearchResult) => {
+      if (item.source) {
+        uniqueSources.add(item.source);
+      }
+    });
       setSearchResults(results);
-      setTotalSources(results.length);
+      setTotalSources(uniqueSources.size);
       setShowResults(true);
     } catch (error) {
       setSearchResults([]);
@@ -489,9 +496,9 @@ function SearchPageClient() {
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
                   搜索结果
                     {/* 添加进度指示器 */}
-                {searchResults.length > 0 && (
+                {!isLoading && searchResults.length > 0 && totalSources > 0 && && (
                   <span className='ml-2 text-lg font-normal text-gray-500 dark:text-gray-400'>
-                    {searchResults.length}
+                    {totalSources}个来源
                   </span>
                 )}
                 </h2>
