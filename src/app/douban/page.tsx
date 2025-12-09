@@ -483,35 +483,20 @@ function DoubanPageClient() {
                 ? (multiLevelValues.label as string)
                 : '',
             });
-          } else if (primarySelection === '全部') {
-            data = await getDoubanRecommends({
-              kind: type === 'show' ? 'tv' : (type as 'tv' | 'movie'),
-              pageLimit: 25,
-              pageStart: currentPage * 25,
-              category: multiLevelValues.type
-                ? (multiLevelValues.type as string)
-                : '',
-              format: type === 'show' ? '综艺' : type === 'tv' ? '电视剧' : '',
-              region: multiLevelValues.region
-                ? (multiLevelValues.region as string)
-                : '',
-              year: multiLevelValues.year
-                ? (multiLevelValues.year as string)
-                : '',
-              platform: multiLevelValues.platform
-                ? (multiLevelValues.platform as string)
-                : '',
-              sort: multiLevelValues.sort
-                ? (multiLevelValues.sort as string)
-                : '',
-              label: multiLevelValues.label
-                ? (multiLevelValues.label as string)
-                : '',
-            });
           } else {
-            data = await getDoubanCategories(
-              getRequestParams(currentPage * 25)
-            );
+              // 电影、电视剧、综艺：统一使用推荐API + 多级筛选
+              data = await getDoubanRecommends({
+                kind: type === 'show' ? 'tv' : (type as 'tv' | 'movie'),
+                pageLimit: 25,
+                pageStart: 0,
+                category: primarySelection === '全部' ? '' : primarySelection,
+                format: type === 'show' ? '综艺' : type === 'tv' ? '电视剧' : '',
+                region: multiLevelValues.region ? (multiLevelValues.region as string) : '',
+                year: multiLevelValues.year ? (multiLevelValues.year as string) : '',
+                platform: multiLevelValues.platform ? (multiLevelValues.platform as string) : '',
+                sort: multiLevelValues.sort ? (multiLevelValues.sort as string) : '',
+                label: multiLevelValues.label ? (multiLevelValues.label as string) : '',
+              });
           }
 
           if (data.code === 200) {
