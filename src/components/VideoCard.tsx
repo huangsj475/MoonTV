@@ -36,6 +36,7 @@ interface VideoCardProps {
   items?: SearchResult[];
   type?: string;
   remarks?: string;// 新增 更新信息
+  isBangumi?: boolean;// 新增：动漫
 }
 
 export default function VideoCard({
@@ -55,7 +56,8 @@ export default function VideoCard({
   rate,
   items,
   type = '',
-  remarks = '', // 新增
+  remarks = '', // 新增：更新到哪一集信息
+  isBangumi = false,// 新增：动漫
 }: VideoCardProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -249,7 +251,15 @@ export default function VideoCard({
     [from, actualSource, actualId, onDelete]
   );
 
+
   const handleClick = useCallback(() => {
+    // 动漫（Bangumi）的特殊处理
+    if (isBangumi && from === 'douban' && actualDoubanId) {
+      // 动漫点击：跳转到Bangumi详情页
+      window.open(`https://bgm.tv/subject/${actualDoubanId}`, '_blank', 'noopener,noreferrer');
+      return;
+    }
+	  
     if (from === 'douban') {
       router.push(
         `/play?title=${encodeURIComponent(actualTitle.trim())}${
@@ -277,6 +287,8 @@ export default function VideoCard({
     isAggregate,
     actualQuery,
     actualSearchType,
+    isBangumi, // 添加isBangumi依赖
+    actualDoubanId, // 添加actualDoubanId依赖
   ]);
 
   const config = useMemo(() => {
@@ -432,7 +444,11 @@ export default function VideoCard({
         {/* 豆瓣链接 */}
         {config.showDoubanLink && actualDoubanId && (
           <a
-            href={`https://movie.douban.com/subject/${actualDoubanId}`}
+            href={
+            isBangumi
+                 ? `https://bgm.tv/subject/${actualDoubanId}`
+                 : `https://movie.douban.com/subject/${actualDoubanId}`
+            }
             target='_blank'
             rel='noopener noreferrer'
             onClick={(e) => e.stopPropagation()}
