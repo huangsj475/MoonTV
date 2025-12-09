@@ -485,7 +485,7 @@ function SearchPageClient() {
           ) : showResults ? (
             <section className='mb-8'>
               {/* 标题 + 聚合开关 */}
-              <div className='mb-8 flex items-center justify-between'>
+              <div className='mb-4 flex items-center justify-between'>
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
                   搜索结果
                     {/* 添加进度指示器 */}
@@ -515,7 +515,7 @@ function SearchPageClient() {
                 </label>
               </div>
               {/* 筛选器 */}
-              <div className='mb-8 flex items-center justify-between gap-3'>
+              <div className='mb-4 flex items-center justify-between gap-3'>
                 <div className='flex-1 min-w-0'>
                   {viewMode === 'agg' ? (
                     <SearchResultFilter
