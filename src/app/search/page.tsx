@@ -540,11 +540,12 @@ function SearchPageClient() {
                   <div className='text-center text-gray-500 py-8 dark:text-gray-400'>
                     未找到相关结果
                   </div>
-        				) : (viewMode === 'agg' ? filteredAggResults : filteredAllResults).length === 0 ? (
-        				  <div className='col-span-full text-center text-gray-500 py-8 dark:text-gray-400'>
-        					筛选后无结果
-        				  </div>
-        				) : (
+				) : (viewMode === 'agg' ? filteredAggResults : filteredAllResults).length === 0 ? (
+				  <div className='col-span-full text-center text-gray-500 py-8 dark:text-gray-400'>
+					筛选后无结果
+				  </div>
+				  )
+				) : (
               <div
                 key={`search-results-${viewMode}`}
                 className='justify-start grid grid-cols-3 gap-x-2 gap-y-14 sm:gap-y-20 px-0 sm:px-2 sm:grid-cols-[repeat(auto-fill,_minmax(11rem,_1fr))] sm:gap-x-8'
