@@ -496,7 +496,7 @@ function SearchPageClient() {
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
                   搜索结果
                     {/* 添加进度指示器 */}
-                {!isLoading && searchResults.length > 0 && totalSources > 0 && && (
+                {!isLoading && searchResults.length > 0 && totalSources > 0 && (
                   <span className='ml-2 text-lg font-normal text-gray-500 dark:text-gray-400'>
                     {totalSources}个来源
                   </span>
