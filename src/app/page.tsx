@@ -429,7 +429,7 @@ function HomeClient() {
                               anime.images.small ||
                               anime.images.grid
                             }
-                            douban_id={anime.id}
+                            douban_id={String(anime.id)}
                             rate={anime.rating?.score?.toFixed(1) || ''}
                             year={anime.air_date?.split('-')?.[0] || ''}
                             isBangumi={true}
