@@ -354,6 +354,7 @@ function SearchPageClient() {
       setSearchResults([]);
       setTotalSources(0);
       setCompletedSources(0);
+	  setVideoSourcesCount(0);
       // 清理缓冲
       pendingResultsRef.current = [];
       if (flushTimerRef.current) {
@@ -744,7 +745,7 @@ function SearchPageClient() {
 					  ) : totalSources > 0 ? (
 					    // 搜索完成（流式或传统）：显示视频源总数
 					    <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
-					      {totalSources}个可用源
+					      {videoSourcesCount}个可用源
 					    </span>
 					  ) : null}
 				  {isLoading && useFluidSearch && (
