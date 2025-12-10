@@ -42,6 +42,7 @@ function SearchPageClient() {
   const pendingResultsRef = useRef<SearchResult[]>([]);
   const flushTimerRef = useRef<number | null>(null);
   const [useFluidSearch, setUseFluidSearch] = useState(true);
+  const [videoSourcesCount, setVideoSourcesCount] = useState(0); 
 
   // 获取默认聚合设置：只读取用户本地设置，默认为 true
   const getDefaultAggregate = () => {
@@ -444,12 +445,21 @@ function SearchPageClient() {
 					const finalVideoCount = videoSourcesSet.size;
 					
 					//  设置最终的视频源总数
-					setTotalSources(finalVideoCount);
+					setVideoSourcesCount(finalVideoCount);
 					return newResults;
 
                   });
 				});
-                }
+                }else {
+			    // 如果没有缓冲数据，也要计算
+			    const videoSourcesSet = new Set<string>();
+			    searchResults.forEach((item) => {
+			      if (item.source) {
+			        videoSourcesSet.add(item.source);
+			      }
+			    });
+			    setVideoSourcesCount(videoSourcesSet.size);
+			  }
                 setIsLoading(false);
                 try { es.close(); } catch { }
                 if (eventSourceRef.current === es) {
@@ -486,11 +496,20 @@ function SearchPageClient() {
 		        const finalVideoCount = videoSourcesSet.size;
 		        
 		        // 设置最终的视频源总数
-		        setTotalSources(finalVideoCount);
+		        setVideoSourcesCount(finalVideoCount);
 		        return newResults;
 		      });
 		    });
-          }
+          }else {
+		    // 如果没有缓冲数据，计算现有的
+		    const videoSourcesSet = new Set<string>();
+		    searchResults.forEach((item) => {
+		      if (item.source) {
+		        videoSourcesSet.add(item.source);
+		      }
+		    });
+		    setVideoSourcesCount(videoSourcesSet.size);
+		  }
           try { es.close(); } catch { }
           if (eventSourceRef.current === es) {
             eventSourceRef.current = null;
@@ -577,7 +596,7 @@ function SearchPageClient() {
       });
     }
       setSearchResults(results);
-      setTotalSources(uniqueSources.size);
+      setVideoSourcesCount(uniqueSources.size);
       //setShowResults(true);
     } catch (error) {
       setSearchResults([]);
