@@ -448,8 +448,7 @@ function SearchPageClient() {
 					setTotalSources(finalVideoCount);
 					return newResults;
                   });
-				}
-                }
+				  }
                 }
                 setIsLoading(false);
                 try { es.close(); } catch { }
