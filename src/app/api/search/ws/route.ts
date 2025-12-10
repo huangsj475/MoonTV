@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const query = searchParams.get('q');
 
   if (!query) {
-    return new Response(
+    return NextResponse(
       JSON.stringify({ error: '搜索关键词不能为空' }),
       {
         status: 400,
@@ -170,7 +170,7 @@ export async function GET(request: NextRequest) {
   });
 
   // 返回流式响应
-  return new Response(stream, {
+  return NextResponse(stream, {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
