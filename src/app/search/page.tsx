@@ -422,7 +422,7 @@ function SearchPageClient() {
               case 'source_error':
                 setCompletedSources((prev) => prev + 1);
                 break;
-              case 'complete':
+              case 'complete':{
                 setCompletedSources(payload.completedSources || totalSources);
 
 				  //---新增： 计算最终的视频源总数---
@@ -459,6 +459,7 @@ function SearchPageClient() {
                   eventSourceRef.current = null;
                 }
                 break;
+			 }
             }
           } catch { }
         };
