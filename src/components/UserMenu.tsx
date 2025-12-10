@@ -31,6 +31,7 @@ export const UserMenu: React.FC = () => {
   const [enableOptimization, setEnableOptimization] = useState(true);
   const [enableImageProxy, setEnableImageProxy] = useState(false);
   const [enableDoubanProxy, setEnableDoubanProxy] = useState(false);
+  const [fluidSearch, setFluidSearch] = useState(true);//新增：流式选项
 
   // 修改密码相关状态
   const [newPassword, setNewPassword] = useState('');
@@ -106,6 +107,12 @@ export const UserMenu: React.FC = () => {
       if (savedEnableOptimization !== null) {
         setEnableOptimization(JSON.parse(savedEnableOptimization));
       }
+        //---新增：流式搜索配置
+      const savedFluidSearch = localStorage.getItem('fluidSearch');
+      if (savedFluidSearch !== null) {
+        setFluidSearch(JSON.parse(savedFluidSearch));
+      }
+      
     }
   }, []);
 
@@ -245,6 +252,13 @@ export const UserMenu: React.FC = () => {
       localStorage.setItem('enableOptimization', JSON.stringify(value));
     }
   };
+   //---新增：处理流式搜索切换
+  const handleFluidSearchToggle = (value: boolean) => {
+    setFluidSearch(value);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fluidSearch', JSON.stringify(value));
+    }
+  };
 
   const handleImageProxyToggle = (value: boolean) => {
     setEnableImageProxy(value);
@@ -267,6 +281,7 @@ export const UserMenu: React.FC = () => {
 
     setDefaultAggregateSearch(true);
     setEnableOptimization(true);
+    setFluidSearch(true);
     setDoubanProxyUrl(defaultDoubanProxy);
     setEnableDoubanProxy(!!defaultDoubanProxy);
     setEnableImageProxy(!!defaultImageProxy);
@@ -275,6 +290,7 @@ export const UserMenu: React.FC = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('defaultAggregateSearch', JSON.stringify(true));
       localStorage.setItem('enableOptimization', JSON.stringify(true));
+      localStorage.setItem('fluidSearch', JSON.stringify(true));
       localStorage.setItem('doubanProxyUrl', defaultDoubanProxy);
       localStorage.setItem(
         'enableDoubanProxy',
@@ -513,6 +529,30 @@ export const UserMenu: React.FC = () => {
             </label>
           </div>
 
+            {/* 流式搜索 */}
+            <div className='flex items-center justify-between'>
+              <div>
+                <h4 className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+                  流式搜索输出
+                </h4>
+                <p className='text-xs text-gray-500 dark:text-gray-400 mt-1'>
+                  启用搜索结果实时流式输出，关闭后使用传统一次性搜索
+                </p>
+              </div>
+              <label className='flex items-center cursor-pointer'>
+                <div className='relative'>
+                  <input
+                    type='checkbox'
+                    className='sr-only peer'
+                    checked={fluidSearch}
+                    onChange={(e) => handleFluidSearchToggle(e.target.checked)}
+                  />
+                  <div className='w-11 h-6 bg-gray-300 rounded-full peer-checked:bg-green-500 transition-colors dark:bg-gray-600'></div>
+                  <div className='absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5'></div>
+                </div>
+              </label>
+            </div>
+          
           {/* 分割线 */}
           <div className='border-t border-gray-200 dark:border-gray-700'></div>
 
