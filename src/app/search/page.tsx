@@ -430,10 +430,9 @@ function SearchPageClient() {
                     clearTimeout(flushTimerRef.current);
                     flushTimerRef.current = null;
                   }
-                  startTransition(() => {
-                    //setSearchResults((prev) => prev.concat(toAppend));
-					setSearchResults((prev) => {const newResults = prev.concat(toAppend);
-					
+                 startTransition(() => {
+				    //setSearchResults((prev) => prev.concat(toAppend));
+                    setSearchResults((prev) => {const newResults = prev.concat(toAppend);
 					  //  直接在这里计算唯一视频源
 					const videoSourcesSet = new Set<string>();
 					newResults.forEach((item: SearchResult) => {
@@ -447,8 +446,9 @@ function SearchPageClient() {
 					//  设置最终的视频源总数
 					setTotalSources(finalVideoCount);
 					return newResults;
+
                   });
-				  }
+				});
                 }
                 setIsLoading(false);
                 try { es.close(); } catch { }
