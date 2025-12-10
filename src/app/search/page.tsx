@@ -42,7 +42,6 @@ function SearchPageClient() {
   const pendingResultsRef = useRef<SearchResult[]>([]);
   const flushTimerRef = useRef<number | null>(null);
   const [useFluidSearch, setUseFluidSearch] = useState(true);
-  const [videoSourcesCount, setVideoSourcesCount] = useState(0); 
 
   // 获取默认聚合设置：只读取用户本地设置，默认为 true
   const getDefaultAggregate = () => {
@@ -354,7 +353,6 @@ function SearchPageClient() {
       setSearchResults([]);
       setTotalSources(0);
       setCompletedSources(0);
-	  setVideoSourcesCount(0);
       // 清理缓冲
       pendingResultsRef.current = [];
       if (flushTimerRef.current) {
@@ -433,34 +431,10 @@ function SearchPageClient() {
                     flushTimerRef.current = null;
                   }
                  startTransition(() => {
-				    //setSearchResults((prev) => prev.concat(toAppend));
-                    setSearchResults((prev) => {const newResults = prev.concat(toAppend);
-					  //  直接在这里计算唯一视频源
-					const videoSourcesSet = new Set<string>();
-					newResults.forEach((item: SearchResult) => {
-					  if (item.source) {
-						videoSourcesSet.add(item.source);
-					  }
-					});
-					
-					const finalVideoCount = videoSourcesSet.size;
-					
-					//  设置最终的视频源总数
-					setVideoSourcesCount(finalVideoCount);
-					return newResults;
-
-                  });
+				    setSearchResults((prev) => prev.concat(toAppend));
+   
 				});
-                }else {
-			    // 如果没有缓冲数据，也要计算
-			    const videoSourcesSet = new Set<string>();
-			    searchResults.forEach((item) => {
-			      if (item.source) {
-			        videoSourcesSet.add(item.source);
-			      }
-			    });
-			    setVideoSourcesCount(videoSourcesSet.size);
-			  }
+                }
                 setIsLoading(false);
                 try { es.close(); } catch { }
                 if (eventSourceRef.current === es) {
@@ -483,34 +457,9 @@ function SearchPageClient() {
               flushTimerRef.current = null;
             }
 		    startTransition(() => {
-		      setSearchResults((prev) => {
-		        const newResults = prev.concat(toAppend);
-		        
-		        // 重新计算实际的唯一视频源数量
-		        const videoSourcesSet = new Set<string>();
-		        newResults.forEach((item: SearchResult) => {
-		          if (item.source) {
-		            videoSourcesSet.add(item.source);
-		          }
-		        });
-		        
-		        const finalVideoCount = videoSourcesSet.size;
-		        
-		        // 设置最终的视频源总数
-		        setVideoSourcesCount(finalVideoCount);
-		        return newResults;
-		      });
+		      setSearchResults((prev) => prev.concat(toAppend));
 		    });
-          }else {
-		    // 如果没有缓冲数据，计算现有的
-		    const videoSourcesSet = new Set<string>();
-		    searchResults.forEach((item) => {
-		      if (item.source) {
-		        videoSourcesSet.add(item.source);
-		      }
-		    });
-		    setVideoSourcesCount(videoSourcesSet.size);
-		  }
+          }
           try { es.close(); } catch { }
           if (eventSourceRef.current === es) {
             eventSourceRef.current = null;
@@ -564,13 +513,7 @@ function SearchPageClient() {
           return !yellowWords.some((word: string) => typeName.includes(word));
         });
       }
-    // 计算唯一视频源数量
-    const uniqueSources = new Set<string>();
-    results.forEach((item: SearchResult) => {
-      if (item.source) {
-        uniqueSources.add(item.source);
-      }
-    });
+
     // 应用排序 - 根据当前的排序状态
     const activeYearOrder = viewMode === 'agg' ? filterAgg.yearOrder : filterAll.yearOrder;
     
@@ -597,11 +540,9 @@ function SearchPageClient() {
       });
     }
       setSearchResults(results);
-      setVideoSourcesCount(uniqueSources.size);
       //setShowResults(true);
     } catch (error) {
       setSearchResults([]);
-      setVideoSourcesCount(0)
     } finally {
       setIsLoading(false);
     }
@@ -742,10 +683,18 @@ function SearchPageClient() {
 					        {completedSources}/{totalSources}个视频源
 					      </span>
 					    </>
-					  ) : !isLoading && videoSourcesCount > 0 ? (
+					  ) : !isLoading && searchResults.length > 0 ? (
 					    // 搜索完成（流式或传统）：显示视频源总数
 					    <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
-					      {videoSourcesCount}个可用源
+						  {(() => {
+							const videoSourcesSet = new Set<string>();
+							searchResults.forEach((item: SearchResult) => {
+							  if (item.source) {
+								videoSourcesSet.add(item.source);
+							  }
+							});
+							return videoSourcesSet.size;
+						  })()}个可用源
 					    </span>
 					  ) : null}
 				  {isLoading && useFluidSearch && (
