@@ -99,6 +99,35 @@ function SearchPageClient() {
       }
     });
   }, [searchResults]);
+
+  //---新增： 当聚合结果变化时，如果某个聚合已存在，则调用其卡片 ref 的 set 方法增量更新
+  useEffect(() => {
+    aggregatedResults.forEach(([mapKey, group]) => {
+      const stats = computeGroupStats(group);
+      const prev = groupStatsRef.current.get(mapKey);
+      if (!prev) {
+        // 第一次出现，记录初始值，不调用 ref（由初始 props 渲染）
+        groupStatsRef.current.set(mapKey, stats);
+        return;
+      }
+      // 对比变化并调用对应的 set 方法
+      const ref = groupRefs.current.get(mapKey);
+      if (ref && ref.current) {
+        if (prev.episodes !== stats.episodes) {
+          ref.current.setEpisodes(stats.episodes);
+        }
+        const prevNames = (prev.source_names || []).join('|');
+        const nextNames = (stats.source_names || []).join('|');
+        if (prevNames !== nextNames) {
+          ref.current.setSourceNames(stats.source_names);
+        }
+        if (prev.douban_id !== stats.douban_id) {
+          ref.current.setDoubanId(stats.douban_id);
+        }
+        groupStatsRef.current.set(mapKey, stats);
+      }
+    });
+  }, [aggregatedResults]);
 	
   // ---新增：过滤器：非聚合与聚合
   const [filterAll, setFilterAll] = useState<{ source: string; title: string; year: string; yearOrder: 'none' | 'asc' | 'desc' }>({
@@ -116,6 +145,26 @@ function SearchPageClient() {
   const [viewMode, setViewMode] = useState<'agg' | 'all'>(() => {
     return getDefaultAggregate() ? 'agg' : 'all';
   });
+
+  // ---新增：在“无排序”场景用于每个源批次的预排序：完全匹配标题优先，其次年份倒序，未知年份最后
+  const sortBatchForNoOrder = (items: SearchResult[]) => {
+    const q = currentQueryRef.current.trim();
+    return items.slice().sort((a, b) => {
+      const aExact = (a.title || '').trim() === q;
+      const bExact = (b.title || '').trim() === q;
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+
+      const aNum = Number.parseInt(a.year as any, 10);
+      const bNum = Number.parseInt(b.year as any, 10);
+      const aValid = !Number.isNaN(aNum);
+      const bValid = !Number.isNaN(bNum);
+      if (aValid && !bValid) return -1;
+      if (!aValid && bValid) return 1;
+      if (aValid && bValid) return bNum - aNum; // 年份倒序
+      return 0;
+    });
+  };
   // ---新增：构建筛选选项
   const filterOptions = useMemo(() => {
     const sourcesSet = new Map<string, string>();
