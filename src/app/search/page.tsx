@@ -34,8 +34,14 @@ function SearchPageClient() {
   const [showResults, setShowResults] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);//新增搜索建议
+	//---新增以下流式搜索相关---
+  const currentQueryRef = useRef<string>('');
   const [totalSources, setTotalSources] = useState(0);
-
+  const [completedSources, setCompletedSources] = useState(0);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const pendingResultsRef = useRef<SearchResult[]>([]);
+  const flushTimerRef = useRef<number | null>(null);
+  const [useFluidSearch, setUseFluidSearch] = useState(true);
 
   // 获取默认聚合设置：只读取用户本地设置，默认为 true
   const getDefaultAggregate = () => {
@@ -313,22 +319,165 @@ function SearchPageClient() {
 
   useEffect(() => {
     // 当搜索参数变化时更新搜索状态
-    const query = searchParams.get('q');
+    const query = searchParams.get('q') || '';
+    currentQueryRef.current = query.trim();
+
     if (query) {
       setSearchQuery(query);
-      fetchSearchResults(query);
+      // 新搜索：关闭旧连接并清空结果
+      if (eventSourceRef.current) {
+        try { eventSourceRef.current.close(); } catch { }
+        eventSourceRef.current = null;
+      }
+      setSearchResults([]);
       setTotalSources(0);
+      setCompletedSources(0);
+      // 清理缓冲
+      pendingResultsRef.current = [];
+      if (flushTimerRef.current) {
+        clearTimeout(flushTimerRef.current);
+        flushTimerRef.current = null;
+      }
+      setIsLoading(true);
+      setShowResults(true);
+
+      const trimmed = query.trim();
+
+      // 每次搜索时重新读取设置，确保使用最新的配置
+      let currentFluidSearch = useFluidSearch;
+      if (typeof window !== 'undefined') {
+        const savedFluidSearch = localStorage.getItem('fluidSearch');
+        if (savedFluidSearch !== null) {
+          currentFluidSearch = JSON.parse(savedFluidSearch);
+        } else {
+          const defaultFluidSearch = (window as any).RUNTIME_CONFIG?.FLUID_SEARCH !== false;
+          currentFluidSearch = defaultFluidSearch;
+        }
+      }
+
+      // 如果读取的配置与当前状态不同，更新状态
+      if (currentFluidSearch !== useFluidSearch) {
+        setUseFluidSearch(currentFluidSearch);
+      }
+
+      if (currentFluidSearch) {
+        // 流式搜索：打开新的流式连接
+        const es = new EventSource(`/api/search/ws?q=${encodeURIComponent(trimmed)}`);
+        eventSourceRef.current = es;
+
+        es.onmessage = (event) => {
+          if (!event.data) return;
+          try {
+            const payload = JSON.parse(event.data);
+            if (currentQueryRef.current !== trimmed) return;
+            switch (payload.type) {
+              case 'start':
+                setTotalSources(payload.totalSources || 0);
+                setCompletedSources(0);
+                break;
+              case 'source_result': {
+                setCompletedSources((prev) => prev + 1);
+                if (Array.isArray(payload.results) && payload.results.length > 0) {
+                  // 缓冲新增结果，节流刷入，避免频繁重渲染导致闪烁
+                  const activeYearOrder = (viewMode === 'agg' ? (filterAgg.yearOrder) : (filterAll.yearOrder));
+                  const incoming: SearchResult[] =
+                    activeYearOrder === 'none'
+                      ? sortBatchForNoOrder(payload.results as SearchResult[])
+                      : (payload.results as SearchResult[]);
+                  pendingResultsRef.current.push(...incoming);
+                  if (!flushTimerRef.current) {
+                    flushTimerRef.current = window.setTimeout(() => {
+                      const toAppend = pendingResultsRef.current;
+                      pendingResultsRef.current = [];
+                      startTransition(() => {
+                        setSearchResults((prev) => prev.concat(toAppend));
+                      });
+                      flushTimerRef.current = null;
+                    }, 80);
+                  }
+                }
+                break;
+              }
+              case 'source_error':
+                setCompletedSources((prev) => prev + 1);
+                break;
+              case 'complete':
+                setCompletedSources(payload.completedSources || totalSources);
+                // 完成前确保将缓冲写入
+                if (pendingResultsRef.current.length > 0) {
+                  const toAppend = pendingResultsRef.current;
+                  pendingResultsRef.current = [];
+                  if (flushTimerRef.current) {
+                    clearTimeout(flushTimerRef.current);
+                    flushTimerRef.current = null;
+                  }
+                  startTransition(() => {
+                    setSearchResults((prev) => prev.concat(toAppend));
+                  });
+                }
+                setIsLoading(false);
+                try { es.close(); } catch { }
+                if (eventSourceRef.current === es) {
+                  eventSourceRef.current = null;
+                }
+                break;
+            }
+          } catch { }
+        };
+
+        es.onerror = () => {
+          setIsLoading(false);
+          // 错误时也清空缓冲
+          if (pendingResultsRef.current.length > 0) {
+            const toAppend = pendingResultsRef.current;
+            pendingResultsRef.current = [];
+            if (flushTimerRef.current) {
+              clearTimeout(flushTimerRef.current);
+              flushTimerRef.current = null;
+            }
+            startTransition(() => {
+              setSearchResults((prev) => prev.concat(toAppend));
+            });
+          }
+          try { es.close(); } catch { }
+          if (eventSourceRef.current === es) {
+            eventSourceRef.current = null;
+          }
+        };
+      } else {
+        // 传统搜索：使用普通接口
+		fetchSearchResults(query);
+      }
+
 
       // 保存到搜索历史 (事件监听会自动更新界面)
       addSearchHistory(query);
     } else {
       setShowResults(false);
+      setShowSuggestions(false);
     }
   }, [searchParams]);
 
+  // 组件卸载时，关闭可能存在的连接
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        try { eventSourceRef.current.close(); } catch { }
+        eventSourceRef.current = null;
+      }
+      if (flushTimerRef.current) {
+        clearTimeout(flushTimerRef.current);
+        flushTimerRef.current = null;
+      }
+      pendingResultsRef.current = [];
+    };
+  }, []);
+	
   const fetchSearchResults = async (query: string) => {
     try {
-      setIsLoading(true);
+      //setIsLoading(true);
+		setSearchResults([]); // 清空旧结果
+		currentQueryRef.current = query.trim(); // 更新当前查询引用
       const response = await fetch(
         `/api/search?q=${encodeURIComponent(query.trim())}`
       );
@@ -350,9 +499,34 @@ function SearchPageClient() {
         uniqueSources.add(item.source);
       }
     });
+    // 应用排序 - 根据当前的排序状态
+    const activeYearOrder = viewMode === 'agg' ? filterAgg.yearOrder : filterAll.yearOrder;
+    
+    if (activeYearOrder === 'none') {
+      // 使用 sortBatchForNoOrder 进行预排序
+      results = sortBatchForNoOrder(results);
+    } else {
+      // 使用现有的排序逻辑（流式搜索中用的逻辑）
+      results = results.sort((a: SearchResult, b: SearchResult) => {
+        // 首先按年份排序
+        const yearComp = compareYear(a.year, b.year, activeYearOrder);
+        if (yearComp !== 0) return yearComp;
+
+        // 年份相同时，精确匹配在前
+        const aExactMatch = a.title === query.trim();
+        const bExactMatch = b.title === query.trim();
+        if (aExactMatch && !bExactMatch) return -1;
+        if (!aExactMatch && bExactMatch) return 1;
+
+        // 最后按标题排序
+        return activeYearOrder === 'asc' ?
+          a.title.localeCompare(b.title) :
+          b.title.localeCompare(a.title);
+      });
+    }
       setSearchResults(results);
       setTotalSources(uniqueSources.size);
-      setShowResults(true);
+      //setShowResults(true);
     } catch (error) {
       setSearchResults([]);
       setTotalSources(0);
@@ -401,13 +575,11 @@ function SearchPageClient() {
     setSearchQuery(trimmed);
     setIsLoading(true);
     setShowResults(true);
+    setShowSuggestions(false);
 
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
-    // 直接发请求
-    fetchSearchResults(trimmed);
 
-    // 保存到搜索历史 (事件监听会自动更新界面)
-    addSearchHistory(trimmed);
+	// 其余由 searchParams 变化的 effect 处理
   };
 
   // 返回顶部功能
@@ -485,22 +657,30 @@ function SearchPageClient() {
 
         {/* 搜索结果或搜索历史 */}
         <div className='max-w-[95%] mx-auto mt-8 overflow-visible'>
-          {isLoading ? (
-            <div className='flex justify-center items-center h-40'>
-              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-500'></div>
-            </div>
-          ) : showResults ? (
+          {showResults ? (
             <section className='mb-8'>
               {/* 标题 + 聚合开关 */}
               <div className='mb-4 flex items-center justify-between'>
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
                   搜索结果
-                    {/* 添加进度指示器 */}
-                {!isLoading && searchResults.length > 0 && totalSources > 0 && (
-                  <span className='ml-2 text-lg font-normal text-gray-500 dark:text-gray-400'>
-                    {totalSources}个来源
-                  </span>
-                )}
+				  {totalSources > 0 && (
+					<>
+					  {useFluidSearch ? (
+						<span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
+						  {completedSources}/{totalSources}个资源
+						</span>
+					  ) : (
+						<span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
+						  {totalSources}个资源
+						</span>
+					  )}
+					</>
+				  )}
+				  {isLoading && useFluidSearch && (
+					<span className='ml-2 inline-block align-middle'>
+					  <span className='inline-block h-3 w-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
+					</span>
+				  )}
                 </h2>
                 {/* 聚合开关 */}
                 <label className='flex items-center gap-2 cursor-pointer select-none'>
@@ -539,11 +719,17 @@ function SearchPageClient() {
                   )}
                 </div>
               </div>
-			    {(viewMode === 'agg' ? filteredAggResults.length : filteredAllResults.length) === 0 ? (
-			      <div className='text-center text-gray-500 py-8 dark:text-gray-400'>
-			        {searchResults.length === 0 ? '未找到相关结果' : '筛选后无结果'}
-			      </div>
-			    ) : (
+              {searchResults.length === 0 ? (
+                isLoading ? (
+                  <div className='flex justify-center items-center h-40'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-500'></div>
+                  </div>
+                ) : (
+                  <div className='text-center text-gray-500 py-8 dark:text-gray-400'>
+                    未找到相关结果
+                  </div>
+                )
+              ) : (
               <div
                 key={`search-results-${viewMode}`}
                 className='justify-start grid grid-cols-3 gap-x-2 gap-y-14 sm:gap-y-20 px-0 sm:px-2 sm:grid-cols-[repeat(auto-fill,_minmax(11rem,_1fr))] sm:gap-x-8'
