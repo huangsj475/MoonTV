@@ -422,23 +422,6 @@ function SearchPageClient() {
               case 'complete':{
                 setCompletedSources(payload.completedSources || totalSources);
 
-				  //---新增： 计算最终的视频源总数---
-				  const allResults = [...searchResults, ...pendingResultsRef.current];
-				  const videoSourcesSet = new Set<string>();
-				  
-					//  从流式搜索的结果中计算唯一视频源
-					allResults.forEach((item: SearchResult) => {
-					  if (item.source) {
-					    videoSourcesSet.add(item.source);
-					  }
-					});
-				  
-				  const finalVideoCount = videoSourcesSet.size;
-				  
-				  // 设置最终的视频源总数
-				  setTotalSources(finalVideoCount);
-					//---新增： 计算最终的视频源总数----
-					
                 // 完成前确保将缓冲写入
                 if (pendingResultsRef.current.length > 0) {
                   const toAppend = pendingResultsRef.current;
@@ -448,8 +431,25 @@ function SearchPageClient() {
                     flushTimerRef.current = null;
                   }
                   startTransition(() => {
-                    setSearchResults((prev) => prev.concat(toAppend));
+                    //setSearchResults((prev) => prev.concat(toAppend));
+					setSearchResults((prev) => {const newResults = prev.concat(toAppend);
+					
+					  //  直接在这里计算唯一视频源
+					const videoSourcesSet = new Set<string>();
+					newResults.forEach((item: SearchResult) => {
+					  if (item.source) {
+						videoSourcesSet.add(item.source);
+					  }
+					});
+					
+					const finalVideoCount = videoSourcesSet.size;
+					
+					//  设置最终的视频源总数
+					setTotalSources(finalVideoCount);
+					return newResults;
                   });
+
+                }
                 }
                 setIsLoading(false);
                 try { es.close(); } catch { }
@@ -704,7 +704,7 @@ function SearchPageClient() {
 					    // 流式搜索进行中：显示 API 源进度
 					    <>
 					      <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
-					        {completedSources}/{totalSources}个可用源
+					        {completedSources}/{totalSources}个视频源
 					      </span>
 					    </>
 					  ) : totalSources > 0 ? (
