@@ -601,7 +601,7 @@ function SearchPageClient() {
       //setShowResults(true);
     } catch (error) {
       setSearchResults([]);
-      setTotalSources(0);
+      setVideoSourcesCount(0)
     } finally {
       setIsLoading(false);
     }
