@@ -424,6 +424,23 @@ function SearchPageClient() {
                 break;
               case 'complete':
                 setCompletedSources(payload.completedSources || totalSources);
+
+				  //---新增： 计算最终的视频源总数---
+				  const allResults = [...searchResults, ...pendingResultsRef.current];
+				  const videoSourcesSet = new Set<string>();
+				  
+				  allResults.forEach((item: SearchResult) => {
+				    if (item.source) {
+				      videoSourcesSet.add(item.source);
+				    }
+				  });
+				  
+				  const finalVideoCount = videoSourcesSet.size;
+				  
+				  // 设置最终的视频源总数
+				  setTotalSources(finalVideoCount);
+					//---新增： 计算最终的视频源总数----
+					
                 // 完成前确保将缓冲写入
                 if (pendingResultsRef.current.length > 0) {
                   const toAppend = pendingResultsRef.current;
@@ -683,20 +700,23 @@ function SearchPageClient() {
               {/* 标题 + 聚合开关 */}
               <div className='mb-4 flex items-center justify-between'>
                 <h2 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
-                  搜索结果
-				  {totalSources > 0 && (
-					<>
-					  {useFluidSearch ? (
-						<span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
-						  {completedSources}/{totalSources}个资源
-						</span>
-					  ) : (
-						<span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
-						  {totalSources}个资源
-						</span>
-					  )}
-					</>
-				  )}
+					  搜索结果
+					  {isLoading && useFluidSearch ? (
+					    // 流式搜索进行中：显示 API 源进度
+					    <>
+					      <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
+					        {completedSources}/{totalSources}个可用源
+					      </span>
+					      <span className='ml-2 inline-block align-middle'>
+					        <span className='inline-block h-3 w-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
+					      </span>
+					    </>
+					  ) : totalSources > 0 ? (
+					    // 搜索完成（流式或传统）：显示视频源总数
+					    <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
+					      {totalSources}个可用源
+					    </span>
+					  ) : null}
 				  {isLoading && useFluidSearch && (
 					<span className='ml-2 inline-block align-middle'>
 					  <span className='inline-block h-3 w-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
@@ -744,6 +764,7 @@ function SearchPageClient() {
                 isLoading ? (
                   <div className='flex justify-center items-center h-40'>
                     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-500'></div>
+					  搜索中......
                   </div>
                 ) : (
                   <div className='text-center text-gray-500 py-8 dark:text-gray-400'>
