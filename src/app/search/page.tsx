@@ -471,9 +471,25 @@ function SearchPageClient() {
               clearTimeout(flushTimerRef.current);
               flushTimerRef.current = null;
             }
-            startTransition(() => {
-              setSearchResults((prev) => prev.concat(toAppend));
-            });
+		    startTransition(() => {
+		      setSearchResults((prev) => {
+		        const newResults = prev.concat(toAppend);
+		        
+		        // 重新计算实际的唯一视频源数量
+		        const videoSourcesSet = new Set<string>();
+		        newResults.forEach((item: SearchResult) => {
+		          if (item.source) {
+		            videoSourcesSet.add(item.source);
+		          }
+		        });
+		        
+		        const finalVideoCount = videoSourcesSet.size;
+		        
+		        // 设置最终的视频源总数
+		        setTotalSources(finalVideoCount);
+		        return newResults;
+		      });
+		    });
           }
           try { es.close(); } catch { }
           if (eventSourceRef.current === es) {
