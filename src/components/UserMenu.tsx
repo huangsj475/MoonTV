@@ -60,6 +60,29 @@ export const UserMenu: React.FC = () => {
     }
   }, []);
 
+    // Body 滚动锁定 - 使用 overflow 方式避免布局问题
+  useEffect(() => {
+    if (isSettingsOpen || isChangePasswordOpen) {
+      const body = document.body;
+      const html = document.documentElement;
+
+      // 保存原始样式
+      const originalBodyOverflow = body.style.overflow;
+      const originalHtmlOverflow = html.style.overflow;
+
+      // 只设置 overflow 来阻止滚动
+      body.style.overflow = 'hidden';
+      html.style.overflow = 'hidden';
+
+      return () => {
+
+        // 恢复所有原始样式
+        body.style.overflow = originalBodyOverflow;
+        html.style.overflow = originalHtmlOverflow;
+      };
+    }
+  }, [isSettingsOpen, isChangePasswordOpen]);
+  
   // 从 localStorage 读取设置
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -452,10 +475,30 @@ export const UserMenu: React.FC = () => {
       <div
         className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000]'
         onClick={handleCloseSettings}
+        onTouchMove={(e) => {
+          // 只阻止滚动，允许其他触摸事件
+          e.preventDefault();
+        }}
+        onWheel={(e) => {
+          // 阻止滚轮滚动
+          e.preventDefault();
+        }}
+        style={{
+          touchAction: 'none',
+        }}
       />
 
       {/* 设置面板 */}
-      <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-xl z-[1001] p-6'>
+      <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl max-h-[90vh] bg-white dark:bg-gray-900 rounded-xl shadow-xl z-[1001] flex flex-col'>
+        {/* 内容容器 - 独立的滚动区域 */}
+        <div
+          className='flex-1 p-6 overflow-y-auto'
+          data-panel-content
+          style={{
+            touchAction: 'pan-y', // 只允许垂直滚动
+            overscrollBehavior: 'contain', // 防止滚动冒泡
+          }}
+        >
         {/* 标题栏 */}
         <div className='flex items-center justify-between mb-6'>
           <div className='flex items-center gap-3'>
@@ -660,7 +703,8 @@ export const UserMenu: React.FC = () => {
         <div className='mt-6 pt-4 border-t border-gray-200 dark:border-gray-700'>
           <p className='text-xs text-gray-500 dark:text-gray-400 text-center'>
             这些设置保存在本地浏览器中
-          </p>
+            </p>
+          </div>
         </div>
       </div>
     </>
@@ -673,10 +717,33 @@ export const UserMenu: React.FC = () => {
       <div
         className='fixed inset-0 bg-black/50 backdrop-blur-sm z-[1000]'
         onClick={handleCloseChangePassword}
+        onTouchMove={(e) => {
+          // 只阻止滚动，允许其他触摸事件
+          e.preventDefault();
+        }}
+        onWheel={(e) => {
+          // 阻止滚轮滚动
+          e.preventDefault();
+        }}
+        style={{
+          touchAction: 'none',
+        }}
       />
 
       {/* 修改密码面板 */}
       <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-gray-900 rounded-xl shadow-xl z-[1001] p-6'>
+        {/* 内容容器 - 独立的滚动区域 */}
+        <div
+          className='h-full p-6'
+          data-panel-content
+          onTouchMove={(e) => {
+            // 阻止事件冒泡到遮罩层，但允许内部滚动
+            e.stopPropagation();
+          }}
+          style={{
+            touchAction: 'auto', // 允许所有触摸操作
+          }}
+        >
         {/* 标题栏 */}
         <div className='flex items-center justify-between mb-6'>
           <h3 className='text-xl font-bold text-gray-800 dark:text-gray-200'>
@@ -753,7 +820,8 @@ export const UserMenu: React.FC = () => {
         <div className='mt-4 pt-4 border-t border-gray-200 dark:border-gray-700'>
           <p className='text-xs text-gray-500 dark:text-gray-400 text-center'>
             修改密码后需要重新登录
-          </p>
+            </p>
+          </div>
         </div>
       </div>
     </>
