@@ -370,9 +370,6 @@ function SearchPageClient() {
         const savedFluidSearch = localStorage.getItem('fluidSearch');
         if (savedFluidSearch !== null) {
           currentFluidSearch = JSON.parse(savedFluidSearch);
-        } else {
-          const defaultFluidSearch = (window as any).RUNTIME_CONFIG?.FLUID_SEARCH !== false;
-          currentFluidSearch = defaultFluidSearch;
         }
       }
 
@@ -429,11 +426,12 @@ function SearchPageClient() {
 				  const allResults = [...searchResults, ...pendingResultsRef.current];
 				  const videoSourcesSet = new Set<string>();
 				  
-				  allResults.forEach((item: SearchResult) => {
-				    if (item.source) {
-				      videoSourcesSet.add(item.source);
-				    }
-				  });
+					//  从流式搜索的结果中计算唯一视频源
+					allResults.forEach((item: SearchResult) => {
+					  if (item.source) {
+					    videoSourcesSet.add(item.source);
+					  }
+					});
 				  
 				  const finalVideoCount = videoSourcesSet.size;
 				  
@@ -708,9 +706,6 @@ function SearchPageClient() {
 					      <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
 					        {completedSources}/{totalSources}个可用源
 					      </span>
-					      <span className='ml-2 inline-block align-middle'>
-					        <span className='inline-block h-3 w-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
-					      </span>
 					    </>
 					  ) : totalSources > 0 ? (
 					    // 搜索完成（流式或传统）：显示视频源总数
@@ -765,7 +760,7 @@ function SearchPageClient() {
                 isLoading ? (
                   <div className='flex justify-center items-center h-40'>
                     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-500'></div>
-					  搜索中......
+					<div className='text-gray-500 dark:text-gray-400'>搜索中......</div>
                   </div>
                 ) : (
                   <div className='text-center text-gray-500 py-8 dark:text-gray-400'>
