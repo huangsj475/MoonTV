@@ -742,7 +742,7 @@ function SearchPageClient() {
 					        {completedSources}/{totalSources}个视频源
 					      </span>
 					    </>
-					  ) : totalSources > 0 ? (
+					  ) : !isLoading && videoSourcesCount > 0 (
 					    // 搜索完成（流式或传统）：显示视频源总数
 					    <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
 					      {videoSourcesCount}个可用源
