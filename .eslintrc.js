@@ -17,6 +17,7 @@ module.exports = {
     'no-console': 'warn',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     'react/no-unescaped-entities': 'off',
+    "no-empty": ["error", { "allowEmptyCatch": true }],
 
     'react/display-name': 'off',
     'react/jsx-curly-brace-presence': [
