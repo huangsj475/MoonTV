@@ -253,18 +253,12 @@ export default function VideoCard({
 
 
   const handleClick = useCallback(() => {
-    // 动漫（Bangumi）的特殊处理
-    if (isBangumi && from === 'douban' && actualDoubanId) {
-      // 动漫点击：跳转到Bangumi详情页
-      window.open(`https://bgm.tv/subject/${actualDoubanId}`, '_blank', 'noopener,noreferrer');
-      return;
-    }
-	  
-    if (from === 'douban') {
+
+    if (from === 'douban'|| (!actualSource && !actualId)) {
       router.push(
         `/play?title=${encodeURIComponent(actualTitle.trim())}${
           actualYear ? `&year=${actualYear}` : ''
-        }${actualSearchType ? `&stype=${actualSearchType}` : ''}`
+        }${actualSearchType ? `&stype=${actualSearchType}` : ''}${isAggregate ? '&prefer=true' : ''}${actualQuery ? `&stitle=${encodeURIComponent(actualQuery.trim())}` : ''}`
       );
     } else if (actualSource && actualId) {
       router.push(
@@ -287,8 +281,6 @@ export default function VideoCard({
     isAggregate,
     actualQuery,
     actualSearchType,
-    isBangumi, // 添加isBangumi依赖
-    actualDoubanId, // 添加actualDoubanId依赖
   ]);
 
   const config = useMemo(() => {
