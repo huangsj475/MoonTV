@@ -34,9 +34,24 @@ export async function GET(request: Request) {
     if (!config.SiteConfig.DisableYellowFilter) {
       flattenedResults = flattenedResults.filter((result) => {
         const typeName = result.type_name || '';
-        return !yellowWords.some((word: string) => typeName.includes(word));
-      });
-    }
+              //---新增：标题过滤
+              const title = (result.title || '').toLowerCase();
+              const searchQuery = query.toLowerCase();
+              // 同时满足两个条件：
+              // 1. 不是黄色内容
+              // 2. 标题包含搜索词
+              return !yellowWords.some((word: string) => typeName.includes(word)) && 
+                     title.includes(searchQuery);
+
+            });
+          } else {
+            // 即使黄色过滤关闭，也要进行标题过滤
+            filteredResults = results.filter((result) => {
+              const title = (result.title || '').toLowerCase();
+              const searchQuery = query.toLowerCase();
+              return title.includes(searchQuery);
+            });
+          }
     const cacheTime = await getCacheTime();
 
     return NextResponse.json(
