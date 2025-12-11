@@ -699,7 +699,7 @@ function SearchPageClient() {
 					  ) : null}
 				  {isLoading && useFluidSearch && (
 					<span className='ml-2 inline-block align-middle'>
-					  <span className='inline-block h-4 w-4 lg:h-5 lg:w-5 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
+					  <span className='inline-block h-4 w-4 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
 					</span>
 				  )}
                 </h2>
