@@ -504,7 +504,7 @@ function SearchPageClient() {
       );
       const data = await response.json();
       let results = data.results;
-      if (
+      /*if (
         typeof window !== 'undefined' &&
         !(window as any).RUNTIME_CONFIG?.DISABLE_YELLOW_FILTER
       ) {
@@ -512,7 +512,7 @@ function SearchPageClient() {
           const typeName = result.type_name || '';
           return !yellowWords.some((word: string) => typeName.includes(word));
         });
-      }
+      }*/
 
     // 应用排序 - 根据当前的排序状态
     const activeYearOrder = viewMode === 'agg' ? filterAgg.yearOrder : filterAll.yearOrder;
