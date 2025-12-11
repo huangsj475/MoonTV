@@ -46,7 +46,7 @@ export async function GET(request: Request) {
             });
           } else {
             // 即使黄色过滤关闭，也要进行标题过滤
-            filteredResults = results.filter((result) => {
+            flattenedResults = flattenedResults.filter((result) => {
               const title = (result.title || '').toLowerCase();
               const searchQuery = query.toLowerCase();
               return title.includes(searchQuery);
