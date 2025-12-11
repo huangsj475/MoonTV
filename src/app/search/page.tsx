@@ -679,13 +679,13 @@ function SearchPageClient() {
 					  {isLoading && useFluidSearch ? (
 					    // 流式搜索进行中：显示 API 源进度
 					    <>
-					      <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
+					      <span className='ml-2 text-base lg:text-lg font-normal text-gray-500 dark:text-gray-400'>
 					        {completedSources}/{totalSources}个视频源
 					      </span>
 					    </>
 					  ) : !isLoading && searchResults.length > 0 ? (
 					    // 搜索完成（流式或传统）：显示视频源总数
-					    <span className='ml-2 text-sm font-normal text-gray-500 dark:text-gray-400'>
+					    <span className='ml-2 text-base lg:text-lg font-normal text-gray-500 dark:text-gray-400'>
 						  {(() => {
 							const videoSourcesSet = new Set<string>();
 							searchResults.forEach((item: SearchResult) => {
@@ -699,7 +699,7 @@ function SearchPageClient() {
 					  ) : null}
 				  {isLoading && useFluidSearch && (
 					<span className='ml-2 inline-block align-middle'>
-					  <span className='inline-block h-3 w-3 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
+					  <span className='inline-block h-4 w-4 lg:h-5 lg:w-5 border-2 border-gray-300 border-t-green-500 rounded-full animate-spin'></span>
 					</span>
 				  )}
                 </h2>
@@ -742,8 +742,8 @@ function SearchPageClient() {
               </div>
               {searchResults.length === 0 ? (
                 isLoading ? (
-                  <div className='flex justify-center items-center h-40'>
-                    <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-green-500'></div>
+                  <div className='flex justify-center items-center h-40 flex-col'>
+                    <div className='animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-green-500'></div>
 					<div className='text-gray-500 dark:text-gray-400'>搜索中......</div>
                   </div>
                 ) : (
