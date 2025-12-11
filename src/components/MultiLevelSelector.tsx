@@ -245,7 +245,7 @@ const MultiLevelSelector: React.FC<MultiLevelSelectorProps> = ({
           { label: '腾讯视频', value: 'tencent' },
           { label: '爱奇艺', value: 'iqiyi' },
           { label: '优酷', value: 'youku' },
-          { label: '芒果TV', value: 'mangguo_tv' },
+          { label: '湖南卫视', value: 'hunan_tv' },
           { label: 'Netflix', value: 'netflix' },
           { label: 'HBO', value: 'hbo' },
           { label: 'BBC', value: 'bbc' },
