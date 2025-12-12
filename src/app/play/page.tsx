@@ -50,6 +50,7 @@ function PlayPageClient() {
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
+  const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -834,10 +835,12 @@ useEffect(() => {
       
       if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
         artPlayerRef.current.video.hls.destroy();
+		console.log('播放进度已保存后---播放器视频流hls销毁');
       }
       
       if (typeof artPlayerRef.current.destroy === 'function') {
         artPlayerRef.current.destroy();
+		console.log('播放进度已保存后---播放器销毁');
       }
     }
     
@@ -998,6 +1001,7 @@ useEffect(() => {
   // 处理集数切换
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
+	  isChangingEpisodeRef.current = true;
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
@@ -1011,6 +1015,9 @@ useEffect(() => {
     } else {
       resumeTimeRef.current = null;
     }
+	      setTimeout(() => {
+		      isChangingEpisodeRef.current = false;
+		    }, 1500);
     setCurrentEpisodeIndex(episodeindexNumber);
   }
 };
@@ -1839,8 +1846,10 @@ useEffect(() => {
       });
 
       artPlayerRef.current.on('pause', () => {
-        saveCurrentPlayProgress();
-		console.log('暂停---播放进度已保存');
+		  if (!isChangingEpisodeRef.current) {
+		    saveCurrentPlayProgress();
+		    console.log('暂停---播放进度已保存');
+		  }
       });
 
 	  if (artPlayerRef.current?.video) {
