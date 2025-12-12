@@ -1002,7 +1002,6 @@ useEffect(() => {
     // 在更换集数前保存当前播放进度
     if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
-	  resumeTimeRef.current = null;
     }
     /*// 新增：查询历史记录，并设置 resumeTimeRef
     const allRecords = await getAllPlayRecords();
