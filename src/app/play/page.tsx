@@ -1716,15 +1716,16 @@ useEffect(() => {
 				          console.log('等待视频时长加载...');
 				          return;
 				        }
-				      
-						if (checkInterval) {
-						  clearInterval(checkInterval);
-						  checkInterval = null;
-						}
 					  const finalTarget = target >= duration - 2 ? Math.max(0, duration - 5) : target;
 					  player.currentTime = finalTarget;
 					  console.log('成功恢复播放进度到:', finalTarget);
 					  resumeTimeRef.current = null;
+					  
+						if (checkInterval) {
+						  clearInterval(checkInterval);
+						  console.log('恢复播放进度，已清除定时器');
+						  checkInterval = null;
+						}
 				     
 				  }, 100); // 每100ms检查一次
 				  
