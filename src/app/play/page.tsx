@@ -1829,7 +1829,7 @@ useEffect(() => {
         }
       });
 
-      artPlayerRef.current.on('video:timeupdate', () => {
+      /*artPlayerRef.current.on('video:timeupdate', () => {
         const now = Date.now();
         let interval = 5000;
         if (process.env.NEXT_PUBLIC_STORAGE_TYPE === 'd1') {
@@ -1843,7 +1843,7 @@ useEffect(() => {
 		  console.log('d1-10s,upatash-20s,其他-5s，定时保存---播放进度已保存');
           lastSaveTimeRef.current = now;
         }
-      });
+      });*/
 
       artPlayerRef.current.on('pause', () => {
 		  if (!isChangingEpisodeRef.current) {
