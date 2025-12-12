@@ -1706,6 +1706,7 @@ useEffect(() => {
 				  // 使用setInterval持续检查条件
 				  let isCompleted = false;
 				  const checkInterval = setInterval(() => {
+					  if (isCompleted) return;
 				      const player = artPlayerRef.current;
 				      if (!player?.video || player.video.readyState < 2) {
 				          console.log('等待播放器视频就绪...');
