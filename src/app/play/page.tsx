@@ -1705,7 +1705,7 @@ useEffect(() => {
             */
             // 添加延迟确保播放器完全准备好-----改后---------
       setTimeout(() => {
-        if (artPlayerRef.current) {
+        if (artPlayerRef.current && artPlayerRef.current.video && artPlayerRef.current.video.hls) {
           artPlayerRef.current.currentTime = target;
           console.log('成功恢复播放进度到:', target);
         }
