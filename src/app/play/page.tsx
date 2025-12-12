@@ -1692,43 +1692,36 @@ useEffect(() => {
         // 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
           try {
-            const duration = artPlayerRef.current.duration || 0;
             let target = resumeTimeRef.current;
-            if (duration && target >= duration - 2) {
-              target = Math.max(0, duration - 5);
-            }
-           /* //--------原来的---------------
-            artPlayerRef.current.currentTime = target;
-            console.log('成功恢复播放进度到:', resumeTimeRef.current);
-            //--------原来的---------------
-            */
 				setTimeout(() => {
 				  // 使用setInterval持续检查条件
 				  const checkInterval = setInterval(() => {
-				    if (artPlayerRef.current && artPlayerRef.current.video) {
-				      const video = artPlayerRef.current.video;
+				      const player = artPlayerRef.current;
+				      if (!player?.video || player.video.readyState < 2) {
+				          console.log('等待播放器视频就绪...');
+				          return;
+				        }
+				      const duration = player.duration;
+				      if (!duration || duration <= 0) {
+				          console.log('等待视频时长加载...');
+				          return;
+				        }
 				      
-				      // 检查视频就绪状态
-				      if (video.readyState >= 2) {
-				        // 清除定时器
-				        clearInterval(checkInterval);
-				        // 执行跳转
-				        artPlayerRef.current.currentTime = target;
-				        console.log('成功恢复播放进度到:', target);
-				      } else {
-				        console.log(`等待视频就绪... (readyState: ${video.readyState})`);
-				      }
-				    } else {
-				      console.log('等待播放器或视频元素就绪...');
-				    }
+				      clearInterval(checkInterval);
+					  const finalTarget = target >= duration - 2 ? Math.max(0, duration - 5) : target;
+					  player.currentTime = finalTarget;
+					  console.log('成功恢复播放进度到:', finalTarget);
+					  resumeTimeRef.current = null;
+				     
 				  }, 300); // 每300ms检查一次
 				  
 				  // 设置超时，3秒后强制清除
 				  setTimeout(() => {
 				    clearInterval(checkInterval);
+					resumeTimeRef.current = null; //  超时也清除
 				    console.log('检查超时，已清除定时器');
 				  }, 3000);
-				}, 500);
+				}, 800);
             /*// 添加延迟确保播放器完全准备好-----改后---------
       setTimeout(() => {
         if (artPlayerRef.current && artPlayerRef.current.video) {
@@ -1739,12 +1732,8 @@ useEffect(() => {
             //-----改后---------
           } catch (err) {
             console.warn('恢复播放进度失败:', err);
-          }finally {
-      // 只在成功或失败后清除，不要提前清除------改后的-------
-      setTimeout(() => {
-        resumeTimeRef.current = null;
-      }, 300);
-        }
+			resumeTimeRef.current = null;
+          }
      } 
         //resumeTimeRef.current = null;-----原来的------
 
