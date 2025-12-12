@@ -830,6 +830,7 @@ useEffect(() => {
   return () => {
     if (artPlayerRef.current) {
       saveCurrentPlayProgress();
+	  console.log('播放器销毁前---播放进度已保存');
       
       if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
         artPlayerRef.current.video.hls.destroy();
@@ -998,9 +999,9 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
     // 在更换集数前保存当前播放进度
-    if (artPlayerRef.current && artPlayerRef.current.paused) {
+    /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
-    }
+    }*/
     // 新增：查询历史记录，并设置 resumeTimeRef
     const allRecords = await getAllPlayRecords();
     const key = generateStorageKey(currentSource, currentId);
@@ -1020,6 +1021,7 @@ useEffect(() => {
     if (d && d.episodes && idx > 0) {
       if (artPlayerRef.current && !artPlayerRef.current.paused) {
         saveCurrentPlayProgress();
+		console.log('上一集---播放进度已保存');
       }
       setCurrentEpisodeIndex(idx - 1);
     }
@@ -1031,6 +1033,7 @@ useEffect(() => {
     if (d && d.episodes && idx < d.episodes.length - 1) {
       if (artPlayerRef.current && !artPlayerRef.current.paused) {
         saveCurrentPlayProgress();
+		console.log('下一集---播放进度已保存');
       }
       setCurrentEpisodeIndex(idx + 1);
     }
@@ -1182,7 +1185,7 @@ useEffect(() => {
     // 页面即将卸载时保存播放进度
     const handleBeforeUnload = () => {
       saveCurrentPlayProgress();
-      
+	  console.log('页面即将卸载时---播放进度已保存');
     };
 
  
@@ -1190,6 +1193,7 @@ useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         saveCurrentPlayProgress();
+		console.log('页面隐藏---播放进度已保存');
       }else if (document.visibilityState === 'visible') {//---------新添加开始-----------
       // 页面重新可见时，重新检查播放进度
       if (currentSource && currentId) {
@@ -1829,12 +1833,14 @@ useEffect(() => {
         }
         if (now - lastSaveTimeRef.current > interval) {
           saveCurrentPlayProgress();
+		  console.log('d1-10s,upatash-20s,其他-5s，定时保存---播放进度已保存');
           lastSaveTimeRef.current = now;
         }
       });
 
       artPlayerRef.current.on('pause', () => {
         saveCurrentPlayProgress();
+		console.log('暂停---播放进度已保存');
       });
 
 	  if (artPlayerRef.current?.video) {
