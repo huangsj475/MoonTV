@@ -1702,13 +1702,40 @@ useEffect(() => {
             console.log('成功恢复播放进度到:', resumeTimeRef.current);
             //--------原来的---------------
             */
-            // 添加延迟确保播放器完全准备好-----改后---------
+				setTimeout(() => {
+				  // 使用setInterval持续检查条件
+				  const checkInterval = setInterval(() => {
+				    if (artPlayerRef.current && artPlayerRef.current.video) {
+				      const video = artPlayerRef.current.video;
+				      
+				      // 检查视频就绪状态
+				      if (video.readyState >= 2) {
+				        // 清除定时器
+				        clearInterval(checkInterval);
+				        // 执行跳转
+				        artPlayerRef.current.currentTime = target;
+				        console.log('成功恢复播放进度到:', target);
+				      } else {
+				        console.log(`等待视频就绪... (readyState: ${video.readyState})`);
+				      }
+				    } else {
+				      console.log('等待播放器或视频元素就绪...');
+				    }
+				  }, 300); // 每300ms检查一次
+				  
+				  // 设置超时，3秒后强制清除
+				  setTimeout(() => {
+				    clearInterval(checkInterval);
+				    console.log('检查超时，已清除定时器');
+				  }, 3000);
+				}, 500);
+            /*// 添加延迟确保播放器完全准备好-----改后---------
       setTimeout(() => {
-        if (artPlayerRef.current && artPlayerRef.current.video && artPlayerRef.current.video.hls) {
+        if (artPlayerRef.current && artPlayerRef.current.video) {
           artPlayerRef.current.currentTime = target;
           console.log('成功恢复播放进度到:', target);
         }
-      }, 1000);
+      }, 1000);*/
             //-----改后---------
           } catch (err) {
             console.warn('恢复播放进度失败:', err);
