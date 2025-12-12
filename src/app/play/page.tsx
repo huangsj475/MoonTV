@@ -50,8 +50,6 @@ function PlayPageClient() {
   const [loadingMessage, setLoadingMessage] = useState('正在搜索播放源...');
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
-  //新增 ------通过 Y 轴移动距离判断是否为上滑/下滑 ------
-  const touchStartY = useRef<number | null>(null);
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -1692,7 +1690,7 @@ useEffect(() => {
         // 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
           try {
-            let target = resumeTimeRef.current;
+            const target = resumeTimeRef.current;
 				setTimeout(() => {
 				  // 使用setInterval持续检查条件
 				  const checkInterval = setInterval(() => {
