@@ -1007,10 +1007,10 @@ useEffect(() => {
     const allRecords = await getAllPlayRecords();
     const key = generateStorageKey(currentSource, currentId);
     const record = allRecords[key];
-    if (record && record.index - 1 === episodeNumber) {
+    if (record && record.index + 1 === episodeNumber) {
       resumeTimeRef.current = record.play_time;
     } else {
-      resumeTimeRef.current = 0;
+      resumeTimeRef.current = null;
     }
     setCurrentEpisodeIndex(episodeNumber);
   }
@@ -1708,7 +1708,7 @@ useEffect(() => {
           artPlayerRef.current.currentTime = target;
           console.log('成功恢复播放进度到:', target);
         }
-      }, 1000);
+      }, 300);
             //-----改后---------
           } catch (err) {
             console.warn('恢复播放进度失败:', err);
@@ -1716,7 +1716,7 @@ useEffect(() => {
       // 只在成功或失败后清除，不要提前清除------改后的-------
       setTimeout(() => {
         resumeTimeRef.current = null;
-      }, 1000);
+      }, 300);
         }
      } 
         //resumeTimeRef.current = null;-----原来的------
