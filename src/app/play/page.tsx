@@ -1722,13 +1722,13 @@ useEffect(() => {
 					  console.log('成功恢复播放进度到:', finalTarget);
 					  resumeTimeRef.current = null;
 				     
-				  }, 300); // 每300ms检查一次
+				  }, 100); // 每100ms检查一次
 				  
 				  // 设置超时，3秒后强制清除
 				  setTimeout(() => {
 				    clearInterval(checkInterval);
 					resumeTimeRef.current = null; //  超时也清除
-				    console.log('检查超时，已清除定时器');
+				    console.log('检查超过3s后，已清除定时器');
 				  }, 3000);
 				}, 800);
             /*// 添加延迟确保播放器完全准备好-----改后---------
