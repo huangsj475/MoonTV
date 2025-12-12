@@ -1709,7 +1709,7 @@ useEffect(() => {
           artPlayerRef.current.currentTime = target;
           console.log('成功恢复播放进度到:', target);
         }
-      }, 300);
+      }, 600);
             //-----改后---------
           } catch (err) {
             console.warn('恢复播放进度失败:', err);
