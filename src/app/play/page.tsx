@@ -1704,7 +1704,8 @@ useEffect(() => {
             const target = resumeTimeRef.current;
 				setTimeout(() => {
 				  // 使用setInterval持续检查条件
-				  const checkInterval = setInterval(() => {
+				  let checkInterval = null;
+				  checkInterval = setInterval(() => {
 				      const player = artPlayerRef.current;
 				      if (!player?.video || player.video.readyState < 2) {
 				          console.log('等待播放器视频就绪...');
@@ -1716,7 +1717,10 @@ useEffect(() => {
 				          return;
 				        }
 				      
-				      clearInterval(checkInterval);
+						if (checkInterval) {
+						  clearInterval(checkInterval);
+						  checkInterval = null;
+						}
 					  const finalTarget = target >= duration - 2 ? Math.max(0, duration - 5) : target;
 					  player.currentTime = finalTarget;
 					  console.log('成功恢复播放进度到:', finalTarget);
@@ -1726,11 +1730,14 @@ useEffect(() => {
 				  
 				  // 设置超时，3秒后强制清除
 				  setTimeout(() => {
-				    clearInterval(checkInterval);
-					resumeTimeRef.current = null; //  超时也清除
-				    console.log('检查超过3s后，已清除定时器');
+					if (checkInterval) {
+					  clearInterval(checkInterval);
+					  checkInterval = null;
+					  resumeTimeRef.current = null;
+					  console.log('检查超过3s后，已清除定时器');
+					}
 				  }, 3000);
-				}, 600);
+				}, 400);
           } catch (err) {
             console.warn('恢复播放进度失败:', err);
 			resumeTimeRef.current = null;
