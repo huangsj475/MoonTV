@@ -1704,7 +1704,7 @@ useEffect(() => {
 				} else {
 				  // 解析用户输入的时间点
 				  const parsedTime = parseTimePoint(input);
-				  if (endTimeInSeconds === null) {
+				  if (parsedTime === null) {
 					return '输入无效';
 				  }
 					endTimeInSeconds = parsedTime;
