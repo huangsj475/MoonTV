@@ -51,6 +51,8 @@ function PlayPageClient() {
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
+  const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
+  const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -74,9 +76,6 @@ function PlayPageClient() {
     skipConfig.intro_time,
     skipConfig.outro_time,
   ]);
-
-  // 跳过检查的时间间隔控制
-  const lastSkipCheckRef = useRef(0);
 
   // 去广告开关（从 localStorage 继承，默认 true）
   const [blockAdEnabled, setBlockAdEnabled] = useState<boolean>(() => {
@@ -566,16 +565,27 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           tooltip:
             skipConfigRef.current.intro_time === 0
               ? '设置片头时间'
-              : `${formatTime(skipConfigRef.current.intro_time)}`,
+              : `${formatTime(skipConfigRef.current.intro_time)}(点击删除)`,
           onClick: function () {
             const currentTime = artPlayerRef.current?.currentTime || 0;
+			  const currentIntroTime = skipConfigRef.current.intro_time;
+			  	// 如果有设置，直接删除
+			    if (currentIntroTime > 0) {
+			        const newConfig = {
+			          ...skipConfigRef.current,
+			          intro_time: 0,
+			        };
+			        handleSkipConfigChange(newConfig);
+			        artPlayerRef.current.notice.show = '已删除片头配置';
+			        return '';
+			    }
             if (currentTime > 0) {
               const newConfig = {
                 ...skipConfigRef.current,
                 intro_time: currentTime,
               };
               handleSkipConfigChange(newConfig);
-              return `${formatTime(currentTime)}`;
+              return `${formatTime(currentTime)}(点击删除)`;
             }
           },
         });
@@ -586,8 +596,19 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           tooltip:
             skipConfigRef.current.outro_time >= 0
               ? '设置片尾时间'
-              : `-${formatTime(-skipConfigRef.current.outro_time)}`,
+              : `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
           onClick: function () {
+					const currentOutroTime = skipConfigRef.current.outro_time;
+					    // 如果有设置，直接删除
+				    if (currentOutroTime < 0) {
+				        const newConfig = {
+				          ...skipConfigRef.current,
+				          outro_time: 0,
+				        };
+				        handleSkipConfigChange(newConfig);
+				        artPlayerRef.current.notice.show = '已删除片尾配置';
+				      return '';
+				    }
             const outroTime =
               -(
                 artPlayerRef.current?.duration -
@@ -599,7 +620,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
                 outro_time: outroTime,
               };
               handleSkipConfigChange(newConfig);
-              return `-${formatTime(-outroTime)}`;
+              return `-${formatTime(-outroTime)}(点击删除)`;
             }
           },
         });
@@ -1018,6 +1039,10 @@ useEffect(() => {
 	      setTimeout(() => {
 		      isChangingEpisodeRef.current = false;
 		    }, 1500);
+	  // 重置片头/恢复处理标志
+    skipIntroProcessedRef.current = false;
+    // 重置片尾检查标志
+    outroCheckStartedRef.current = false;
     setCurrentEpisodeIndex(episodeindexNumber);
   }
 };
@@ -1571,6 +1596,74 @@ useEffect(() => {
 				},
 			  },
 			  {
+				name: '设置片头',
+				html: '设置片头',
+				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="2" fill="#ffffff"/><path d="M9 12L17 12" stroke="#ffffff" stroke-width="2"/><path d="M17 6L17 18" stroke="#ffffff" stroke-width="2"/></svg>',
+				tooltip:
+				  skipConfigRef.current.intro_time === 0
+					? '设置片头时间'
+					: `${formatTime(skipConfigRef.current.intro_time)}(点击删除)`,
+				onClick: function () {
+				  const currentTime = artPlayerRef.current?.currentTime || 0;
+				  const currentIntroTime = skipConfigRef.current.intro_time;
+
+			    // 如果有设置，直接删除
+			    if (currentIntroTime > 0) {
+			        const newConfig = {
+			          ...skipConfigRef.current,
+			          intro_time: 0,
+			        };
+			        handleSkipConfigChange(newConfig);
+			        artPlayerRef.current.notice.show = '已删除片头配置';
+			        return '';
+			    }
+			    // 如果没有设置，直接使用当前时间设置
+				  if (currentTime > 0) {
+					const newConfig = {
+					  ...skipConfigRef.current,
+					  intro_time: currentTime,
+					};
+					handleSkipConfigChange(newConfig);
+					return `${formatTime(currentTime)}(点击删除)`;
+				  }
+				},
+			  },
+			  {
+				name: '设置片尾',
+				html: '设置片尾',
+				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
+				tooltip:
+				  skipConfigRef.current.outro_time >= 0
+					? '设置片尾时间'
+					: `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
+				onClick: function () {
+					const currentOutroTime = skipConfigRef.current.outro_time;
+					    // 如果有设置，直接删除
+				    if (currentOutroTime < 0) {
+				        const newConfig = {
+				          ...skipConfigRef.current,
+				          outro_time: 0,
+				        };
+				        handleSkipConfigChange(newConfig);
+				        artPlayerRef.current.notice.show = '已删除片尾配置';
+				      return '';
+				    }
+				  const outroTime =
+					-(
+					  artPlayerRef.current?.duration -
+					  artPlayerRef.current?.currentTime
+					) || 0;
+				  if (outroTime < 0) {
+					const newConfig = {
+					  ...skipConfigRef.current,
+					  outro_time: outroTime,
+					};
+					handleSkipConfigChange(newConfig);
+					return `-${formatTime(-outroTime)}(点击删除)`;
+				  }
+				},
+			  },
+			  {
 				html: '删除跳过配置',
 				icon: `
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -1592,50 +1685,6 @@ useEffect(() => {
 					outro_time: 0,
 				  });
 				  return '';
-				},
-			  },
-			  {
-				name: '设置片头',
-				html: '设置片头',
-				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="2" fill="#ffffff"/><path d="M9 12L17 12" stroke="#ffffff" stroke-width="2"/><path d="M17 6L17 18" stroke="#ffffff" stroke-width="2"/></svg>',
-				tooltip:
-				  skipConfigRef.current.intro_time === 0
-					? '设置片头时间'
-					: `${formatTime(skipConfigRef.current.intro_time)}`,
-				onClick: function () {
-				  const currentTime = artPlayerRef.current?.currentTime || 0;
-				  if (currentTime > 0) {
-					const newConfig = {
-					  ...skipConfigRef.current,
-					  intro_time: currentTime,
-					};
-					handleSkipConfigChange(newConfig);
-					return `${formatTime(currentTime)}`;
-				  }
-				},
-			  },
-			  {
-				name: '设置片尾',
-				html: '设置片尾',
-				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
-				tooltip:
-				  skipConfigRef.current.outro_time >= 0
-					? '设置片尾时间'
-					: `-${formatTime(-skipConfigRef.current.outro_time)}`,
-				onClick: function () {
-				  const outroTime =
-					-(
-					  artPlayerRef.current?.duration -
-					  artPlayerRef.current?.currentTime
-					) || 0;
-				  if (outroTime < 0) {
-					const newConfig = {
-					  ...skipConfigRef.current,
-					  outro_time: outroTime,
-					};
-					handleSkipConfigChange(newConfig);
-					return `-${formatTime(-outroTime)}`;
-				  }
 				},
 			  },
         ],
@@ -1698,7 +1747,7 @@ useEffect(() => {
 
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-        // 若存在需要恢复的播放进度，则跳转
+        /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
           try {
             const target = resumeTimeRef.current;
@@ -1744,7 +1793,7 @@ useEffect(() => {
             console.warn('恢复播放进度失败:', err);
 			resumeTimeRef.current = null;
           }
-     } 
+     }*/ 
         //resumeTimeRef.current = null;-----原来的------
 
         setTimeout(() => {
@@ -1770,46 +1819,101 @@ useEffect(() => {
 
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
-        if (!skipConfigRef.current.enable) return;
+		  const currentTime = artPlayerRef.current.currentTime || 0;
+		  const duration = artPlayerRef.current.duration || 0;
 
-        const currentTime = artPlayerRef.current.currentTime || 0;
-        const duration = artPlayerRef.current.duration || 0;
-        const now = Date.now();
-
-        // 限制跳过检查频率为1.5秒一次
-        if (now - lastSkipCheckRef.current < 1500) return;
-        lastSkipCheckRef.current = now;
-
-        // 跳过片头
-        if (
-          skipConfigRef.current.intro_time > 0 &&
-          currentTime < skipConfigRef.current.intro_time
-        ) {
-          artPlayerRef.current.currentTime = skipConfigRef.current.intro_time;
-          artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(
-            skipConfigRef.current.intro_time
-          )})`;
-        }
-
-        // 跳过片尾
-        if (
-          skipConfigRef.current.outro_time < 0 &&
-          duration > 0 &&
-          currentTime >
-            artPlayerRef.current.duration + skipConfigRef.current.outro_time
-        ) {
-          if (
-            currentEpisodeIndexRef.current <
-            (detailRef.current?.episodes?.length || 1) - 1
-          ) {
-            handleNextEpisode();
-          } else {
-            artPlayerRef.current.pause();
-          }
-          artPlayerRef.current.notice.show = `已跳过片尾 (${formatTime(
-            skipConfigRef.current.outro_time
-          )})`;
-        }
+		  const resumeTime = resumeTimeRef.current || 0;
+		  const hasResumeTime = resumeTimeRef.current && resumeTimeRef.current > 0;
+		  const skipEnabled = skipConfigRef.current.enable;
+		  const introTime = skipConfigRef.current.intro_time || 0;
+		  const outroTime = skipConfigRef.current.outro_time || 0; // 负值，如 -60
+		
+		  // 情况1：跳过开关没开启并且没有恢复进度存在
+		  if (!skipEnabled && !hasResumeTime) {
+		    return;
+		  }
+		
+		  // ============= 处理跳过片头逻辑（只执行一次） =============
+		  
+		  // 使用一个局部变量记录是否处理过开头
+		  if (!skipIntroProcessedRef.current) {
+		    // 情况2：恢复进度存在，跳过开启
+		    if (hasResumeTime && skipEnabled && introTime > 0) {
+		      const targetTime = Math.max(resumeTime, introTime);
+		      
+		      if (currentTime < targetTime) {
+		        artPlayerRef.current.currentTime = targetTime;
+		        artPlayerRef.current.notice.show = targetTime === resumeTime 
+		          ? `已恢复进度 (${formatTime(resumeTime)})` 
+		          : `已跳过片头 (${formatTime(introTime)})`;
+		        
+		        resumeTimeRef.current = null;
+		        skipIntroProcessedRef.current = true;
+		        return;
+		      }
+		    }
+		
+		    // 情况3：只有恢复进度
+		    if (hasResumeTime && !skipEnabled) {
+		      if (currentTime < resumeTime) {
+		        artPlayerRef.current.currentTime = resumeTime;
+		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
+		        resumeTimeRef.current = null;
+		        skipIntroProcessedRef.current = true;
+		        return;
+		      }
+		    }
+		
+		    // 情况4：只有跳过片头
+		    if (skipEnabled && !hasResumeTime && introTime > 0) {
+		      if (currentTime < introTime) {
+		        artPlayerRef.current.currentTime = introTime;
+		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
+		        skipIntroProcessedRef.current = true;
+		        return;
+		      }
+		    }
+		
+		    // 如果当前时间已经超过可能的目标时间，标记为已处理
+		    const maxPossibleTime = Math.max(
+		      resumeTime,
+		      introTime
+		    );
+		    if (currentTime >= maxPossibleTime) {
+		      skipIntroProcessedRef.current = true;
+		    }
+		  }
+		
+		  // ============= 处理跳过结尾逻辑（延迟检查） =============
+		  
+		  // 跳过片尾：只有跳过开关开启且设置了片尾时间
+		  if (skipEnabled && outroTime < 0 && duration > 0) {
+		    // 计算片尾开始时间（负值变正）
+		    const outroStartTime = duration + outroTime; // outroTime是负值，如 -60 → 300-60=240
+		    
+		    // 优化：只有接近片尾开始时间（例如提前3秒）才开始检查
+		    // 避免整个视频都在检查片尾
+		    const checkStartTime = outroStartTime - 3; // 提前3秒开始检查
+		    
+		    // 如果还没到检查时间，直接返回
+		    if (currentTime < checkStartTime) {
+		      return;
+		    }
+		    
+		    // 现在才真正检查是否进入片尾区域
+		    if (!outroCheckStartedRef.current && currentTime > outroStartTime) {
+		      if (
+		        currentEpisodeIndexRef.current <
+		        (detailRef.current?.episodes?.length || 1) - 1
+		      ) {
+		        handleNextEpisode();
+		      } else {
+		        artPlayerRef.current.pause();
+		      }
+		      artPlayerRef.current.notice.show = `已跳过片尾`;
+			  outroCheckStartedRef.current = true;
+		    }
+		  }
       });
 
       artPlayerRef.current.on('error', (err: any) => {
