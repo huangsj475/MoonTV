@@ -1036,9 +1036,9 @@ useEffect(() => {
     } else {
       resumeTimeRef.current = 0;
     }
-	      setTimeout(() => {
-		      isChangingEpisodeRef.current = false;
-		    }, 1500);
+	   
+	isChangingEpisodeRef.current = false;
+	
 	  // 重置片头/恢复处理标志
     skipIntroProcessedRef.current = false;
     // 重置片尾检查标志
