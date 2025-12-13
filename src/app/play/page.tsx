@@ -1037,12 +1037,14 @@ useEffect(() => {
       resumeTimeRef.current = 0;
     }
 	   
-	isChangingEpisodeRef.current = false;
-	
-	  // 重置片头/恢复处理标志
-    skipIntroProcessedRef.current = false;
-    // 重置片尾检查标志
-    outroCheckStartedRef.current = false;
+	      setTimeout(() => {
+		    isChangingEpisodeRef.current = false;
+			// 重置片头/恢复处理标志
+			skipIntroProcessedRef.current = false;
+			// 重置片尾检查标志
+			outroCheckStartedRef.current = false;
+		    }, 1000);
+
     setCurrentEpisodeIndex(episodeindexNumber);
   }
 };
