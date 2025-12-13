@@ -1821,7 +1821,8 @@ useEffect(() => {
       artPlayerRef.current.on('video:timeupdate', () => {
 		  const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
-		
+
+		  const resumeTime = resumeTimeRef.current || 0;
 		  const hasResumeTime = resumeTimeRef.current && resumeTimeRef.current > 0;
 		  const skipEnabled = skipConfigRef.current.enable;
 		  const introTime = skipConfigRef.current.intro_time || 0;
@@ -1838,12 +1839,12 @@ useEffect(() => {
 		  if (!skipIntroProcessedRef.current) {
 		    // 情况2：恢复进度存在，跳过开启
 		    if (hasResumeTime && skipEnabled && introTime > 0) {
-		      const targetTime = Math.max(resumeTimeRef.current!, introTime);
+		      const targetTime = Math.max(resumeTime, introTime);
 		      
 		      if (currentTime < targetTime) {
 		        artPlayerRef.current.currentTime = targetTime;
-		        artPlayerRef.current.notice.show = targetTime === resumeTimeRef.current 
-		          ? `已恢复进度 (${formatTime(resumeTimeRef.current)})` 
+		        artPlayerRef.current.notice.show = targetTime === resumeTime 
+		          ? `已恢复进度 (${formatTime(resumeTime)})` 
 		          : `已跳过片头 (${formatTime(introTime)})`;
 		        
 		        resumeTimeRef.current = null;
@@ -1854,9 +1855,9 @@ useEffect(() => {
 		
 		    // 情况3：只有恢复进度
 		    if (hasResumeTime && !skipEnabled) {   
-		      if (currentTime < resumeTimeRef.current!) {
-		        artPlayerRef.current.currentTime = resumeTimeRef.current;
-		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTimeRef.current)})`;
+		      if (currentTime < resumeTime) {
+		        artPlayerRef.current.currentTime = resumeTime;
+		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
 		        resumeTimeRef.current = null;
 		        skipIntroProcessedRef.current = true;
 		        return;
@@ -1875,7 +1876,7 @@ useEffect(() => {
 		
 		    // 如果当前时间已经超过可能的目标时间，标记为已处理
 		    const maxPossibleTime = Math.max(
-		      resumeTimeRef.current || 0,
+		      resumeTime,
 		      introTime
 		    );
 		    if (currentTime >= maxPossibleTime) {
