@@ -596,7 +596,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           tooltip:
             skipConfigRef.current.outro_time >= 0
               ? '设置片尾时间'
-              : `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
+              : `${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`,
           onClick: function () {
 					const currentOutroTime = skipConfigRef.current.outro_time;
 					    // 如果有设置，直接删除
@@ -620,7 +620,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
                 outro_time: outroTime,
               };
               handleSkipConfigChange(newConfig);
-              return `-${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`;
+              return `${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`;
             }
           },
         });
@@ -1633,7 +1633,7 @@ useEffect(() => {
 				tooltip:
 				  skipConfigRef.current.outro_time >= 0
 					? '设置片尾时间'
-					: `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
+					: `${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`,
 				onClick: function () {
 					const currentOutroTime = skipConfigRef.current.outro_time;
 					    // 如果有设置，直接删除
@@ -1657,7 +1657,7 @@ useEffect(() => {
 					  outro_time: outroTime,
 					};
 					handleSkipConfigChange(newConfig);
-					return `-${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`;
+					return `${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`;
 				  }
 				},
 			  },
