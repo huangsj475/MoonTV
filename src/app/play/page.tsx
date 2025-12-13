@@ -1838,7 +1838,7 @@ useEffect(() => {
 		  if (!skipIntroProcessedRef.current) {
 		    // 情况2：恢复进度存在，跳过开启
 		    if (hasResumeTime && skipEnabled && introTime > 0) {
-		      const targetTime = Math.max(resumeTimeRef.current, introTime);
+		      const targetTime = Math.max(resumeTimeRef.current!, introTime);
 		      
 		      if (currentTime < targetTime) {
 		        artPlayerRef.current.currentTime = targetTime;
