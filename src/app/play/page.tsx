@@ -212,7 +212,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
   const totalEpisodes = detail?.episodes?.length || 0;
 
   // 用于记录是否需要在播放器 ready 后跳转到指定进度
-  const resumeTimeRef = useRef<number | null>(null);
+  const resumeTimeRef = useRef<number>(0);
   // 上次使用的音量，默认 0.7
   const lastVolumeRef = useRef<number>(0.7);
   // 上次使用的播放速率，默认 1.0
@@ -1034,7 +1034,7 @@ useEffect(() => {
     if (record && record.index - 1 === episodeindexNumber) {
       resumeTimeRef.current = record.play_time;
     } else {
-      resumeTimeRef.current = null;
+      resumeTimeRef.current = 0;
     }
 	      setTimeout(() => {
 		      isChangingEpisodeRef.current = false;
@@ -1770,7 +1770,7 @@ useEffect(() => {
 					  const finalTarget = target >= duration - 2 ? Math.max(0, duration - 5) : target;
 					  player.currentTime = finalTarget;
 					  console.log('成功恢复播放进度到:', finalTarget);
-					  resumeTimeRef.current = null;
+					  resumeTimeRef.current = 0;
 					  				      
 						if (!isCompleted) {
 						  clearInterval(checkInterval);
@@ -1784,17 +1784,16 @@ useEffect(() => {
 				  setTimeout(() => {
 					if (!isCompleted) {
 					  clearInterval(checkInterval);
-					  resumeTimeRef.current = null;
+					  resumeTimeRef.current = 0;
 					  console.log('检查超过3s后，已清除定时器');
 					}
 				  }, 3000);
 				}, 400);
           } catch (err) {
             console.warn('恢复播放进度失败:', err);
-			resumeTimeRef.current = null;
+			resumeTimeRef.current = 0;
           }
      }*/ 
-        //resumeTimeRef.current = null;-----原来的------
 
         setTimeout(() => {
           if (
@@ -1828,7 +1827,7 @@ useEffect(() => {
 		  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
 		
 		  // 情况1：跳过开关没开启并且没有恢复进度存在
-		  if (!skipEnabled && !resumeTime ) {
+		  if (!skipEnabled && resumeTime === 0) {
 		    return;
 		  }
 		
@@ -1837,18 +1836,17 @@ useEffect(() => {
 		  // 使用一个局部变量记录是否处理过开头
 		  if (!skipIntroProcessedRef.current) {
 		    // 情况2：恢复进度存在，跳过开启
-			const resumeTimeNum = resumeTime as number;
-		    if (resumeTimeNum > 0 && introTime > 0) {
+		    if (resumeTime > 0 && introTime > 0) {
 				
-		      const targetTime = Math.max(resumeTimeNum, introTime);
+		      const targetTime = Math.max(resumeTime, introTime);
 		      
 		      if (currentTime < targetTime) {
 		        artPlayerRef.current.currentTime = targetTime;
-		        artPlayerRef.current.notice.show = targetTime === resumeTimeNum 
-		          ? `已恢复进度 (${formatTime(resumeTimeNum)})` 
+		        artPlayerRef.current.notice.show = targetTime === resumeTime 
+		          ? `已恢复进度 (${formatTime(resumeTime)})` 
 		          : `已跳过片头 (${formatTime(introTime)})`;
 		        
-		        resumeTimeRef.current = null;
+		        resumeTimeRef.current = 0;
 		        skipIntroProcessedRef.current = true;
 		        return;
 		      }
@@ -1857,9 +1855,9 @@ useEffect(() => {
 		    // 情况3：只有恢复进度
 		    if (resumeTime > 0) {
 		      if (currentTime < resumeTime) {
-		        artPlayerRef.current.currentTime = resumeTimeNum;
-		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTimeNum)})`;
-		        resumeTimeRef.current = null;
+		        artPlayerRef.current.currentTime = resumeTime;
+		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
+		        resumeTimeRef.current = 0;
 		        skipIntroProcessedRef.current = true;
 		        return;
 		      }
@@ -1877,7 +1875,7 @@ useEffect(() => {
 		
 		    // 如果当前时间已经超过可能的目标时间，标记为已处理
 		    const maxPossibleTime = Math.max(
-		      resumeTimeNum,
+		      resumeTime,
 		      introTime
 		    );
 		    if (currentTime >= maxPossibleTime) {
