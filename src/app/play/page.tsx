@@ -1854,7 +1854,7 @@ useEffect(() => {
 		
 		    // 情况3：只有恢复进度
 		    if (hasResumeTime && !skipEnabled) {   
-		      if (currentTime < resumeTimeRef.current) {
+		      if (currentTime < resumeTimeRef.current!) {
 		        artPlayerRef.current.currentTime = resumeTimeRef.current;
 		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTimeRef.current)})`;
 		        resumeTimeRef.current = null;
