@@ -1606,7 +1606,7 @@ useEffect(() => {
 				  const currentTime = artPlayerRef.current?.currentTime || 0;
 				  const currentIntroTime = skipConfigRef.current.intro_time;
 
-			    // 如果有设置，直接询问是否删除
+			    // 如果有设置，直接删除
 			    if (currentIntroTime > 0) {
 			        const newConfig = {
 			          ...skipConfigRef.current,
@@ -1614,7 +1614,7 @@ useEffect(() => {
 			        };
 			        handleSkipConfigChange(newConfig);
 			        artPlayerRef.current.notice.show = '已删除片头配置';
-			        return '已删除';
+			        return '';
 			    }
 			    // 如果没有设置，直接使用当前时间设置
 				  if (currentTime > 0) {
