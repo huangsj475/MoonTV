@@ -124,24 +124,28 @@ export default function VideoCard({
 	const handleMouseEnter = useCallback(async () => {
 	  // 排除不支持收藏状态的卡片
 	  if (from === 'douban' || !actualSource || !actualId ) return;
-	  
-	  if (favorited === null && !checkingFavorite) {
-		setCheckingFavorite(true);
-		setTooltip('检查收藏...');
-		
+	    // 如果已经知道状态，就不显示提示
+		  if (favorited !== null) {
+		    setTooltip(''); // 清除提示
+		    return;
+		  }
+	  if (!checkingFavorite) {
+	    setCheckingFavorite(true);
+	    setTooltip('检查收藏...'); // 开始检查时显示提示
+
 		try {
 		  const fav = await isFavorited(actualSource, actualId);
 		  setFavorited(fav);
-		  setTooltip(fav ? '已收藏' : '未收藏');
+		  //setTooltip(fav ? '已收藏' : '未收藏');
 		} catch (err) {
 		  setFavorited(false);
 		  setTooltip('检查收藏状态失败');
 		} finally {
 		  setCheckingFavorite(false);
 		}
-	  }else if (favorited !== null) {
-		// 如果已经知道状态，只显示提示，不重复检查
-		setTooltip(favorited ? '✅已收藏' : '❌未收藏');
+	  }else {
+	    // 如果正在检查中，保持显示提示
+	    setTooltip('检查中...');
 	  }
 	}, [favorited, actualSource, actualId, checkingFavorite, from]);
 	//----改动：鼠标悬停，划过获取收藏状态--------
