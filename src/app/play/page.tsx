@@ -1828,7 +1828,7 @@ useEffect(() => {
 		  const outroTime = skipConfigRef.current.outro_time || 0; // 负值，如 -60
 		
 		  // 情况1：跳过开关没开启并且没有恢复进度存在
-		  if (!skipEnabled && !hasResumeTime) {
+		  if (!skipEnabled && !resumeTime) {
 		    return;
 		  }
 		
