@@ -1842,7 +1842,7 @@ useEffect(() => {
 		      
 		      if (currentTime < targetTime) {
 		        artPlayerRef.current.currentTime = targetTime;
-				console.log('成功恢复播放进度到:', finalTarget);
+				console.log('成功恢复播放进度到:', targetTime);
 				console.log('播放器时间:', artPlayerRef.current.currentTime);
 		        artPlayerRef.current.notice.show = targetTime === resumeTime 
 		          ? `已恢复进度 (${formatTime(resumeTime)})` 
@@ -1858,7 +1858,7 @@ useEffect(() => {
 		    if (duration > 0 && resumeTime > 0) {
 		      if (currentTime < resumeTime) {
 		        artPlayerRef.current.currentTime = resumeTime;
-				console.log('播放进度:', finalTarget);
+				console.log('播放进度:', resumeTime);
 				console.log('播放器时间:', artPlayerRef.current.currentTime);
 		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
 		        resumeTimeRef.current = 0;
