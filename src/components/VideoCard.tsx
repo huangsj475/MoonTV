@@ -137,9 +137,11 @@ export default function VideoCard({
 		  const fav = await isFavorited(actualSource, actualId);
 		  setFavorited(fav);
 		  //setTooltip(fav ? '已收藏' : '未收藏');
+
 		} catch (err) {
 		  setFavorited(false);
 		  setTooltip('检查收藏状态失败');
+
 		} finally {
 		  setCheckingFavorite(false);
 		}
@@ -404,7 +406,7 @@ export default function VideoCard({
 					  : 'stroke-gray-400 opacity-60'
 				  } hover:scale-[1.1]`}
               />
-				{tooltip && (
+				{checkingFavor && itetooltip && (
 				  <div className="absolute bottom-8 right-0 bg-gray-800 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-50">
 					{tooltip}
 					<div className="absolute -bottom-1 right-2 w-2 h-2 bg-gray-800 transform rotate-45"></div>
