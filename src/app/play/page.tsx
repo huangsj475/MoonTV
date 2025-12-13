@@ -569,6 +569,17 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
               : `${formatTime(skipConfigRef.current.intro_time)}`,
           onClick: function () {
             const currentTime = artPlayerRef.current?.currentTime || 0;
+			  const currentIntroTime = skipConfigRef.current.intro_time;
+			  	// 如果有设置，直接删除
+			    if (currentIntroTime > 0) {
+			        const newConfig = {
+			          ...skipConfigRef.current,
+			          intro_time: 0,
+			        };
+			        handleSkipConfigChange(newConfig);
+			        artPlayerRef.current.notice.show = '已删除片头配置';
+			        return '';
+			    }
             if (currentTime > 0) {
               const newConfig = {
                 ...skipConfigRef.current,
