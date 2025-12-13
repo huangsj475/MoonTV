@@ -1039,10 +1039,6 @@ useEffect(() => {
 	   
 	      setTimeout(() => {
 		    isChangingEpisodeRef.current = false;
-			// 重置片头/恢复处理标志
-			skipIntroProcessedRef.current = false;
-			// 重置片尾检查标志
-			outroCheckStartedRef.current = false;
 		    }, 1000);
 
     setCurrentEpisodeIndex(episodeindexNumber);
@@ -1817,7 +1813,13 @@ useEffect(() => {
         // 隐藏换源加载状态
         setIsVideoLoading(false);
       });
-
+		
+	  	// 在创建播放器时监听视频加载事件
+		artPlayerRef.current.on('video:loadedmetadata', () => {
+		  // 视频元数据加载完成后才重置标志
+		  skipIntroProcessedRef.current = false;
+		  outroCheckStartedRef.current = false;
+		});
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
 		  const currentTime = artPlayerRef.current.currentTime || 0;
@@ -1845,7 +1847,6 @@ useEffect(() => {
 		      if (currentTime < targetTime) {
 		        artPlayerRef.current.currentTime = targetTime;
 				console.log('成功恢复播放进度到:', targetTime);
-				console.log('播放器时间:', artPlayerRef.current.currentTime);
 		        artPlayerRef.current.notice.show = targetTime === resumeTime 
 		          ? `已恢复进度 (${formatTime(resumeTime)})` 
 		          : `已跳过片头 (${formatTime(introTime)})`;
@@ -1860,8 +1861,7 @@ useEffect(() => {
 		    if (duration > 0 && resumeTime > 0) {
 		      if (currentTime < resumeTime) {
 		        artPlayerRef.current.currentTime = resumeTime;
-				console.log('播放进度:', resumeTime);
-				console.log('播放器时间:', artPlayerRef.current.currentTime);
+				console.log('恢复播放进度:', resumeTime);
 		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
 		        resumeTimeRef.current = 0;
 		        skipIntroProcessedRef.current = true;
@@ -1873,8 +1873,7 @@ useEffect(() => {
 		    if (duration > 0 && introTime > 0) {
 		      if (currentTime < introTime) {
 		        artPlayerRef.current.currentTime = introTime;
-				console.log('片头:', introTime);
-				console.log('播放器时间:', artPlayerRef.current.currentTime);
+				console.log('跳过片头:', introTime);
 		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
 		        skipIntroProcessedRef.current = true;
 		        return;
