@@ -1606,110 +1606,21 @@ useEffect(() => {
 				  const currentTime = artPlayerRef.current?.currentTime || 0;
 				  const currentIntroTime = skipConfigRef.current.intro_time;
 
-				// 将用户输入的时间点转换为秒数
-				const parseTimePoint = (input: string): number | null => {
-				  if (!input || input.trim() === '') return null;
-				  
-				  const cleanInput = input.trim();
-				  
-				  // 1. 如果输入0，返回0（不跳过）
-				  if (cleanInput === '0' || cleanInput === '0:00' || cleanInput === '00:00') {
-					return 0;
-				  }
-				  
-				  // 2. 解析时:分:秒或分:秒格式
-				  const timeRegex = /^(?:(\d+):)?(\d{1,2}):(\d{1,2})$/;
-				  const match = cleanInput.match(timeRegex);
-				  
-				  if (match) {
-					let hours = 0, minutes, seconds;
-					
-					if (match[1]) {
-					  // 时:分:秒格式 (如 1:20:30)
-					  hours = parseInt(match[1], 10);
-					  minutes = parseInt(match[2], 10);
-					  seconds = parseInt(match[3], 10);
-					} else {
-					  // 分:秒格式 (如 20:30)
-					  minutes = parseInt(match[2], 10);
-					  seconds = parseInt(match[3], 10);
-					}
-					
-					// 验证输入
-					if (minutes >= 60) {
-					  alert('分钟数不能超过59');
-					  return null;
-					}
-					if (seconds >= 60) {
-					  alert('秒数不能超过59');
-					  return null;
-					}
-					if (hours < 0 || minutes < 0 || seconds < 0) {
-					  alert('时间不能为负数');
-					  return null;
-					}
-					
-					return hours * 3600 + minutes * 60 + seconds;
-				  }
-				  
-				  // 3. 如果是纯数字，当作时间点（秒）
-				  if (/^\d+$/.test(cleanInput)) {
-					const seconds = parseInt(cleanInput, 10);
-					if (seconds < 0) {
-					  alert('时间不能为负数');
-					  return null;
-					}
-					return seconds;
-				  }
-				  
-				  // 4. 其他格式不支持
-				  alert('请输入有效的时间格式：\n• 时:分:秒 如 1:20:30\n• 分:秒 如 20:30\n• 秒数 如 120\n• 0 或 0:00: 不跳过片头');
-				  return null;
-				};
-				// 生成提示信息
-				let promptMessage = `🎬 设置片头结束时间\n\n`;
-				promptMessage += `当前播放位置: ${formatTime(currentTime)}\n`;
-				
-				if (currentIntroTime > 0) {
-				  promptMessage += `当前设置: 片头到 ${formatTime(currentIntroTime)} 结束\n\n`;
-				} else {
-				  promptMessage += `当前设置: 未设置\n\n`;
-				}
-				
-				promptMessage += `📝 请输入片头结束的时间点 (示例):\n`;
-				promptMessage += `• 1:30    → 片头到 1分30秒 结束\n`;
-				promptMessage += `• 1:20:30 → 片头到 1小时20分30秒 结束\n`;
-				promptMessage += `• 90      → 片头到 90秒 结束\n`;
-				promptMessage += `• 直接确定 → 使用当前时间作为片头结束\n`;
-				promptMessage += `• 0       → 不跳过片头\n\n`;
-				promptMessage += `💡 视频将从该时间点开始播放`;
-				
-				// 计算默认值
-				let defaultValue;
-				if (currentIntroTime > 0) {
-				  defaultValue = formatTime(currentIntroTime);
-				} else if (currentTime > 0) {
-				  defaultValue = formatTime(currentTime);
-				}
-				
-				const input = prompt(promptMessage, defaultValue);
-				
-				if (input === null) return '';
-				
-				let endTimeInSeconds: number;
-				
-				// 如果用户直接点击确定（空输入），使用当前时间
-				if (input.trim() === '') {
-				  endTimeInSeconds = Math.round(currentTime);
-				} else {
-				  // 解析用户输入的时间点
-				  const parsedTime = parseTimePoint(input);
-				  if (parsedTime === null) {
-					return '输入无效';
-				  }
-					endTimeInSeconds = parsedTime;
-				}
-					
+			    // 如果有设置，直接询问是否删除
+			    if (currentIntroTime > 0) {
+			      const confirmDelete = confirm(`删除片头设置：${formatTime(currentIntroTime)}？`);
+			      if (confirmDelete) {
+			        const newConfig = {
+			          ...skipConfigRef.current,
+			          intro_time: 0,
+			        };
+			        handleSkipConfigChange(newConfig);
+			        artPlayerRef.current.notice.show = '已删除片头配置';
+			        return '已删除';
+			      }
+			      return '';
+			    }
+			    // 如果没有设置，直接使用当前时间设置
 				  if (currentTime > 0) {
 					const newConfig = {
 					  ...skipConfigRef.current,
