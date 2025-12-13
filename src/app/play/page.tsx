@@ -566,7 +566,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           tooltip:
             skipConfigRef.current.intro_time === 0
               ? '设置片头时间'
-              : `${formatTime(skipConfigRef.current.intro_time)}`,
+              : `${formatTime(skipConfigRef.current.intro_time)}(点击删除)`,
           onClick: function () {
             const currentTime = artPlayerRef.current?.currentTime || 0;
 			  const currentIntroTime = skipConfigRef.current.intro_time;
@@ -597,8 +597,19 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           tooltip:
             skipConfigRef.current.outro_time >= 0
               ? '设置片尾时间'
-              : `-${formatTime(-skipConfigRef.current.outro_time)}`,
+              : `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
           onClick: function () {
+					const currentOutroTime = skipConfigRef.current.outro_time;
+					    // 如果有设置，直接删除
+				    if (currentOutroTime < 0) {
+				        const newConfig = {
+				          ...skipConfigRef.current,
+				          outro_time: 0,
+				        };
+				        handleSkipConfigChange(newConfig);
+				        artPlayerRef.current.notice.show = '已删除片尾配置';
+				      return '';
+				    }
             const outroTime =
               -(
                 artPlayerRef.current?.duration -
@@ -1582,37 +1593,13 @@ useEffect(() => {
 				},
 			  },
 			  {
-				html: '删除跳过配置',
-				icon: `
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-					xmlns="http://www.w3.org/2000/svg">
-					<path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7" 
-					stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
-					<path d="M10 11V17" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
-					<path d="M14 11V17" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
-					<path d="M3 7H21" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
-					<path d="M8 7V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V7" 
-					stroke="white" stroke-width="2" fill="none"/>
-				</svg>
-				`,
-				tooltip: '删除跳过配置',
-				onClick: function () {
-				  handleSkipConfigChange({
-					enable: false,
-					intro_time: 0,
-					outro_time: 0,
-				  });
-				  return '';
-				},
-			  },
-			  {
 				name: '设置片头',
 				html: '设置片头',
 				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="5" cy="12" r="2" fill="#ffffff"/><path d="M9 12L17 12" stroke="#ffffff" stroke-width="2"/><path d="M17 6L17 18" stroke="#ffffff" stroke-width="2"/></svg>',
 				tooltip:
 				  skipConfigRef.current.intro_time === 0
 					? '设置片头时间'
-					: `${formatTime(skipConfigRef.current.intro_time)}`,
+					: `${formatTime(skipConfigRef.current.intro_time)}(点击删除)`,
 				onClick: function () {
 				  const currentTime = artPlayerRef.current?.currentTime || 0;
 				  const currentIntroTime = skipConfigRef.current.intro_time;
@@ -1645,8 +1632,19 @@ useEffect(() => {
 				tooltip:
 				  skipConfigRef.current.outro_time >= 0
 					? '设置片尾时间'
-					: `-${formatTime(-skipConfigRef.current.outro_time)}`,
+					: `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
 				onClick: function () {
+					const currentOutroTime = skipConfigRef.current.outro_time;
+					    // 如果有设置，直接删除
+				    if (currentOutroTime < 0) {
+				        const newConfig = {
+				          ...skipConfigRef.current,
+				          outro_time: 0,
+				        };
+				        handleSkipConfigChange(newConfig);
+				        artPlayerRef.current.notice.show = '已删除片尾配置';
+				      return '';
+				    }
 				  const outroTime =
 					-(
 					  artPlayerRef.current?.duration -
@@ -1660,6 +1658,30 @@ useEffect(() => {
 					handleSkipConfigChange(newConfig);
 					return `-${formatTime(-outroTime)}`;
 				  }
+				},
+			  },
+			  {
+				html: '删除跳过配置',
+				icon: `
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+					xmlns="http://www.w3.org/2000/svg">
+					<path d="M19 7L18.1327 19.1425C18.0579 20.1891 17.187 21 16.1378 21H7.86224C6.81296 21 5.94208 20.1891 5.86732 19.1425L5 7" 
+					stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+					<path d="M10 11V17" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+					<path d="M14 11V17" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+					<path d="M3 7H21" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+					<path d="M8 7V4C8 3.44772 8.44772 3 9 3H15C15.5523 3 16 3.44772 16 4V7" 
+					stroke="white" stroke-width="2" fill="none"/>
+				</svg>
+				`,
+				tooltip: '删除跳过配置',
+				onClick: function () {
+				  handleSkipConfigChange({
+					enable: false,
+					intro_time: 0,
+					outro_time: 0,
+				  });
+				  return '';
 				},
 			  },
         ],
