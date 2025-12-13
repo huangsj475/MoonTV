@@ -1703,10 +1703,11 @@ useEffect(() => {
 				  endTimeInSeconds = Math.round(currentTime);
 				} else {
 				  // 解析用户输入的时间点
-				  endTimeInSeconds = parseTimePoint(input);
+				  const parsedTime = parseTimePoint(input);
 				  if (endTimeInSeconds === null) {
 					return '输入无效';
 				  }
+					endTimeInSeconds = parsedTime;
 				}
 					
 				  if (currentTime > 0) {
