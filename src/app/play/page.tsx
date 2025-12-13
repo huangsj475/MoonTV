@@ -1836,7 +1836,7 @@ useEffect(() => {
 		  // 使用一个局部变量记录是否处理过开头
 		  if (!skipIntroProcessedRef.current) {
 		    // 情况2：恢复进度存在，跳过开启
-		    if (resumeTime > 0 && introTime > 0) {
+		    if (duration > 0 && resumeTime > 0 && introTime > 0) {
 				
 		      const targetTime = Math.max(resumeTime, introTime);
 		      
@@ -1853,7 +1853,7 @@ useEffect(() => {
 		    }
 		
 		    // 情况3：只有恢复进度
-		    if (resumeTime > 0) {
+		    if (duration > 0 && resumeTime > 0) {
 		      if (currentTime < resumeTime) {
 		        artPlayerRef.current.currentTime = resumeTime;
 		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
@@ -1864,7 +1864,7 @@ useEffect(() => {
 		    }
 		
 		    // 情况4：只有跳过片头
-		    if (introTime > 0) {
+		    if (duration > 0 && introTime > 0) {
 		      if (currentTime < introTime) {
 		        artPlayerRef.current.currentTime = introTime;
 		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
