@@ -1838,7 +1838,7 @@ useEffect(() => {
 		  if (!skipIntroProcessedRef.current) {
 		    // 情况2：恢复进度存在，跳过开启
 			const resumeTimeNum = resumeTime as number;
-		    if (resumeTime > 0 && introTime > 0) {
+		    if (resumeTimeNum > 0 && introTime > 0) {
 				
 		      const targetTime = Math.max(resumeTimeNum, introTime);
 		      
