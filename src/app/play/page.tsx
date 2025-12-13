@@ -1607,7 +1607,7 @@ useEffect(() => {
 				  const currentIntroTime = skipConfigRef.current.intro_time;
 
 				// 将用户输入的时间点转换为秒数
-				const parseTimePoint = (input) => {
+				const parseTimePoint = (input: string): number | null => {
 				  if (!input || input.trim() === '') return null;
 				  
 				  const cleanInput = input.trim();
@@ -1696,7 +1696,7 @@ useEffect(() => {
 				
 				if (input === null) return '';
 				
-				let endTimeInSeconds;
+				let endTimeInSeconds: number;
 				
 				// 如果用户直接点击确定（空输入），使用当前时间
 				if (input.trim() === '') {
