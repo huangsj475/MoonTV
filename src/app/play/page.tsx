@@ -1779,8 +1779,8 @@ useEffect(() => {
 
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-		  console.log('视频可以播放...',video?.readyState);
-		    if (video?.readyState >= 3) { // HAVE_FUTURE_DATA
+		  console.log('视频可以播放...',artPlayerRef.current.video?.readyState);
+		    if (artPlayerRef.current.video?.readyState >= 3) { // HAVE_FUTURE_DATA
 			    skipIntroProcessedRef.current = false;
 			    outroCheckStartedRef.current = false;
 			  }
