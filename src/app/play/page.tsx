@@ -1846,7 +1846,7 @@ useEffect(() => {
       });
 			//视频元数据
 		artPlayerRef.current.on('video:loadedmetadata', () => {
-
+			//视频元数据
 		});
 		
       // 监听视频时间更新事件，实现跳过片头片尾
