@@ -1543,10 +1543,10 @@ useEffect(() => {
 			hls.on(Hls.Events.MANIFEST_PARSED, function (event: any, data: any) {
 			  // 播放列表解析完成，可以开始播放
 
-				  setTimeout(() => {
+				  /*setTimeout(() => {
 				  skipIntroProcessedRef.current = false;
 				  outroCheckStartedRef.current = false;
-				  }, 500);
+				  }, 500);*/
 			  console.log('HLS 清单解析完成', data);
 			});  
 
@@ -1779,6 +1779,10 @@ useEffect(() => {
 
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
+				  setTimeout(() => {
+				  skipIntroProcessedRef.current = false;
+				  outroCheckStartedRef.current = false;
+				  }, 550);
 		  console.log('视频可以播放...');
         /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
