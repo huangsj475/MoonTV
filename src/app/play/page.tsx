@@ -1880,8 +1880,12 @@ useEffect(() => {
 		      const targetTime = Math.max(resumeTime, introTime);
 		      
 		      if (currentTime < targetTime) {
+
+			    if (artPlayerRef.current.video?.readyState >= 3) {
 		        artPlayerRef.current.currentTime = targetTime;
 				console.log('成功恢复播放进度到:', targetTime);
+				  }
+
 		        artPlayerRef.current.notice.show = targetTime === resumeTime 
 		          ? `已恢复进度 (${formatTime(resumeTime)})` 
 		          : `已跳过片头 (${formatTime(introTime)})`;
