@@ -53,7 +53,6 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
-  const videoTotalDurationRef = useRef<number>(0);// 添加一个ref存储视频总时长
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -598,14 +597,16 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 			  const outroTime = skipConfigRef.current.outro_time;
 			  
 			  if (outroTime < 0) {
-			
-			    if (videoTotalDurationRef.current > 0) {
-			      const endTime = videoTotalDurationRef.current + outroTime;
+			    // 使用当前播放器的实际时长（如果可用）
+			    const currentDuration = artPlayerRef.current?.duration || 0;
+			    
+			    if (currentDuration > 0) {
+			      const endTime = currentDuration + outroTime;
 			      return `${formatTime(endTime)}(点击删除)`;
 			    }
 			    
-			    // 优先级3：都没有，显示相对时间
-			    return `-${formatTime(-outroTime)}(点击删除)`;
+			    // 如果播放器时长不可用，显示相对时间
+			    return `距离结尾${formatTime(-outroTime)}开始(点击删除)`;
 			  }
 			  return '设置片尾时间';
 			})(),
@@ -890,7 +891,6 @@ useEffect(() => {
     
   const initFromHistory = async () => {
     if (!currentSource || !currentId) return;//--------改后的-------------
-	  videoTotalDurationRef.current = 0;
     try {
       const allRecords = await getAllPlayRecords();
       const key = generateStorageKey(currentSource, currentId);
@@ -898,7 +898,6 @@ useEffect(() => {
       if (record) {
         const targetIndex = record.index - 1;
         const targetTime = record.play_time;
-		videoTotalDurationRef.current = record.total_time;
         if (targetIndex !== currentEpisodeIndex) {
           setCurrentEpisodeIndex(targetIndex);
         }
@@ -1064,10 +1063,14 @@ useEffect(() => {
     const d = detailRef.current;
     const idx = currentEpisodeIndexRef.current;
     if (d && d.episodes && idx > 0) {
-      if (artPlayerRef.current && !artPlayerRef.current.paused) {
+      /*if (artPlayerRef.current && !artPlayerRef.current.paused) {
         saveCurrentPlayProgress();
 		console.log('上一集---播放进度已保存');
-      }
+      }*/
+	  	    setTimeout(() => {
+		    isChangingEpisodeRef.current = false;
+		    }, 1000);
+	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx - 1);
     }
   };
@@ -1080,6 +1083,9 @@ useEffect(() => {
         saveCurrentPlayProgress();
 		console.log('下一集---播放进度已保存');
       }*/
+			setTimeout(() => {
+		    isChangingEpisodeRef.current = false;
+		    }, 1000);
 	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx + 1);
     }
@@ -1655,14 +1661,16 @@ useEffect(() => {
 				  const outroTime = skipConfigRef.current.outro_time;
 				  
 				  if (outroTime < 0) {
-				
-				    if (videoTotalDurationRef.current > 0) {
-				      const endTime = videoTotalDurationRef.current + outroTime;
+				    // 使用当前播放器的实际时长（如果可用）
+				    const currentDuration = artPlayerRef.current?.duration || 0;
+				    
+				    if (currentDuration > 0) {
+				      const endTime = currentDuration + outroTime;
 				      return `${formatTime(endTime)}(点击删除)`;
 				    }
 				    
-				    // 优先级3：都没有，显示相对时间
-				    return `-${formatTime(-outroTime)}(点击删除)`;
+				    // 如果播放器时长不可用，显示相对时间
+				    return `距离结尾${formatTime(-outroTime)}开始(点击删除)`;
 				  }
 				  return '设置片尾时间';
 				})(),
