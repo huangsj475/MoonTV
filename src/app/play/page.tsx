@@ -1967,13 +1967,14 @@ useEffect(() => {
 		    
 		    // 优化：只有接近片尾开始时间（例如提前3秒）才开始检查
 		    // 避免整个视频都在检查片尾
-		    const checkStartTime = outroStartTime - 4; // 提前3秒开始检查
+		    const checkStartTime = outroStartTime - 8; // 提前8秒开始检查
 		    
 		    // 如果还没到检查时间，直接返回
 		    if (currentTime < checkStartTime) {
 		      return;
 		    }
-		    
+			  
+		    console.log('开始检查片尾，8s后跳过：', ${formatTime(checkStartTime)});
 		    // 现在才真正检查是否进入片尾区域
 		    if (!outroCheckStartedRef.current && currentTime > outroStartTime) {
 		      if (
