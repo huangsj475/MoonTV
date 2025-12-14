@@ -1976,7 +1976,7 @@ useEffect(() => {
 		      return;
 		    }
 			  
-		    console.log('开始检查片尾，8s后跳过：', ${formatTime(checkStartTime)});
+		    console.log('开始检查片尾，8s后跳过：', ${formatTime(checkStartTime)};
 		    // 现在才真正检查是否进入片尾区域
 		    if (!outroCheckStartedRef.current && currentTime > outroStartTime) {
 		      if (
