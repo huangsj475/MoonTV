@@ -1852,6 +1852,7 @@ useEffect(() => {
 		  skipIntroProcessedRef.current = false;
 		  outroCheckStartedRef.current = false;
           }, 60);*/
+			console.log('视频加载事件完成');
 		});
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
