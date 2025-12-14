@@ -53,6 +53,7 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
+  const videoTotalDurationRef = useRef<number>(0);// 添加一个ref存储视频总时长
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -593,35 +594,21 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           name: '设置片尾',
           html: '设置片尾',
           icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
-					tooltip: (function() {
-					  const outroTime = skipConfigRef.current.outro_time;
-					  const player = artPlayerRef.current;
-					  
-					  if (outroTime < 0) {
-					    // 立即设置一个初始值
-					    const initialTooltip = `-${formatTime(-outroTime)}(点击删除)`;
-					    
-					    // 延迟检查并更新
-					    if (player && player.duration <= 0) {
-					      setTimeout(() => {
-					        if (player.duration > 0) {
-					          const endTime = player.duration + outroTime;
-					          player.setting.update({
-					            name: '设置片尾',
-					            tooltip: `${formatTime(endTime)}(点击删除)`,
-					          });
-					        }
-					      }, 1000);
-					    } else if (player?.duration > 0) {
-					      // 如果已经有时长，直接返回准确值
-					      const endTime = player.duration + outroTime;
-					      return `${formatTime(endTime)}(点击删除)`;
-					    }
-					    
-					    return initialTooltip;
-					  }
-					  return '设置片尾时间';
-					})(),
+			tooltip: (function() {
+			  const outroTime = skipConfigRef.current.outro_time;
+			  
+			  if (outroTime < 0) {
+			
+			    if (videoTotalDurationRef.current > 0) {
+			      const endTime = videoTotalDurationRef.current + outroTime;
+			      return `${formatTime(endTime)}(点击删除)`;
+			    }
+			    
+			    // 优先级3：都没有，显示相对时间
+			    return `-${formatTime(-outroTime)}(点击删除)`;
+			  }
+			  return '设置片尾时间';
+			})(),
           onClick: function () {
 					const currentOutroTime = skipConfigRef.current.outro_time;
 					    // 如果有设置，直接删除
@@ -895,13 +882,14 @@ useEffect(() => {
     }
   };
 }, []);//-----------3.新添加-------------
-  
+
   // 播放记录处理
   useEffect(() => {
   //if (!currentSource || !currentId) return;------换到下面行---------原来的---------
     
   const initFromHistory = async () => {
     if (!currentSource || !currentId) return;//--------改后的-------------
+	  videoTotalDurationRef.current = 0;
     try {
       const allRecords = await getAllPlayRecords();
       const key = generateStorageKey(currentSource, currentId);
@@ -909,6 +897,7 @@ useEffect(() => {
       if (record) {
         const targetIndex = record.index - 1;
         const targetTime = record.play_time;
+		videoTotalDurationRef.current = record.total_time;
         if (targetIndex !== currentEpisodeIndex) {
           setCurrentEpisodeIndex(targetIndex);
         }
@@ -925,8 +914,7 @@ useEffect(() => {
 
   initFromHistory();
 }, [currentSource, currentId]);
-
-
+	
   // 跳过片头片尾配置处理
   useEffect(() => {
     // 仅在初次挂载时检查跳过片头片尾配置
@@ -1657,30 +1645,16 @@ useEffect(() => {
 				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
 				tooltip: (function() {
 				  const outroTime = skipConfigRef.current.outro_time;
-				  const player = artPlayerRef.current;
 				  
 				  if (outroTime < 0) {
-				    // 立即设置一个初始值
-				    const initialTooltip = `-${formatTime(-outroTime)}(点击删除)`;
-				    
-				    // 延迟检查并更新
-				    if (player && player.duration <= 0) {
-				      setTimeout(() => {
-				        if (player.duration > 0) {
-				          const endTime = player.duration + outroTime;
-				          player.setting.update({
-				            name: '设置片尾',
-				            tooltip: `${formatTime(endTime)}(点击删除)`,
-				          });
-				        }
-				      }, 1000);
-				    } else if (player?.duration > 0) {
-				      // 如果已经有时长，直接返回准确值
-				      const endTime = player.duration + outroTime;
+				
+				    if (videoTotalDurationRef.current > 0) {
+				      const endTime = videoTotalDurationRef.current + outroTime;
 				      return `${formatTime(endTime)}(点击删除)`;
 				    }
 				    
-				    return initialTooltip;
+				    // 优先级3：都没有，显示相对时间
+				    return `-${formatTime(-outroTime)}(点击删除)`;
 				  }
 				  return '设置片尾时间';
 				})(),
