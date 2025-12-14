@@ -1875,7 +1875,7 @@ useEffect(() => {
 		      
 		      if (currentTime < targetTime) {
 
-			    if (artPlayerRef.current.video?.readyState >= 2) {
+			    if (artPlayerRef.current.video?.readyState >= 3) {
 		        artPlayerRef.current.currentTime = targetTime;
 				console.log('成功恢复播放进度到:', targetTime);
 				  }
