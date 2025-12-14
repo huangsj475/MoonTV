@@ -51,8 +51,8 @@ function PlayPageClient() {
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
-  const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
-  const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
+  //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
+  //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const videoTotalDurationRef = useRef<number>(0);// 添加一个ref存储视频总时长
 
   // 收藏状态
@@ -1036,9 +1036,7 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
 	  isChangingEpisodeRef.current = true;
-		skipIntroProcessedRef.current = false;
-		outroCheckStartedRef.current = false;
-		console.log('这里重置标签');
+
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
@@ -1777,6 +1775,79 @@ useEffect(() => {
 
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
+		  const currentTime = artPlayerRef.current.currentTime || 0;
+		  const duration = artPlayerRef.current.duration || 0;
+
+		  const resumeTime = resumeTimeRef.current;
+		  const skipEnabled = skipConfigRef.current.enable;
+		  const introTime = skipConfigRef.current.intro_time;
+		  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
+		
+		  // 情况1：跳过开关没开启并且没有恢复进度存在
+		  if (!skipEnabled && resumeTime === 0) {
+		    return;
+		  }
+		
+		  // ============= 处理跳过片头逻辑 =============
+	
+		    // 情况2：恢复进度存在，跳过开启
+		    if (duration > 0 && resumeTime > 0 && introTime > 0) {
+		      const targetTime = Math.max(resumeTime, introTime);
+		      if (currentTime < targetTime) {
+
+		        artPlayerRef.current.currentTime = targetTime;
+				console.log('成功恢复播放进度到:', targetTime);
+				  
+		        artPlayerRef.current.notice.show = targetTime === resumeTime 
+		          ? `已恢复进度 (${formatTime(resumeTime)})` 
+		          : `已跳过片头 (${formatTime(introTime)})`;
+		        resumeTimeRef.current = 0;
+		        return;
+		      }
+		    }
+		
+		    // 情况3：只有恢复进度
+		    if (duration > 0 && resumeTime > 0) {
+		      if (currentTime < resumeTime) {
+		        artPlayerRef.current.currentTime = resumeTime;
+				console.log('恢复播放进度:', resumeTime);
+				  
+		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
+		        resumeTimeRef.current = 0;
+		        return;
+		      }
+		    }
+		
+		    // 情况4：只有跳过片头
+		    if (duration > 0 && introTime > 0) {
+		      if (currentTime < introTime) {
+		        artPlayerRef.current.currentTime = introTime;
+				console.log('跳过片头:', introTime);
+
+		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
+		        return;
+		      }
+		    }
+	
+		  // ============= 处理跳过结尾逻辑 =============
+		  
+		  // 跳过片尾：只有跳过开关开启且设置了片尾时间
+		  if (outroTime < 0 && duration > 0) {
+		    // 计算片尾开始时间（负值变正）
+		    const outroStartTime = duration + outroTime; // outroTime是负值
+		    // 现在才真正检查是否进入片尾区域
+		    if (currentTime > outroStartTime) {
+		      if (
+		        currentEpisodeIndexRef.current <
+		        (detailRef.current?.episodes?.length || 1) - 1
+		      ) {
+		        handleNextEpisode();
+		      } else {
+		        artPlayerRef.current.pause();
+		      }
+		      artPlayerRef.current.notice.show = `已跳过片尾`;
+		    }
+		  }
         /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
           try {
@@ -1851,7 +1922,7 @@ useEffect(() => {
 		
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
-		  const currentTime = artPlayerRef.current.currentTime || 0;
+		  /*const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
 
 		  const resumeTime = resumeTimeRef.current;
@@ -1871,7 +1942,7 @@ useEffect(() => {
 		    // 情况2：恢复进度存在，跳过开启
 		    if (duration > 0 && resumeTime > 0 && introTime > 0) {
 		      const targetTime = Math.max(resumeTime, introTime);
-		      if (currentTime > 0 && currentTime < targetTime) {
+		      if (currentTime < targetTime) {
 
 		        artPlayerRef.current.currentTime = targetTime;
 				console.log('成功恢复播放进度到:', targetTime);
@@ -1887,7 +1958,7 @@ useEffect(() => {
 		
 		    // 情况3：只有恢复进度
 		    if (duration > 0 && resumeTime > 0) {
-		      if (currentTime > 0 && currentTime < resumeTime) {
+		      if (currentTime < resumeTime) {
 		        artPlayerRef.current.currentTime = resumeTime;
 				console.log('恢复播放进度:', resumeTime);
 				  
@@ -1900,7 +1971,7 @@ useEffect(() => {
 		
 		    // 情况4：只有跳过片头
 		    if (duration > 0 && introTime > 0) {
-		      if (currentTime > 0 && currentTime < introTime) {
+		      if (currentTime < introTime) {
 		        artPlayerRef.current.currentTime = introTime;
 				console.log('跳过片头:', introTime);
 
@@ -1949,7 +2020,7 @@ useEffect(() => {
 		      artPlayerRef.current.notice.show = `已跳过片尾`;
 			  outroCheckStartedRef.current = true;
 		    }
-		  }
+		  }*/
       });
 
       artPlayerRef.current.on('error', (err: any) => {
