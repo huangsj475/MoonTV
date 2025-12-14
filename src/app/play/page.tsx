@@ -593,23 +593,10 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           name: '设置片尾',
           html: '设置片尾',
           icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
-			tooltip: (function() {
-			  const outroTime = skipConfigRef.current.outro_time;
-			  
-			  if (outroTime < 0) {
-			    // 使用当前播放器的实际时长（如果可用）
-			    const currentDuration = artPlayerRef.current?.duration || 0;
-			    
-			    if (currentDuration > 0) {
-			      const endTime = currentDuration + outroTime;
-			      return `${formatTime(endTime)}(点击删除)`;
-			    }
-			    
-			    // 如果播放器时长不可用，显示相对时间
-			    return `-${formatTime(-outroTime)}(点击删除)`;
-			  }
-			  return '设置片尾时间';
-			})(),
+          tooltip:
+            skipConfigRef.current.outro_time >= 0
+              ? '设置片尾时间'
+              : `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
           onClick: function () {
 					const currentOutroTime = skipConfigRef.current.outro_time;
 					    // 如果有设置，直接删除
@@ -1657,23 +1644,10 @@ useEffect(() => {
 				name: '设置片尾',
 				html: '设置片尾',
 				icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 6L7 18" stroke="#ffffff" stroke-width="2"/><path d="M7 12L15 12" stroke="#ffffff" stroke-width="2"/><circle cx="19" cy="12" r="2" fill="#ffffff"/></svg>',
-				tooltip: (function() {
-				  const outroTime = skipConfigRef.current.outro_time;
-				  
-				  if (outroTime < 0) {
-				    // 使用当前播放器的实际时长（如果可用）
-				    const currentDuration = artPlayerRef.current?.duration || 0;
-				    
-				    if (currentDuration > 0) {
-				      const endTime = currentDuration + outroTime;
-				      return `${formatTime(endTime)}(点击删除)`;
-				    }
-				    
-				    // 如果播放器时长不可用，显示相对时间
-				    return `-${formatTime(-outroTime)}(点击删除)`;
-				  }
-				  return '设置片尾时间';
-				})(),
+		          tooltip:
+		            skipConfigRef.current.outro_time >= 0
+		              ? '设置片尾时间'
+		              : `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`,
 				onClick: function () {
 					const currentOutroTime = skipConfigRef.current.outro_time;
 					    // 如果有设置，直接删除
