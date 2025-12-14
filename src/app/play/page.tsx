@@ -1779,10 +1779,12 @@ useEffect(() => {
 
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-				  setTimeout(() => {
-				  skipIntroProcessedRef.current = false;
-				  outroCheckStartedRef.current = false;
-				  }, 550);
+		  console.log('视频可以播放...',video?.readyState);
+		    if (video?.readyState >= 3) { // HAVE_FUTURE_DATA
+			    skipIntroProcessedRef.current = false;
+			    outroCheckStartedRef.current = false;
+			  }
+
 		  console.log('视频可以播放...');
         /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
