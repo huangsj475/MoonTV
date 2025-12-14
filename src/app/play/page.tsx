@@ -1870,15 +1870,12 @@ useEffect(() => {
 		  if (!skipIntroProcessedRef.current) {
 		    // 情况2：恢复进度存在，跳过开启
 		    if (duration > 0 && resumeTime > 0 && introTime > 0) {
-				
 		      const targetTime = Math.max(resumeTime, introTime);
-		      
-		      if (currentTime < targetTime) {
+		      if (currentTime > 0 && currentTime < targetTime) {
 
-			    if (artPlayerRef.current.video?.readyState >= 3) {
 		        artPlayerRef.current.currentTime = targetTime;
 				console.log('成功恢复播放进度到:', targetTime);
-				  }
+				  
 		        artPlayerRef.current.notice.show = targetTime === resumeTime 
 		          ? `已恢复进度 (${formatTime(resumeTime)})` 
 		          : `已跳过片头 (${formatTime(introTime)})`;
@@ -1890,11 +1887,9 @@ useEffect(() => {
 		
 		    // 情况3：只有恢复进度
 		    if (duration > 0 && resumeTime > 0) {
-		      if (currentTime < resumeTime) {
-			    if (artPlayerRef.current.video?.readyState >= 3) {
+		      if (currentTime > 0 && currentTime < resumeTime) {
 		        artPlayerRef.current.currentTime = resumeTime;
 				console.log('恢复播放进度:', resumeTime);
-				  }
 				  
 		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
 		        resumeTimeRef.current = 0;
@@ -1905,11 +1900,9 @@ useEffect(() => {
 		
 		    // 情况4：只有跳过片头
 		    if (duration > 0 && introTime > 0) {
-		      if (currentTime < introTime) {
-			    if (artPlayerRef.current.video?.readyState >= 3) {
+		      if (currentTime > 0 && currentTime < introTime) {
 		        artPlayerRef.current.currentTime = introTime;
 				console.log('跳过片头:', introTime);
-				  }
 
 		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
 		        skipIntroProcessedRef.current = true;
