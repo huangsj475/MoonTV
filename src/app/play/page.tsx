@@ -1543,9 +1543,6 @@ useEffect(() => {
 			hls.on(Hls.Events.MANIFEST_PARSED, function (event: any, data: any) {
 			  // 播放列表解析完成，可以开始播放
 
-			    skipIntroProcessedRef.current = false;
-			    outroCheckStartedRef.current = false;
-			  
 			});  
 
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
@@ -1845,6 +1842,12 @@ useEffect(() => {
         // 隐藏换源加载状态
         setIsVideoLoading(false);
       });
+			//视频元数据
+		artPlayerRef.current.on('video:loadedmetadata', () => {
+			    skipIntroProcessedRef.current = false;
+			    outroCheckStartedRef.current = false;
+			    console.log('这里重置标签');
+		});
 		
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
@@ -1872,14 +1875,13 @@ useEffect(() => {
 		      
 		      if (currentTime < targetTime) {
 
-			    if (artPlayerRef.current.video?.readyState >= 3) {
+			    if (artPlayerRef.current.video?.readyState >= 2) {
 		        artPlayerRef.current.currentTime = targetTime;
 				console.log('成功恢复播放进度到:', targetTime);
+				  }
 		        artPlayerRef.current.notice.show = targetTime === resumeTime 
 		          ? `已恢复进度 (${formatTime(resumeTime)})` 
 		          : `已跳过片头 (${formatTime(introTime)})`;
-				  }
-
 		        resumeTimeRef.current = 0;
 		        skipIntroProcessedRef.current = true;
 		        return;
@@ -1892,8 +1894,9 @@ useEffect(() => {
 			    if (artPlayerRef.current.video?.readyState >= 3) {
 		        artPlayerRef.current.currentTime = resumeTime;
 				console.log('恢复播放进度:', resumeTime);
-		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
 				  }
+				  
+		        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
 		        resumeTimeRef.current = 0;
 		        skipIntroProcessedRef.current = true;
 		        return;
@@ -1906,9 +1909,9 @@ useEffect(() => {
 			    if (artPlayerRef.current.video?.readyState >= 3) {
 		        artPlayerRef.current.currentTime = introTime;
 				console.log('跳过片头:', introTime);
-		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
 				  }
 
+		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
 		        skipIntroProcessedRef.current = true;
 		        return;
 		      }
