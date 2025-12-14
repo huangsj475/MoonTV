@@ -606,7 +606,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 			    }
 			    
 			    // 如果播放器时长不可用，显示相对时间
-			    return `距离结尾${formatTime(-outroTime)}开始(点击删除)`;
+			    return `-${formatTime(-outroTime)}(点击删除)`;
 			  }
 			  return '设置片尾时间';
 			})(),
@@ -1053,7 +1053,7 @@ useEffect(() => {
 	   
 	      setTimeout(() => {
 		    isChangingEpisodeRef.current = false;
-		    }, 1000);
+		    }, 1500);
 
     setCurrentEpisodeIndex(episodeindexNumber);
   }
@@ -1069,7 +1069,7 @@ useEffect(() => {
       }*/
 	  	    setTimeout(() => {
 		    isChangingEpisodeRef.current = false;
-		    }, 1000);
+		    }, 2000);
 	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx - 1);
     }
@@ -1085,7 +1085,7 @@ useEffect(() => {
       }*/
 			setTimeout(() => {
 		    isChangingEpisodeRef.current = false;
-		    }, 1000);
+		    }, 2000);
 	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx + 1);
     }
@@ -1670,7 +1670,7 @@ useEffect(() => {
 				    }
 				    
 				    // 如果播放器时长不可用，显示相对时间
-				    return `距离结尾${formatTime(-outroTime)}开始(点击删除)`;
+				    return `-${formatTime(-outroTime)}(点击删除)`;
 				  }
 				  return '设置片尾时间';
 				})(),
@@ -1993,7 +1993,7 @@ useEffect(() => {
 		    
 		    // 优化：只有接近片尾开始时间（例如提前3秒）才开始检查
 		    // 避免整个视频都在检查片尾
-		    const checkStartTime = outroStartTime - 3; // 提前3秒开始检查
+		    const checkStartTime = outroStartTime - 4; // 提前3秒开始检查
 		    
 		    // 如果还没到检查时间，直接返回
 		    if (currentTime < checkStartTime) {
