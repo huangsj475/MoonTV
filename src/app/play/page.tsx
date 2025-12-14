@@ -1841,8 +1841,10 @@ useEffect(() => {
 	  	// 在创建播放器时监听视频加载事件
 		artPlayerRef.current.on('video:loadedmetadata', () => {
 		  // 视频元数据加载完成后才重置标志
+			 setTimeout(() => {
 		  skipIntroProcessedRef.current = false;
 		  outroCheckStartedRef.current = false;
+          }, 60);
 		});
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
