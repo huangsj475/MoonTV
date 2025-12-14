@@ -1542,8 +1542,12 @@ useEffect(() => {
 
 			hls.on(Hls.Events.MANIFEST_PARSED, function (event: any, data: any) {
 			  // 播放列表解析完成，可以开始播放
-			  skipIntroProcessedRef.current = false;
-			  outroCheckStartedRef.current = false;
+
+				  setTimeout(() => {
+				  skipIntroProcessedRef.current = false;
+				  outroCheckStartedRef.current = false;
+					}
+				  }, 260);
 			  console.log('HLS 清单解析完成', data);
 			});  
 
@@ -1845,15 +1849,6 @@ useEffect(() => {
         setIsVideoLoading(false);
       });
 		
-	  	// 在创建播放器时监听视频加载事件
-		artPlayerRef.current.on('video:loadedmetadata', () => {
-		  // 视频元数据加载完成后才重置标志
-			/* setTimeout(() => {
-		  skipIntroProcessedRef.current = false;
-		  outroCheckStartedRef.current = false;
-          }, 60);*/
-			console.log('视频加载事件完成');
-		});
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
 		  const currentTime = artPlayerRef.current.currentTime || 0;
