@@ -1036,6 +1036,9 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
 	  isChangingEpisodeRef.current = true;
+		skipIntroProcessedRef.current = false;
+		outroCheckStartedRef.current = false;
+		console.log('这里重置标签');
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
@@ -1836,7 +1839,6 @@ useEffect(() => {
           ) {
             artPlayerRef.current.playbackRate = lastPlaybackRateRef.current;
           }
-          artPlayerRef.current.notice.show = '';
         }, 0);
 
         // 隐藏换源加载状态
@@ -1844,9 +1846,7 @@ useEffect(() => {
       });
 			//视频元数据
 		artPlayerRef.current.on('video:loadedmetadata', () => {
-			    skipIntroProcessedRef.current = false;
-			    outroCheckStartedRef.current = false;
-			    console.log('这里重置标签');
+
 		});
 		
       // 监听视频时间更新事件，实现跳过片头片尾
