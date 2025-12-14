@@ -703,7 +703,6 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
   useEffect(() => {
     updateVideoUrl(detail, currentEpisodeIndex);
 	  
-	  outroCheckStartedRef.current = false;
   }, [detail, currentEpisodeIndex]);
 
   // 进入页面时直接获取全部源信息
@@ -1038,6 +1037,7 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
 	  isChangingEpisodeRef.current = true;
+	  outroCheckStartedRef.current = false;
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
@@ -1076,10 +1076,11 @@ useEffect(() => {
     const d = detailRef.current;
     const idx = currentEpisodeIndexRef.current;
     if (d && d.episodes && idx < d.episodes.length - 1) {
-      if (artPlayerRef.current && !artPlayerRef.current.paused) {
+      /*if (artPlayerRef.current && !artPlayerRef.current.paused) {
         saveCurrentPlayProgress();
 		console.log('下一集---播放进度已保存');
-      }
+      }*/
+	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx + 1);
     }
   };
