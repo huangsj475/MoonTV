@@ -702,6 +702,8 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
   // 当集数索引变化时自动更新视频地址
   useEffect(() => {
     updateVideoUrl(detail, currentEpisodeIndex);
+	  
+	  outroCheckStartedRef.current = false;
   }, [detail, currentEpisodeIndex]);
 
   // 进入页面时直接获取全部源信息
@@ -1036,7 +1038,6 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
 	  isChangingEpisodeRef.current = true;
-	  outroCheckStartedRef.current = false;
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
