@@ -52,7 +52,7 @@ function PlayPageClient() {
   const [detail, setDetail] = useState<SearchResult | null>(null);
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
-  //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
+  const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const videoTotalDurationRef = useRef<number>(0);// 添加一个ref存储视频总时长
 
   // 收藏状态
@@ -1036,7 +1036,7 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
 	  isChangingEpisodeRef.current = true;
-
+	  outroCheckStartedRef.current = false;
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
@@ -1829,25 +1829,8 @@ useEffect(() => {
 		      }
 		    }
 	
-		  // ============= 处理跳过结尾逻辑 =============
+		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 		  
-		  // 跳过片尾：只有跳过开关开启且设置了片尾时间
-		  if (outroTime < 0 && duration > 0) {
-		    // 计算片尾开始时间（负值变正）
-		    const outroStartTime = duration + outroTime; // outroTime是负值
-		    // 现在才真正检查是否进入片尾区域
-		    if (currentTime > outroStartTime) {
-		      if (
-		        currentEpisodeIndexRef.current <
-		        (detailRef.current?.episodes?.length || 1) - 1
-		      ) {
-		        handleNextEpisode();
-		      } else {
-		        artPlayerRef.current.pause();
-		      }
-		      artPlayerRef.current.notice.show = `已跳过片尾`;
-		    }
-		  }
         /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
           try {
@@ -1922,14 +1905,14 @@ useEffect(() => {
 		
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
-		  /*const currentTime = artPlayerRef.current.currentTime || 0;
+		  const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
-
+		  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
+		
+		  /*
 		  const resumeTime = resumeTimeRef.current;
 		  const skipEnabled = skipConfigRef.current.enable;
 		  const introTime = skipConfigRef.current.intro_time;
-		  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
-		
 		  // 情况1：跳过开关没开启并且没有恢复进度存在
 		  if (!skipEnabled && resumeTime === 0) {
 		    return;
@@ -1989,7 +1972,7 @@ useEffect(() => {
 		    if (currentTime >= maxPossibleTime) {
 		      skipIntroProcessedRef.current = true;
 		    }
-		  }
+		  }*/
 		
 		  // ============= 处理跳过结尾逻辑（延迟检查） =============
 		  
@@ -2020,7 +2003,7 @@ useEffect(() => {
 		      artPlayerRef.current.notice.show = `已跳过片尾`;
 			  outroCheckStartedRef.current = true;
 		    }
-		  }*/
+		  }
       });
 
       artPlayerRef.current.on('error', (err: any) => {
