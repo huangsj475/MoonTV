@@ -1546,7 +1546,6 @@ useEffect(() => {
 				  setTimeout(() => {
 				  skipIntroProcessedRef.current = false;
 				  outroCheckStartedRef.current = false;
-					}
 				  }, 260);
 			  console.log('HLS 清单解析完成', data);
 			});  
