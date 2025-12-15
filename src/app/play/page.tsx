@@ -2109,28 +2109,24 @@ useEffect(() => {
 		if (isFullscreen || fullscreenWeb) {
 			isControlBarVisible = show;
         if (timeElement && titleElement) {
-	        // 关键逻辑：只有在状态真正变化时才执行
-	        if (show && !isControlBarVisible) {
-	          // 请求显示，且当前是隐藏状态 → 显示
-	          timeElement.style.display = 'block';
-	          titleElement.style.display = 'block';
-	          isControlBarVisible = true;
-	          console.log('显示控制栏');
-	          
-	        } else if (!show && isControlBarVisible) {
-	          // 请求隐藏，且当前是显示状态 → 隐藏
-	          timeElement.style.display = 'none';
-	          titleElement.style.display = 'none';
-	          isControlBarVisible = false;
-	          console.log('隐藏控制栏');
-	        }
+	        timeElement.style.display = show ? 'block' : 'none';
+	        titleElement.style.display = show ? 'block' : 'none';
+	        console.log(show ? '显示控制栏' : '隐藏控制栏');
         }
 		}
     });
 	  // ========== 关键：根据 isControlBarVisible 拦截鼠标移动 ==========
+		  let lastMouseMoveTime = 0;
+		  const MOUSE_MOVE_THROTTLE = 300;
 	  const handleMouseMove = (e: Event) => {
+		    // 节流处理
+		    const now = Date.now();
+		    if (now - lastMouseMoveTime < MOUSE_MOVE_THROTTLE) return;
+		    lastMouseMoveTime = now;
+		  
 	    // 1. 非全屏状态：不处理
 	    if (!isFullscreen && !fullscreenWeb) return;
+
 	    
 	    // 2. 控制栏显示期间：禁止鼠标触发显示
 	    if (isControlBarVisible) {
@@ -2139,26 +2135,14 @@ useEffect(() => {
 	    }
 	  };
 	
-	  // 添加节流，避免过于频繁
-	  let lastMouseMoveTime = 0;
-	  const MOUSE_MOVE_THROTTLE = 300;
-	  
-	  const throttledMouseMove = () => {
-	    const now = Date.now();
-	    if (now - lastMouseMoveTime > MOUSE_MOVE_THROTTLE) {
-	      lastMouseMoveTime = now;
-	      handleMouseMove(e);
-	    }
-	  };
-	
 		if (artRef.current) {
-		  artRef.current.addEventListener('mousemove', throttledMouseMove, true);
+		  artRef.current.addEventListener('mousemove', handleMouseMove, true);
 		}
  
 return () => {
   clearInterval(timer);
     if (artRef.current) {
-      artRef.current.removeEventListener('mousemove', throttledMouseMove, true);
+      artRef.current.removeEventListener('mousemove', handleMouseMove, true);
     }
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
