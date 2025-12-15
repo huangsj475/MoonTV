@@ -2142,18 +2142,18 @@ useEffect(() => {
 	    if (isControlBarVisible) {
 	      e.stopPropagation();
 	      e.stopImmediatePropagation();
+	      e.preventDefault();
+		console.log('阻止鼠标事件');
 	    }
 	  };
 	
-		if (artRef.current) {
-		  artRef.current.addEventListener('mousemove', handleMouseMove, true);
-		}
+	  document.addEventListener('mousemove', handleMouseMove, true);
+	  window.addEventListener('mousemove', handleMouseMove, true);
  
 return () => {
   clearInterval(timer);
-    if (artRef.current) {
-      artRef.current.removeEventListener('mousemove', handleMouseMove, true);
-    }
+    document.removeEventListener('mousemove', handleMouseMove, true);
+    window.removeEventListener('mousemove', handleMouseMove, true);
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
 	artPlayerRef.current.off('fullscreen'); 
