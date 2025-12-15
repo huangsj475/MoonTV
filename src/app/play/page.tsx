@@ -1376,7 +1376,7 @@ useEffect(() => {
       const { videoUrl: realVideoUrl } = parseEpisodeUrl(originalUrl);
 	  artPlayerRef.current.switch = realVideoUrl;
 	  const { episodeName } = parseEpisodeUrl(videoUrl);
-      const showEpisodeName = episodeName && episodeName.length > 5;
+      const showEpisodeName = episodeName && episodeName.length >= 4;
 	  artPlayerRef.current.title = `${videoTitle} - ${
     showEpisodeName 
       ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
@@ -1465,7 +1465,7 @@ useEffect(() => {
 		const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
         const { episodeName } = parseEpisodeUrl(originalUrl);
         return `${videoTitle} - ${
-          episodeName && episodeName.length > 5 
+          episodeName && episodeName.length >=4
             ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
             : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
         }`;
@@ -1512,7 +1512,7 @@ useEffect(() => {
             const hls = new Hls({
 			
               debug: false, // 关闭日志
-              enableWorker: false, // WebWorker 解码，降低主线程压力
+              enableWorker: true, // WebWorker 解码，降低主线程压力
               lowLatencyMode: true, // 开启低延迟 LL-HLS
 
               /* 缓冲/内存相关 */
@@ -1521,6 +1521,10 @@ useEffect(() => {
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 80,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
+			  // 强制固定初始质量
+			  startLevel: 0,                    // 始终第一个质量
+			  capLevelToPlayerSize: false,
+			  testBandwidth: false,             // 初始不测试带宽
 			
               /* 自定义loader */
               loader: blockAdEnabledRef.current
@@ -1533,7 +1537,16 @@ useEffect(() => {
 
             video.hls = hls;
             ensureVideoSource(video, url);
-
+			  
+		    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+			    if (typeof window !== 'undefined') {
+			      window.dispatchEvent(
+			        new CustomEvent('globalError', {
+			          detail: { message: '切换视频质量' },
+			        })
+			      );
+			    }
+		    });
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
 				// 无论是否致命错误，都尝试隐藏加载蒙层
 				  setIsVideoLoading(false);
@@ -1551,14 +1564,6 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
-					//hls 全局错误提示
-				    if (typeof window !== 'undefined') {
-				      window.dispatchEvent(
-				        new CustomEvent('globalError', {
-				          detail: { message: '网络错误，尝试恢复...' },
-				        })
-				      );
-				    }
                     //hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
@@ -2156,7 +2161,7 @@ return () => {
 	const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
     const { episodeName } = parseEpisodeUrl(originalUrl);
     titleLayer.innerText = `${videoTitle} - ${
-      episodeName && episodeName.length > 5 
+      episodeName && episodeName.length >= 4 
         ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
         : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
     }`;
@@ -2354,7 +2359,7 @@ return () => {
 					// 使用原始的URL（detail.episodes中的URL）来解析集名称
 					const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
 					const { episodeName } = parseEpisodeUrl(originalUrl);
-					return episodeName && episodeName.length > 5 
+					return episodeName && episodeName.length >= 4 
 					  ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
 					  : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`; // 修复这里的显示逻辑
 				  })()
