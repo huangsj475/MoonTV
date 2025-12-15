@@ -856,6 +856,20 @@ useEffect(() => {
 	  console.log('播放器销毁前---播放进度已保存');
       
       if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
+      //---新增： 停止所有缓冲
+      artPlayerRef.current.video.hls.stopLoad();
+      
+      //---新增： 清空缓冲区
+      const media = artPlayerRef.current.video;
+      if (media) {
+        try {
+          media.removeAttribute('src');
+          media.load();
+        } catch (e) {
+          console.error('视频流hls清空缓冲区错误:', e);
+        }
+	  }
+		  
         artPlayerRef.current.video.hls.destroy();
 		console.log('播放进度已保存后---播放器视频流hls销毁');
       }
@@ -1022,7 +1036,7 @@ useEffect(() => {
   // 处理集数切换
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
-	  isChangingEpisodeRef.current = true;
+	  
 	  outroCheckStartedRef.current = false;
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
@@ -1037,10 +1051,6 @@ useEffect(() => {
     } else {
       resumeTimeRef.current = 0;
     }
-	   
-	      setTimeout(() => {
-		    isChangingEpisodeRef.current = false;
-		    }, 1500);
 
     setCurrentEpisodeIndex(episodeindexNumber);
   }
@@ -1054,9 +1064,7 @@ useEffect(() => {
         saveCurrentPlayProgress();
 		console.log('上一集---播放进度已保存');
       }*/
-	  	    setTimeout(() => {
-		    isChangingEpisodeRef.current = false;
-		    }, 2000);
+	
 	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx - 1);
     }
@@ -1070,9 +1078,7 @@ useEffect(() => {
         saveCurrentPlayProgress();
 		console.log('下一集---播放进度已保存');
       }*/
-			setTimeout(() => {
-		    isChangingEpisodeRef.current = false;
-		    }, 2000);
+
 	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx + 1);
     }
@@ -1366,7 +1372,8 @@ useEffect(() => {
       return;
     }
     console.log(videoUrl);
-
+	  //视频播放前设置正在切换状态，否则播放器会自动触发暂停，然后保存进度
+    isChangingEpisodeRef.current = true;
   
     // 检测是否为WebKit浏览器
     const isWebkit =
@@ -1524,8 +1531,13 @@ useEffect(() => {
               /* 缓冲/内存相关 */
               maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
               backBufferLength: 20, // 仅保留 30s 已播放内容，避免内存占用
-              maxBufferSize: 80 * 1000 * 1000, // 约 60MB，超出后触发清理
+              maxBufferSize: 50 * 1000 * 1000, // 约 60MB，超出后触发清理
+			  // 专门限制音频缓冲区
+			  maxAudioBufferLength: 10,           // 音频最多缓冲10秒
+			  maxMaxBufferLength: 30,             // 总缓冲最多30秒
 
+			  maxMaxBufferLength: 60,//绝对的最大允许缓冲区长度，backBufferLength + maxBufferLength
+			
               /* 自定义loader */
               loader: blockAdEnabledRef.current
                 ? CustomHlsJsLoader
@@ -1826,6 +1838,10 @@ useEffect(() => {
 		    }
 	
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
+
+		  	setTimeout(() => {
+		    isChangingEpisodeRef.current = false;
+		    }, 1000);
 		  
         /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
