@@ -1374,7 +1374,7 @@ useEffect(() => {
       typeof (window as any).webkitConvertPointFromNodeToPage === 'function';
 
 	      // 切换视频后重置片尾检查状态
-  	//outroCheckStartedRef.current = false;
+  	outroCheckStartedRef.current = false;
 	  
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
    if (!isWebkit && artPlayerRef.current) {
@@ -1522,9 +1522,9 @@ useEffect(() => {
               lowLatencyMode: true, // 开启低延迟 LL-HLS
 
               /* 缓冲/内存相关 */
-              maxBufferLength: 30, // 前向缓冲最大 30s，过大容易导致高延迟
+              maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
               backBufferLength: 30, // 仅保留 30s 已播放内容，避免内存占用
-              maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
+              maxBufferSize: 80 * 1000 * 1000, // 约 60MB，超出后触发清理
 
               /* 自定义loader */
               loader: blockAdEnabledRef.current
@@ -1539,6 +1539,17 @@ useEffect(() => {
             ensureVideoSource(video, url);
 
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
+				// 无论是否致命错误，都尝试隐藏加载蒙层
+				  setIsVideoLoading(false);
+				//hls 全局错误提示
+			    if (typeof window !== 'undefined') {
+			      window.dispatchEvent(
+			        new CustomEvent('globalError', {
+			          detail: { message: '网络延迟或加载错误' },
+			        })
+			      );
+			    }
+
               console.error('HLS Error:', event, data);
               if (data.fatal) {
                 switch (data.type) {
@@ -1756,6 +1767,10 @@ useEffect(() => {
 
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
+
+		  // 隐藏加载状态，显示播放器
+        setIsVideoLoading(false);
+		  
 		  const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
 
@@ -1876,8 +1891,6 @@ useEffect(() => {
           }
         }, 0);
 
-        // 隐藏换源加载状态
-        setIsVideoLoading(false);
       });
 		
       // 监听视频时间更新事件，实现跳过片头片尾
