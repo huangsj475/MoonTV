@@ -2107,11 +2107,21 @@ useEffect(() => {
 
         artPlayerRef.current.on('control',  (show: boolean) => {
 		if (isFullscreen || fullscreenWeb) {
-			isControlBarVisible = show;
         if (timeElement && titleElement) {
-	        timeElement.style.display = show ? 'block' : 'none';
-	        titleElement.style.display = show ? 'block' : 'none';
-	        console.log(show ? '显示控制栏' : '隐藏控制栏');
+       if (show && !isControlBarVisible) {
+	          // 请求显示，且当前是隐藏状态 → 显示
+	          timeElement.style.display = 'block';
+	          titleElement.style.display = 'block';
+	          isControlBarVisible = false;
+	          console.log('显示控制栏');
+	          
+	        } else if (!show && isControlBarVisible) {
+	          // 请求隐藏，且当前是显示状态 → 隐藏
+	          timeElement.style.display = 'none';
+	          titleElement.style.display = 'none';
+	          isControlBarVisible = true;
+	          console.log('隐藏控制栏');
+	        }
         }
 		}
     });
