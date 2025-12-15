@@ -1513,7 +1513,7 @@ useEffect(() => {
 			
               debug: false, // 关闭日志
               enableWorker: true, // WebWorker 解码，降低主线程压力
-              lowLatencyMode: true, // 开启低延迟 LL-HLS
+              lowLatencyMode: false, // 开启低延迟 LL-HLS
 
               /* 缓冲/内存相关 */
               maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
@@ -1530,8 +1530,7 @@ useEffect(() => {
 			  enableSoftwareAES: false,
 			  fragLoadingRetryDelay: 0,
 			  levelLoadingRetryDelay: 0,
-			  // 禁用自动质量切换
-			  autoLevelEnabled: false,
+
 			
               /* 自定义loader */
               loader: blockAdEnabledRef.current
