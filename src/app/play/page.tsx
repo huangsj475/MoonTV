@@ -1374,7 +1374,7 @@ useEffect(() => {
       typeof (window as any).webkitConvertPointFromNodeToPage === 'function';
 
 	      // 切换视频后重置片尾检查状态
-  	outroCheckStartedRef.current = false;
+  	//outroCheckStartedRef.current = false;
 	  
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
    if (!isWebkit && artPlayerRef.current) {
