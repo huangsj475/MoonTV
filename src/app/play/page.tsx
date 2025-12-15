@@ -2083,12 +2083,16 @@ useEffect(() => {
 		
 		let isFullscreen = false;
 		let fullscreenWeb = false;
+	  // ========== 新增：记录控制栏当前状态 ==========
+	    let isControlBarVisible = false;
+
 		// 监听全屏切换事件fullscreen
 		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
 		isFullscreen = status;
 		// 全屏退出时强制隐藏标题
 		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
+			  isControlBarVisible = false;// 退出全屏时重置状态
 			}
 		});
 		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
@@ -2096,19 +2100,32 @@ useEffect(() => {
 		// 全屏退出时强制隐藏标题
 		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
+			  isControlBarVisible = false;// 退出全屏时重置状态
 			}
 		});
  
-         //---------开始------------------
+
         artPlayerRef.current.on('control',  (show: boolean) => {
 		if (isFullscreen || fullscreenWeb) {
         if (timeElement && titleElement) {
-            timeElement.style.display  = show ? 'block' : 'none';
-            titleElement.style.display  = show ? 'block' : 'none';
-            console.log(show  ? '显示控制栏' : '隐藏控制栏');
+	        // 关键逻辑：只有在状态真正变化时才执行
+	        if (show && !isControlBarVisible) {
+	          // 请求显示，且当前是隐藏状态 → 显示
+	          timeElement.style.display = 'block';
+	          titleElement.style.display = 'block';
+	          isControlBarVisible = true;
+	          console.log('显示控制栏');
+	          
+	        } else if (!show && isControlBarVisible) {
+	          // 请求隐藏，且当前是显示状态 → 隐藏
+	          timeElement.style.display = 'none';
+	          titleElement.style.display = 'none';
+	          isControlBarVisible = false;
+	          console.log('隐藏控制栏');
+	        }
         }
 		}
-    });//----------结束--------------
+    });
 
  
 return () => {
