@@ -2152,7 +2152,9 @@ useEffect(() => {
 	    }
 	  };
 	
-	  artRef.current.addEventListener('mousemove', throttledMouseMove);
+		if (artRef.current) {
+		  artRef.current.addEventListener('mousemove', throttledMouseMove);
+		}
  
 return () => {
   clearInterval(timer);
