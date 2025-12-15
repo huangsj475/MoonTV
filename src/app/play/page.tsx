@@ -1512,8 +1512,8 @@ useEffect(() => {
             const hls = new Hls({
 			
               debug: false, // 关闭日志
-              enableWorker: true, // WebWorker 解码，降低主线程压力
-              lowLatencyMode: false, // 开启低延迟 LL-HLS
+              enableWorker: false, // WebWorker 解码，降低主线程压力
+              lowLatencyMode: true, // 开启低延迟 LL-HLS
 
               /* 缓冲/内存相关 */
               maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
@@ -1521,16 +1521,6 @@ useEffect(() => {
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 80,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
-
-			    // 禁用所有重试机制
-			  manifestLoadingMaxRetry: 0,      // 清单加载不重试
-			  levelLoadingMaxRetry: 0,         // 质量等级不重试
-			  fragLoadingMaxRetry: 0,          // 分段不重试	
-			  // 禁用错误恢复
-			  enableSoftwareAES: false,
-			  fragLoadingRetryDelay: 0,
-			  levelLoadingRetryDelay: 0,
-
 			
               /* 自定义loader */
               loader: blockAdEnabledRef.current
