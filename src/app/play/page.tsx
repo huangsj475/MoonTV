@@ -2147,7 +2147,7 @@ useEffect(() => {
 	    const now = Date.now();
 	    if (now - lastMouseMoveTime > MOUSE_MOVE_THROTTLE) {
 	      lastMouseMoveTime = now;
-	      handleMouseMove(e: Event);
+	      handleMouseMove(e);
 	    }
 	  };
 	
