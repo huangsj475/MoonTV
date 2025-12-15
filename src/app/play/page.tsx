@@ -1518,7 +1518,7 @@ useEffect(() => {
               /* 缓冲/内存相关 */
               maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
               backBufferLength: 20, // 仅保留 30s 已播放内容，避免内存占用
-              maxBufferSize: 50 * 1000 * 1000, // 约 60MB，超出后触发清理
+              maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 60,//绝对的最大允许缓冲区长度，backBufferLength + maxBufferLength
 			
@@ -2125,35 +2125,10 @@ useEffect(() => {
         }
 		}
     });
-	  // ========== 关键：根据 isControlBarVisible 拦截鼠标移动 ==========
-		  let lastMouseMoveTime = 0;
-		  const MOUSE_MOVE_THROTTLE = 300;
-	  const handleMouseMove = (e: Event) => {
-		    // 节流处理
-		    const now = Date.now();
-		    if (now - lastMouseMoveTime < MOUSE_MOVE_THROTTLE) return;
-		    lastMouseMoveTime = now;
-		  
-	    // 1. 非全屏状态：不处理
-	    if (!isFullscreen && !fullscreenWeb) return;
 
-	    
-	    // 2. 控制栏显示期间：禁止鼠标触发显示
-	    if (isControlBarVisible) {
-	      e.stopPropagation();
-	      e.stopImmediatePropagation();
-	      e.preventDefault();
-		console.log('阻止鼠标事件');
-	    }
-	  };
-	
-	  document.addEventListener('mousemove', handleMouseMove, true);
-	  window.addEventListener('mousemove', handleMouseMove, true);
  
 return () => {
   clearInterval(timer);
-    document.removeEventListener('mousemove', handleMouseMove, true);
-    window.removeEventListener('mousemove', handleMouseMove, true);
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
 	artPlayerRef.current.off('fullscreen'); 
