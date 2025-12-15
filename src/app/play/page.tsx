@@ -2126,10 +2126,39 @@ useEffect(() => {
         }
 		}
     });
-
+	  // ========== 关键：根据 isControlBarVisible 拦截鼠标移动 ==========
+	  const handleMouseMove = () => {
+	    // 1. 非全屏状态：不处理
+	    if (!isFullscreen && !fullscreenWeb) return;
+	    
+	    // 2. 控制栏显示期间：禁止鼠标触发显示
+	    if (isControlBarVisible) return;
+	    
+	    // 3. 控制栏隐藏期间：触发显示
+	    if (!isControlBarVisible) {
+	      artPlayerRef.current.controls.show();
+	    }
+	  };
+	
+	  // 添加节流，避免过于频繁
+	  let lastMouseMoveTime = 0;
+	  const MOUSE_MOVE_THROTTLE = 300;
+	  
+	  const throttledMouseMove = () => {
+	    const now = Date.now();
+	    if (now - lastMouseMoveTime > MOUSE_MOVE_THROTTLE) {
+	      lastMouseMoveTime = now;
+	      handleMouseMove();
+	    }
+	  };
+	
+	  artRef.current.addEventListener('mousemove', throttledMouseMove);
  
 return () => {
   clearInterval(timer);
+    if (artRef.current) {
+      artRef.current.removeEventListener('mousemove', throttledMouseMove);
+    }
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
 	artPlayerRef.current.off('fullscreen'); 
