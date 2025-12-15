@@ -2132,11 +2132,9 @@ useEffect(() => {
 	    if (!isFullscreen && !fullscreenWeb) return;
 	    
 	    // 2. 控制栏显示期间：禁止鼠标触发显示
-	    if (isControlBarVisible) return;
-	    
-	    // 3. 控制栏隐藏期间：触发显示
-	    if (!isControlBarVisible) {
-	      artPlayerRef.current.controls.show();
+	    if (isControlBarVisible) {
+	      e.stopPropagation();
+	      e.stopImmediatePropagation();
 	    }
 	  };
 	
@@ -2153,13 +2151,13 @@ useEffect(() => {
 	  };
 	
 		if (artRef.current) {
-		  artRef.current.addEventListener('mousemove', throttledMouseMove);
+		  artRef.current.addEventListener('mousemove', throttledMouseMove, true);
 		}
  
 return () => {
   clearInterval(timer);
     if (artRef.current) {
-      artRef.current.removeEventListener('mousemove', throttledMouseMove);
+      artRef.current.removeEventListener('mousemove', throttledMouseMove, true);
     }
   if (artPlayerRef.current)  {
     // 组件卸载时移除事件监听 
