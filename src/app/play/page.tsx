@@ -856,20 +856,7 @@ useEffect(() => {
 	  console.log('播放器销毁前---播放进度已保存');
       
       if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
-      //---新增： 停止所有缓冲
-      artPlayerRef.current.video.hls.stopLoad();
-      
-      //---新增： 清空缓冲区
-      const media = artPlayerRef.current.video;
-      if (media) {
-        try {
-          media.removeAttribute('src');
-          media.load();
-        } catch (e) {
-          console.error('视频流hls清空缓冲区错误:', e);
-        }
-	  }
-		  
+
         artPlayerRef.current.video.hls.destroy();
 		console.log('播放进度已保存后---播放器视频流hls销毁');
       }
@@ -1532,9 +1519,6 @@ useEffect(() => {
               maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
               backBufferLength: 20, // 仅保留 30s 已播放内容，避免内存占用
               maxBufferSize: 50 * 1000 * 1000, // 约 60MB，超出后触发清理
-			  // 专门限制音频缓冲区
-			  maxAudioBufferLength: 10,           // 音频最多缓冲10秒
-			  maxMaxBufferLength: 30,             // 总缓冲最多30秒
 
 			  maxMaxBufferLength: 60,//绝对的最大允许缓冲区长度，backBufferLength + maxBufferLength
 			
