@@ -1551,7 +1551,15 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
-                    hls.startLoad();
+					//hls 全局错误提示
+				    if (typeof window !== 'undefined') {
+				      window.dispatchEvent(
+				        new CustomEvent('globalError', {
+				          detail: { message: '网络错误，尝试恢复...' },
+				        })
+				      );
+				    }
+                    //hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
