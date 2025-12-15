@@ -53,6 +53,7 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
+  const qualityReadyRef = useRef(false);//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -1521,11 +1522,7 @@ useEffect(() => {
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 80,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
-			  // 强制固定初始质量
-			  startLevel: 0,                    // 始终第一个质量
-			  capLevelToPlayerSize: false,
-			  testBandwidth: false,             // 初始不测试带宽
-			
+
               /* 自定义loader */
               loader: blockAdEnabledRef.current
                 ? CustomHlsJsLoader
@@ -1539,10 +1536,11 @@ useEffect(() => {
             ensureVideoSource(video, url);
 			  
 		    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+				qualityReadyRef.current = true;
 			    if (typeof window !== 'undefined') {
 			      window.dispatchEvent(
 			        new CustomEvent('globalError', {
-			          detail: { message: '切换视频质量' },
+			          detail: { message: '切换视频质量',type: 'info'  },
 			        })
 			      );
 			    }
@@ -1554,7 +1552,7 @@ useEffect(() => {
 			    if (typeof window !== 'undefined') {
 			      window.dispatchEvent(
 			        new CustomEvent('globalError', {
-			          detail: { message: '网络延迟或加载错误' },
+			          detail: { message: '网络延迟或加载错误'},
 			        })
 			      );
 			    }
@@ -1764,7 +1762,12 @@ useEffect(() => {
       artPlayerRef.current.on('ready', () => {
         setError(null);
        	isChangingEpisodeRef.current = false;
-		console.log('播放器ready，当前切换状态:', isChangingEpisodeRef.current);
+		  setTimeout(() => {
+		    //如果视频质量没切换，这里做稍微延迟设置状态
+			qualityReadyRef.current = true; 
+		console.log('播放器ready，当前切换质量状态:', qualityReadyRef.current);
+		  }, 800);
+		
       });
    
               
@@ -1779,7 +1782,6 @@ useEffect(() => {
       artPlayerRef.current.on('video:canplay', () => {
 
 		    isChangingEpisodeRef.current = false;
-		  console.log('播放器canplay，当前切换状态:', isChangingEpisodeRef.current);
 		  // 隐藏加载状态，显示播放器
         setIsVideoLoading(false);
 		  
@@ -1795,9 +1797,11 @@ useEffect(() => {
 		  if (!skipEnabled && resumeTime === 0) {
 		    return;
 		  }
-		
+		if (!qualityReadyRef.current){
+			return;
+		}
 		  // ============= 处理跳过片头逻辑 =============
-	
+
 		    // 情况2：恢复进度存在，跳过开启
 		    if (duration > 0 && resumeTime > 0 && introTime > 0) {
 		      const targetTime = Math.max(resumeTime, introTime);
@@ -1836,7 +1840,7 @@ useEffect(() => {
 		        return;
 		      }
 		    }
-	
+	       qualityReadyRef.current = false;//恢复完进度，设置为false
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
         /*// 若存在需要恢复的播放进度，则跳转
