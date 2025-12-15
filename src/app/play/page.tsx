@@ -1538,11 +1538,6 @@ useEffect(() => {
             video.hls = hls;
             ensureVideoSource(video, url);
 
-			hls.on(Hls.Events.MANIFEST_PARSED, function (event: any, data: any) {
-			  // 播放列表解析完成，可以开始播放
-
-			});  
-
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
               console.error('HLS Error:', event, data);
               if (data.fatal) {
