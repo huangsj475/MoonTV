@@ -1521,6 +1521,17 @@ useEffect(() => {
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 80,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
+
+			    // 禁用所有重试机制
+			  manifestLoadingMaxRetry: 0,      // 清单加载不重试
+			  levelLoadingMaxRetry: 0,         // 质量等级不重试
+			  fragLoadingMaxRetry: 0,          // 分段不重试	
+			  // 禁用错误恢复
+			  enableSoftwareAES: false,
+			  fragLoadingRetryDelay: 0,
+			  levelLoadingRetryDelay: 0,
+			  // 禁用自动质量切换
+			  autoLevelEnabled: false,
 			
               /* 自定义loader */
               loader: blockAdEnabledRef.current
