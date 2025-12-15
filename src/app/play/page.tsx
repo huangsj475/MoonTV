@@ -1750,7 +1750,8 @@ useEffect(() => {
       // 监听播放器事件
       artPlayerRef.current.on('ready', () => {
         setError(null);
-       
+       	isChangingEpisodeRef.current = false;
+		console.log('播放器ready，当前切换状态:', isChangingEpisodeRef.current);
       });
    
               
@@ -1764,6 +1765,8 @@ useEffect(() => {
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
 
+		    isChangingEpisodeRef.current = false;
+		  console.log('播放器canplay，当前切换状态:', isChangingEpisodeRef.current);
 		  // 隐藏加载状态，显示播放器
         setIsVideoLoading(false);
 		  
@@ -1823,10 +1826,6 @@ useEffect(() => {
 	
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
-		  	setTimeout(() => {
-		    isChangingEpisodeRef.current = false;
-		    }, 1000);
-		  
         /*// 若存在需要恢复的播放进度，则跳转
         if (resumeTimeRef.current && resumeTimeRef.current > 0) {
           try {
