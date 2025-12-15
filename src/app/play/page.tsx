@@ -2084,29 +2084,30 @@ useEffect(() => {
 		let isFullscreen = false;
 		let fullscreenWeb = false;
 	  // ========== 新增：记录控制栏当前状态 ==========
-	    let isControlBarVisible = false;
+	    let isControlBarVisible = true;
 
 		// 监听全屏切换事件fullscreen
 		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
 		isFullscreen = status;
+		isControlBarVisible = status;
 		// 全屏退出时强制隐藏标题
 		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
-			  isControlBarVisible = false;// 退出全屏时重置状态
 			}
 		});
 		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
 		fullscreenWeb = status;
+	    isControlBarVisible = status;
 		// 全屏退出时强制隐藏标题
-		if (!status && titleElement) {
+			if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
-			  isControlBarVisible = false;// 退出全屏时重置状态
 			}
 		});
  
 
         artPlayerRef.current.on('control',  (show: boolean) => {
 		if (isFullscreen || fullscreenWeb) {
+			isControlBarVisible = show;
         if (timeElement && titleElement) {
 	        // 关键逻辑：只有在状态真正变化时才执行
 	        if (show && !isControlBarVisible) {
