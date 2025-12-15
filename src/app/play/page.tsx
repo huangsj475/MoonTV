@@ -2127,7 +2127,7 @@ useEffect(() => {
 		}
     });
 	  // ========== 关键：根据 isControlBarVisible 拦截鼠标移动 ==========
-	  const handleMouseMove = () => {
+	  const handleMouseMove = (e: Event) => {
 	    // 1. 非全屏状态：不处理
 	    if (!isFullscreen && !fullscreenWeb) return;
 	    
