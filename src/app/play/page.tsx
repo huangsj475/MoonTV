@@ -53,12 +53,8 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
-  const [qualityReady, setQualityReady] = useState(false);//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
-  const [canPlay, setCanPlay] = useState(false);//新增：播放器可以播放
-  //全屏状态用来显示标题和时间
-const isControlBarVisibleRef = useRef(true);
-const isFullscreenRef = useRef(false);
-const isFullscreenWebRef = useRef(false);
+  const qualityReadyRef = useRef(false)//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
+
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -1367,8 +1363,7 @@ useEffect(() => {
     console.log(videoUrl);
 	  //视频播放前设置正在切换状态，否则播放器会自动触发暂停，然后保存进度
     isChangingEpisodeRef.current = true;
-    setCanPlay(false);
-    setQualityReady(false);
+    qualityReadyRef.current = false;
   
     // 检测是否为WebKit浏览器
     const isWebkit =
@@ -1543,7 +1538,7 @@ useEffect(() => {
             ensureVideoSource(video, url);
 			  
 		    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-				setQualityReady(true);
+				qualityReadyRef.current = true;
 				console.log('切换视频质量，当前切换质量状态:', true);
 			    if (typeof window !== 'undefined') {
 			      window.dispatchEvent(
@@ -1772,7 +1767,7 @@ useEffect(() => {
        	isChangingEpisodeRef.current = false;
 		  setTimeout(() => {
 		    //如果视频质量没切换，这里做稍微延迟设置状态
-			setQualityReady(true);
+			qualityReadyRef.current = true;
 			console.log('播放器ready，当前切换质量状态:', true);
 		  }, 1100);
 
@@ -1788,14 +1783,12 @@ useEffect(() => {
 		
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-		console.log('播放器canplay，当前切换质量状态:', qualityReady);
+		console.log('播放器canplay，当前切换质量状态:');
 	    isChangingEpisodeRef.current = false;
 		  // 隐藏加载状态，显示播放器
         setIsVideoLoading(false);
 
-		  setCanPlay(true);
-		  console.log('播放器canplay，当前播放状态:', true);
-		  /*const currentTime = artPlayerRef.current.currentTime || 0;
+		  const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
 
 		  const resumeTime = resumeTimeRef.current;
@@ -1850,7 +1843,7 @@ useEffect(() => {
 		        return;
 		      }
 		    }
-	       qualityReadyRef.current = false;//恢复完进度，设置为false*/
+	       qualityReadyRef.current = false;//恢复完进度，设置为false
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
         /*// 若存在需要恢复的播放进度，则跳转
@@ -2105,95 +2098,51 @@ useEffect(() => {
 	    if (titleElement && timeElement){
 		// 初始隐藏标题
 		titleElement.style.display  = 'none';
-		timeElement.style.display = 'block';
 		 }
-
+		let isFullscreen = false;
+		let fullscreenWeb = false;
+	  // ========== 新增：记录控制栏当前状态 ==========
+	    let isControlBarVisible = true;
 		// 监听全屏切换事件fullscreen
 		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
-	    isFullscreenRef.current = status;
-	    isControlBarVisibleRef.current = status;// 进入全屏时显示控制栏
-			    if (titleElement && timeElement) {
-			      if (!status) {
-			        // 退出全屏：标题隐藏，时间显示
-			        titleElement.style.display = 'none';
-			        timeElement.style.display = 'block';
-			      } else {
-			        // 进入全屏：标题和时间根据控制栏状态
-			        if (isControlBarVisibleRef.current) {
-			          titleElement.style.display = 'block';
-			          timeElement.style.display = 'block';
-			        } else {
-			          titleElement.style.display = 'none';
-			          timeElement.style.display = 'none';
-			        }
-			      }
-			    }
-			// 全屏退出时强制隐藏标题
-			/*if (!status && titleElement) {
+		isFullscreen = status;
+		isControlBarVisible = status;
+		// 全屏退出时强制隐藏标题
+		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
-			}*/
+			}
 		});
 		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
-		    isFullscreenWebRef.current = status;
-		    isControlBarVisibleRef.current = status;
-		    if (titleElement && timeElement) {
-		      if (!status) {
-		        titleElement.style.display = 'none';
-		        timeElement.style.display = 'block';
-		      } else {
-		        if (isControlBarVisibleRef.current) {
-		          titleElement.style.display = 'block';
-		          timeElement.style.display = 'block';
-		        } else {
-		          titleElement.style.display = 'none';
-		          timeElement.style.display = 'none';
-		        }
-		      }
-		    }
-			// 全屏退出时强制隐藏标题
-			/*if (!status && titleElement) {
+		fullscreenWeb = status;
+	    isControlBarVisible = status;
+		// 全屏退出时强制隐藏标题
+			if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
-			}*/
+			}
 		});
  
 
         artPlayerRef.current.on('control',  (show: boolean) => {
-	    const isFullscreen = isFullscreenRef.current || isFullscreenWebRef.current;
-	    const currentVisible = isControlBarVisibleRef.current;
-		if (!isFullscreen) return; // 非全屏不处理
-	    if (titleElement && timeElement) {
-	      // 只有状态真正改变时才更新
-	      if (show && !currentVisible) {
-	        timeElement.style.display = 'block';
-	        titleElement.style.display = 'block';
-	        isControlBarVisibleRef.current = true;
-	        console.log('显示控制栏');
-	      } else if (!show && currentVisible) {
-	        timeElement.style.display = 'none';
-	        titleElement.style.display = 'none';
-	        isControlBarVisibleRef.current = false;
-	        console.log('隐藏控制栏');
-	      }
-	    }
-		/*if (isFullscreen || isFullscreenWeb) {
+		if (isFullscreen || fullscreenWeb) {
         if (timeElement && titleElement) {
        if (show && !isControlBarVisible) {
 	          // 请求显示，且当前是隐藏状态 → 显示
 	          timeElement.style.display = 'block';
 	          titleElement.style.display = 'block';
-	          setIsControlBarVisible(true);
+	          isControlBarVisible = true;
 	          console.log('显示控制栏');
 	          
 	        } else if (!show && isControlBarVisible) {
 	          // 请求隐藏，且当前是显示状态 → 隐藏
 	          timeElement.style.display = 'none';
 	          titleElement.style.display = 'none';
-	          setIsControlBarVisible(false);
+	          isControlBarVisible = false;
 	          console.log('隐藏控制栏');
 	        }
         }
-		}*/
+		}
     });
+
 
  
 return () => {
@@ -2231,83 +2180,15 @@ return () => {
     
     //--------------切换集数、加载新视频时调用---------------------
 
-	
-	// ---新增：监听播放器就绪状态和视频质量切换的 useEffect来恢复进度
-		useEffect(() => {
-				  if (!canPlay || !qualityReady) {
-					return;
-				  }
-				  if (!artPlayerRef.current) {
-					setQualityReady(false);
-					setCanPlay(false);
-					return;
-				  }
-				  const currentTime = artPlayerRef.current.currentTime || 0;
-				  const duration = artPlayerRef.current.duration || 0;
-		
-				  const resumeTime = resumeTimeRef.current;
-				  const skipEnabled = skipConfigRef.current.enable;
-				  const introTime = skipConfigRef.current.intro_time;
-				  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
-				
-				  // 情况1：跳过开关没开启并且没有恢复进度存在
-				  if (!skipEnabled && resumeTime === 0) {
-				    return;
-				  }
-		
-				  // ============= 处理跳过片头逻辑 =============
-		
-				    // 情况2：恢复进度存在，跳过开启
-				    if (duration > 0 && resumeTime > 0 && introTime > 0) {
-				      const targetTime = Math.max(resumeTime, introTime);
-				      if (currentTime < targetTime) {
-		
-				        artPlayerRef.current.currentTime = targetTime;
-						console.log('成功恢复播放进度到:', targetTime);
-						  
-				        artPlayerRef.current.notice.show = targetTime === resumeTime 
-				          ? `已恢复进度 (${formatTime(resumeTime)})` 
-				          : `已跳过片头 (${formatTime(introTime)})`;
-				        resumeTimeRef.current = 0;
-				        return;
-				      }
-				    }
-				
-				    // 情况3：只有恢复进度
-				    if (duration > 0 && resumeTime > 0) {
-				      if (currentTime < resumeTime) {
-				        artPlayerRef.current.currentTime = resumeTime;
-						console.log('恢复播放进度:', resumeTime);
-						  
-				        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
-				        resumeTimeRef.current = 0;
-				        return;
-				      }
-				    }
-				
-				    // 情况4：只有跳过片头
-				    if (duration > 0 && introTime > 0) {
-				      if (currentTime < introTime) {
-				        artPlayerRef.current.currentTime = introTime;
-						console.log('跳过片头:', introTime);
-		
-				        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
-				        return;
-				      }
-				    }
-						setQualityReady(false);
-						setCanPlay(false);//恢复完进度，设置为false
-				  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
-		}, [canPlay, qualityReady]);
 
-  /*// 当组件卸载时清理定时器
+  // 当组件卸载时清理定时器
   useEffect(() => {
     return () => {
       if (saveIntervalRef.current) {
         clearInterval(saveIntervalRef.current);
       }
     };
-  }, []);*/
+  }, []);
 
 
   if (loading) {
