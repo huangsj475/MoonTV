@@ -1363,6 +1363,8 @@ useEffect(() => {
     console.log(videoUrl);
 	  //视频播放前设置正在切换状态，否则播放器会自动触发暂停，然后保存进度
     isChangingEpisodeRef.current = true;
+    setCanPlay(false);
+    setQualityReady(false);
   
     // 检测是否为WebKit浏览器
     const isWebkit =
@@ -2136,7 +2138,7 @@ useEffect(() => {
 						setQualityReady(false);
 						setCanPlay(false);//恢复完进度，设置为false
 				  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
-		}, [artPlayerRef.current, canPlay, qualityReady]);
+		}, [canPlay, qualityReady]);
 
   //-------新增：时间显示----------------
   // 添加时间更新函数和事件监听
