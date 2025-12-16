@@ -697,70 +697,71 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     constructor(config: any) {
       super(config);
 	//----------------
-    // 保存原始load方法
-    const originalLoad = this.load.bind(this);
-    
-    // 重写load方法
-    this.load = function (context: any, config: any, callbacks: any) {
-      // 只在第一次manifest加载时处理优选
-      if (context.type === 'manifest') {
-        const originalOnSuccess = callbacks.onSuccess;
-        
-        // 重写onSuccess回调
-        callbacks.onSuccess = function (response: any, stats: any, context: any) {
-          if (response.data && typeof response.data === 'string') {
-            const m3u8Content = response.data;
-            
-            // 检查是否是主播放列表
-            if (m3u8Content.includes('#EXT-X-STREAM-INF')) {
-              console.log('检测到主播放列表，开始优选...');
-              
-              // 选择最佳质量视频流URL
-              const bestStreamUrl = selectBestQualityStreamUrl(m3u8Content, response.url);
-              
-              if (bestStreamUrl) {
-                console.log('选择最佳质量流:', bestStreamUrl);
-                
-                // 创建新的callbacks来处理第二次请求
-                const secondCallbacks = {
-                  onSuccess: function (secondResponse: any, secondStats: any, secondContext: any) {
-                    if (secondResponse.data && typeof secondResponse.data === 'string') {
-                      // 对获取到的m3u8进行广告过滤
-                      const filteredContent = filterAdsFromM3U8(secondResponse.data);
-                      secondResponse.data = filteredContent;
-                      console.log('优选并过滤广告完成');
-                    }
-                    
-                    // 调用原始的onSuccess，将处理后的内容传递给HLS.js
-                    return originalOnSuccess(secondResponse, secondStats, secondContext, null);
-                  },
-                  onError: callbacks.onError,
-                  onTimeout: callbacks.onTimeout
-                };
-                
-                // 修改context为最佳质量流的URL
-                const newContext = {
-                  ...context,
-                  url: bestStreamUrl
-                };
-                
-                // 使用原始load方法加载最佳质量流
-                return originalLoad(newContext, config, secondCallbacks);
-              }
-            }
-            
-            // 如果不是主播放列表或优选失败，直接过滤广告
-            const filteredContent = filterAdsFromM3U8(m3u8Content);
-            response.data = filteredContent;
-          }
-          
-          return originalOnSuccess(response, stats, context, null);
-        };
-      }
-      
-      // 执行原始load方法
-      return originalLoad(context, config, callbacks);
-    };
+	    // 保存原始load方法
+	    const originalLoad = this.load.bind(this);
+		// 重写load方法
+		this.load = function (context: any, config: any, callbacks: any) {
+		  // 只在第一次manifest加载时处理优选
+		  if (context.type === 'manifest') {
+			const originalOnSuccess = callbacks.onSuccess;
+			
+			// 重写onSuccess回调
+			callbacks.onSuccess = function (response: any, stats: any, context: any) {
+			  if (response.data && typeof response.data === 'string') {
+				const m3u8Content = response.data;
+				
+				// 检查是否是主播放列表
+				if (m3u8Content.includes('#EXT-X-STREAM-INF')) {
+				  console.log('检测到主播放列表，开始优选...');
+				  
+				  // 选择最佳质量视频流URL
+				  const bestStreamUrl = selectBestQualityStreamUrl(m3u8Content, response.url);
+				  
+				  if (bestStreamUrl) {
+					console.log('选择最佳质量流:', bestStreamUrl);
+					
+					// 创建新的callbacks来处理第二次请求
+					const secondCallbacks = {
+					  onSuccess: function (secondResponse: any, secondStats: any, secondContext: any) {
+						if (secondResponse.data && typeof secondResponse.data === 'string') {
+						  // 对获取到的m3u8进行广告过滤
+						  const filteredContent = filterAdsFromM3U8(secondResponse.data);
+						  secondResponse.data = filteredContent;
+						  console.log('优选并过滤广告完成');
+						}
+						
+						// 调用原始的onSuccess，将处理后的内容传递给HLS.js
+						return originalOnSuccess(secondResponse, secondStats, secondContext, null);
+					  },
+					  onError: callbacks.onError,
+					  onTimeout: callbacks.onTimeout
+					};
+					
+					// 修改context为最佳质量流的URL
+					const newContext = {
+					  ...context,
+					  url: bestStreamUrl
+					};
+					
+					// 使用原始load方法加载最佳质量流
+					return originalLoad(newContext, config, secondCallbacks);
+				  }
+				  // 如果bestStreamUrl为空，继续执行下面的过滤逻辑
+				}
+				
+				// 如果不是主播放列表或优选失败，直接过滤广告
+				const filteredContent = filterAdsFromM3U8(m3u8Content);
+				response.data = filteredContent;
+			  }
+			  
+			  // 无论如何都要调用originalOnSuccess
+			  return originalOnSuccess(response, stats, context, null);
+			};
+		  }
+		  
+		  // 执行原始load方法
+		  return originalLoad(context, config, callbacks);
+		};
   //---------------
       /*const load = this.load.bind(this);
       this.load = function (context: any, config: any, callbacks: any) {
