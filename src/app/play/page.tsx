@@ -1767,10 +1767,9 @@ useEffect(() => {
 		  setTimeout(() => {
 		    //如果视频质量没切换，这里做稍微延迟设置状态
 			setQualityReady(true);
-			console.log('切换视频质量，当前切换质量状态:', true);
+			console.log('播放器ready，当前切换质量状态:', true);
 		  }, 1100);
-		setCanPlay(true);
-		console.log('播放器ready，当前播放状态:', true);
+
       });
    
               
