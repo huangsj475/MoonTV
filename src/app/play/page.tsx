@@ -2300,14 +2300,14 @@ return () => {
 				  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 		}, [canPlay, qualityReady]);
 
-  // 当组件卸载时清理定时器
+  /*// 当组件卸载时清理定时器
   useEffect(() => {
     return () => {
       if (saveIntervalRef.current) {
         clearInterval(saveIntervalRef.current);
       }
     };
-  }, []);
+  }, []);*/
 
 
   if (loading) {
