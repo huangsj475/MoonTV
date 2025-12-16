@@ -665,10 +665,11 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 	  const load = this.load.bind(this);
       this.load = function (context: any, config: any, callbacks: any) {
         // 拦截manifest和level请求
-        if (
+       /* if (
           (context as any).type === 'manifest' ||
           (context as any).type === 'level'
-        ) {
+        ) {*/
+        if ((context as any).type === 'level') {
           const onSuccess = callbacks.onSuccess;
           callbacks.onSuccess = function (
             response: any,
