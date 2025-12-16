@@ -1521,7 +1521,7 @@ useEffect(() => {
               backBufferLength: 20, // 仅保留 30s 已播放内容，避免内存占用
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
-			  maxMaxBufferLength: 80,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
+			  maxMaxBufferLength: 70,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
 
               /* 自定义loader */
               loader: blockAdEnabledRef.current
@@ -1766,7 +1766,7 @@ useEffect(() => {
 		    //如果视频质量没切换，这里做稍微延迟设置状态
 			qualityReadyRef.current = true; 
 		console.log('播放器ready，当前切换质量状态:', qualityReadyRef.current);
-		  }, 800);
+		  }, 950);
 		
       });
    
