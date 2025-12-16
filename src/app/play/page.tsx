@@ -2171,9 +2171,10 @@ useEffect(() => {
          
    	  const titleElement = document.getElementById('artplayer-title-layer'); 
       const timeElement = document.getElementById('artplayer-current-time');
-	    if (titleElement){
+	    if (titleElement && timeElement){
 		// 初始隐藏标题
 		titleElement.style.display  = 'none';
+		timeElement.style.display = 'block';
 		 }
 
 		// 监听全屏切换事件fullscreen
@@ -2202,14 +2203,14 @@ useEffect(() => {
 	          // 请求显示，且当前是隐藏状态 → 显示
 	          timeElement.style.display = 'block';
 	          titleElement.style.display = 'block';
-	          isControlBarVisible = true;
+	          setIsControlBarVisible(true);
 	          console.log('显示控制栏');
 	          
 	        } else if (!show && isControlBarVisible) {
 	          // 请求隐藏，且当前是显示状态 → 隐藏
 	          timeElement.style.display = 'none';
 	          titleElement.style.display = 'none';
-	          isControlBarVisible = false;
+	          setIsControlBarVisible(false);
 	          console.log('隐藏控制栏');
 	        }
         }
