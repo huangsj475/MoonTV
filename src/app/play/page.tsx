@@ -697,132 +697,49 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     constructor(config: any) {
       super(config);
 	//----------------
-	    // 保存原始load方法
-	    const originalLoad = super.load;
-	    
-	    // 重写load方法
+	    const load = this.load.bind(this);
 	    this.load = function (context: any, config: any, callbacks: any) {
-	      // 只在manifest加载时处理优选逻辑
-	      if (context.type === 'manifest') {
-	        console.log('开始加载manifest:', context.url);
-	        
-	        // 第一次请求：获取主播放列表
-	        const xhr1 = new XMLHttpRequest();
-	        xhr1.open('GET', context.url, true);
-	        
-	        xhr1.onload = function () {
-	          if (xhr1.status >= 200 && xhr1.status < 300) {
-	            const m3u8Content = xhr1.responseText;
-	            const responseUrl = xhr1.responseURL || context.url;
+	      // 拦截manifest和level请求
+	      if (
+	        (context as any).type === 'manifest' ||
+	        (context as any).type === 'level'
+	      ) {
+	        const onSuccess = callbacks.onSuccess;
+	        callbacks.onSuccess = function (
+	          response: any,
+	          stats: any,
+	          context: any
+	        ) {
+	          // 如果是m3u8文件，处理内容以移除广告分段
+	          if (response.data && typeof response.data === 'string') {
+	            let m3u8Content = response.data;
 	            
-	            console.log('获取到主播放列表，内容长度:', m3u8Content.length);
-	            
-	            // 检查是否是主播放列表
+	            // 如果是主播放列表，进行优选
 	            if (m3u8Content.includes('#EXT-X-STREAM-INF')) {
-	              console.log('检测到主播放列表，开始优选...');
-	              
-	              // 选择最佳质量视频流URL
-	              const bestStreamUrl = selectBestQualityStreamUrl(m3u8Content, responseUrl);
-	              
+	              const bestStreamUrl = selectBestQualityStreamUrl(m3u8Content, response.url);
 	              if (bestStreamUrl) {
-	                console.log('选择最佳质量:', bestStreamUrl);
-	                
-	                // 第二次请求：获取最佳质量流
-	                const xhr2 = new XMLHttpRequest();
-	                xhr2.open('GET', bestStreamUrl, true);
-	                
-	                xhr2.onload = function () {
-	                  if (xhr2.status >= 200 && xhr2.status < 300) {
-	                    let finalM3U8 = xhr2.responseText;
-	                    console.log('成功获取优选流内容，长度:', finalM3U8.length);
-	                    
-	                    // 广告过滤
-	                    finalM3U8 = filterAdsFromM3U8(finalM3U8);
-	                    
-	                    // 调用成功回调
-	                    callbacks.onSuccess({
-	                      url: responseUrl,
-	                      data: finalM3U8
-	                    }, {
-	                      trequest: performance.now(),
-	                      tfirst: performance.now(),
-	                      tload: performance.now()
-	                    }, context);
-	                    
-	                  } else {
-	                    // 第二次请求失败，使用第一次的内容并过滤
-	                    console.warn('获取优选流失败，使用原始内容');
-	                    const filteredM3U8 = filterAdsFromM3U8(m3u8Content);
-	                    
-	                    callbacks.onSuccess({
-	                      url: responseUrl,
-	                      data: filteredM3U8
-	                    }, {
-	                      trequest: performance.now(),
-	                      tfirst: performance.now(),
-	                      tload: performance.now()
-	                    }, context);
+	                // 同步请求最佳质量的m3u8
+	                const xhr = new XMLHttpRequest();
+	                xhr.open('GET', bestStreamUrl, false); // 同步请求
+	                try {
+	                  xhr.send();
+	                  if (xhr.status === 200) {
+	                    m3u8Content = xhr.responseText;
 	                  }
-	                };
-	                
-	                xhr2.onerror = function () {
-	                  console.error('获取优选流网络错误');
-	                  // 使用第一次的内容并过滤
-	                  const filteredM3U8 = filterAdsFromM3U8(m3u8Content);
-	                  
-	                  callbacks.onSuccess({
-	                    url: responseUrl,
-	                    data: filteredM3U8
-	                  }, {
-	                    trequest: performance.now(),
-	                    tfirst: performance.now(),
-	                    tload: performance.now()
-	                  }, context);
-	                };
-	                
-	                xhr2.send();
-	                return;
+	                } catch (error) {
+	                  // 如果请求失败，使用原始内容
+	                }
 	              }
 	            }
 	            
-	            // 如果不是主播放列表或优选失败，直接过滤广告
-	            const filteredM3U8 = filterAdsFromM3U8(m3u8Content);
-	            
-	            callbacks.onSuccess({
-	              url: responseUrl,
-	              data: filteredM3U8
-	            }, {
-	              trequest: performance.now(),
-	              tfirst: performance.now(),
-	              tload: performance.now()
-	            }, context);
-	            
-	          } else {
-	            // 第一次请求失败
-	            callbacks.onError({
-	              details: 'http error',
-	              fatal: false,
-	              response: {
-	                code: xhr1.status,
-	                text: xhr1.statusText
-	              }
-	            }, context);
+	            // 使用你原来的广告过滤函数
+	            response.data = filterAdsFromM3u8(m3u8Content);
 	          }
+	          return onSuccess(response, stats, context, null);
 	        };
-	        
-	        xhr1.onerror = function () {
-	          callbacks.onError({
-	            details: 'network error',
-	            fatal: false
-	          }, context);
-	        };
-	        
-	        xhr1.send();
-	        return;
 	      }
-	      
-	      // 对于非manifest请求，使用原始方法
-	      return originalLoad.call(this, context, config, callbacks);
+	      // 执行原始load方法
+	      load(context, config, callbacks);
 	    };
   //---------------
       /*const load = this.load.bind(this);
