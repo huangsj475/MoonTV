@@ -1537,6 +1537,7 @@ useEffect(() => {
 			  
 		    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
 				qualityReadyRef.current = true;
+				console.log('切换视频质量，当前切换质量状态:', qualityReadyRef.current);
 			    if (typeof window !== 'undefined') {
 			      window.dispatchEvent(
 			        new CustomEvent('globalError', {
@@ -1781,7 +1782,7 @@ useEffect(() => {
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
 
-		    isChangingEpisodeRef.current = false;
+	    isChangingEpisodeRef.current = false;
 		  // 隐藏加载状态，显示播放器
         setIsVideoLoading(false);
 		  
