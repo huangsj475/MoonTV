@@ -1784,7 +1784,7 @@ useEffect(() => {
 		
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-		console.log('播放器canplay，当前切换质量状态:');
+		console.log('播放器canplay，当前切换质量状态:', qualityReadyRef.current);
 	    isChangingEpisodeRef.current = false;
 		  // 隐藏加载状态，显示播放器
         setIsVideoLoading(false);
@@ -1844,7 +1844,7 @@ useEffect(() => {
 		        return;
 		      }
 		    }
-	       qualityReadyRef.current = false;//恢复完进度，设置为false
+	       //qualityReadyRef.current = false;//恢复完进度，设置为false
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
         /*// 若存在需要恢复的播放进度，则跳转
