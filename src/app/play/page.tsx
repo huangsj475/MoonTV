@@ -53,8 +53,8 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
-  const [qualityReady, setQualityReady = useState(false);//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
-  const [canPlay, setCanPlay = useState(false);//新增：播放器可以播放
+  const [qualityReady, setQualityReady] = useState(false);//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
+  const [canPlay, setCanPlay] = useState(false);//新增：播放器可以播放
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
