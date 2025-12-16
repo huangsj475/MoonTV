@@ -733,7 +733,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 	            }
 	            
 	            // 使用你原来的广告过滤函数
-	            response.data = filterAdsFromM3u8(m3u8Content);
+	            response.data = filterAdsFromM3U8(m3u8Content);
 	          }
 	          return onSuccess(response, stats, context, null);
 	        };
