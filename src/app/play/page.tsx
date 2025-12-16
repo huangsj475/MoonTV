@@ -515,95 +515,39 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     }
   };
 	//---新增：质量切换优选---
-		// 选择最佳质量视频流的URL（优化版）
+		// 简化的优选函数
 		function selectBestQualityStreamUrl(m3u8Content: string, baseUrl: string): string | null {
 		  const lines = m3u8Content.split('\n');
-		  const streams: Array<{
-		    bandwidth: number;
-		    resolution: string;
-		    resolutionWidth: number;
-		    resolutionHeight: number;
-		    url: string;
-		    codecs?: string;
-		  }> = [];
+		  let bestUrl = '';
+		  let bestBandwidth = 0;
 		  
-		  // 解析所有视频流信息
 		  for (let i = 0; i < lines.length; i++) {
 		    const line = lines[i];
 		    if (line.startsWith('#EXT-X-STREAM-INF:')) {
-		      // 获取下一行的URL
-		      if (i + 1 < lines.length && !lines[i + 1].startsWith('#')) {
-		        const urlLine = lines[i + 1];
-		        const streamInfo = parseStreamInfo(line, urlLine, baseUrl);
-		        if (streamInfo) {
-		          streams.push(streamInfo);
+		      // 解析带宽
+		      const match = line.match(/BANDWIDTH=(\d+)/);
+		      if (match) {
+		        const bandwidth = parseInt(match[1], 10);
+		        
+		        // 获取下一行的URL
+		        if (i + 1 < lines.length && !lines[i + 1].startsWith('#')) {
+		          const urlLine = lines[i + 1];
+		          const absoluteUrl = new URL(urlLine.trim(), baseUrl).href;
+		          
+		          console.log(`可选质量: ${Math.round(bandwidth/1000)}kbps`);
+		          
+		          // 选择带宽最高的
+		          if (bandwidth > bestBandwidth) {
+		            bestBandwidth = bandwidth;
+		            bestUrl = absoluteUrl;
+		          }
 		        }
 		      }
 		    }
 		  }
 		  
-		  if (streams.length === 0) {
-		    console.log('未找到视频流信息');
-		    return null;
-		  }
-		  
-		  console.log(`找到 ${streams.length} 个视频流:`);
-		  streams.forEach((stream, index) => {
-		    console.log(`流 ${index + 1}: ${Math.round(stream.bandwidth/1000)}kbps, 分辨率: ${stream.resolution}`);
-		  });
-		  
-		  // 选择最佳流：优先最高带宽，其次最高分辨率
-		  const bestStream = streams.reduce((best, current) => {
-		    if (current.bandwidth > best.bandwidth) {
-		      return current;
-		    } else if (current.bandwidth === best.bandwidth) {
-		      // 带宽相同时，选择分辨率更高的
-		      const currentPixels = current.resolutionWidth * current.resolutionHeight;
-		      const bestPixels = best.resolutionWidth * best.resolutionHeight;
-		      if (currentPixels > bestPixels) {
-		        return current;
-		      }
-		    }
-		    return best;
-		  });
-		  
-		  console.log(`选择最佳质量: ${Math.round(bestStream.bandwidth/1000)}kbps, 分辨率: ${bestStream.resolution}`);
-		  
-		  return bestStream.url;
+		  return bestUrl || null;
 		}
-		
-		// 解析流信息
-		function parseStreamInfo(infoLine: string, urlLine: string, baseUrl: string) {
-		  const info: any = {};
-		  
-		  // 解析带宽
-		  const bandwidthMatch = infoLine.match(/BANDWIDTH=(\d+)/);
-		  if (bandwidthMatch) {
-		    info.bandwidth = parseInt(bandwidthMatch[1], 10);
-		  }
-		  
-		  // 解析分辨率
-		  const resolutionMatch = infoLine.match(/RESOLUTION=(\d+x\d+)/);
-		  if (resolutionMatch) {
-		    info.resolution = resolutionMatch[1];
-		    const [width, height] = resolutionMatch[1].split('x').map(Number);
-		    info.resolutionWidth = width;
-		    info.resolutionHeight = height;
-		  }
-		  
-		  // 解析编码
-		  const codecsMatch = infoLine.match(/CODECS="([^"]+)"/);
-		  if (codecsMatch) {
-		    info.codecs = codecsMatch[1];
-		  }
-		  
-		  // 处理URL
-		  const absoluteUrl = new URL(urlLine.trim(), baseUrl).href;
-		  info.url = absoluteUrl;
-		  
-		  return info;
-		}
-
 	//---新增：质量切换优选---
 	
   // 去广告相关函数
@@ -752,7 +696,73 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
   class CustomHlsJsLoader extends Hls.DefaultConfig.loader {
     constructor(config: any) {
       super(config);
-      const load = this.load.bind(this);
+	//----------------
+    // 保存原始load方法
+    const originalLoad = this.load.bind(this);
+    
+    // 重写load方法
+    this.load = function (context: any, config: any, callbacks: any) {
+      // 只在第一次manifest加载时处理优选
+      if (context.type === 'manifest') {
+        const originalOnSuccess = callbacks.onSuccess;
+        
+        // 重写onSuccess回调
+        callbacks.onSuccess = function (response: any, stats: any, context: any) {
+          if (response.data && typeof response.data === 'string') {
+            const m3u8Content = response.data;
+            
+            // 检查是否是主播放列表
+            if (m3u8Content.includes('#EXT-X-STREAM-INF')) {
+              console.log('检测到主播放列表，开始优选...');
+              
+              // 选择最佳质量视频流URL
+              const bestStreamUrl = selectBestQualityStreamUrl(m3u8Content, response.url);
+              
+              if (bestStreamUrl) {
+                console.log('选择最佳质量流:', bestStreamUrl);
+                
+                // 创建新的callbacks来处理第二次请求
+                const secondCallbacks = {
+                  onSuccess: function (secondResponse: any, secondStats: any, secondContext: any) {
+                    if (secondResponse.data && typeof secondResponse.data === 'string') {
+                      // 对获取到的m3u8进行广告过滤
+                      const filteredContent = filterAdsFromM3U8(secondResponse.data);
+                      secondResponse.data = filteredContent;
+                      console.log('优选并过滤广告完成');
+                    }
+                    
+                    // 调用原始的onSuccess，将处理后的内容传递给HLS.js
+                    return originalOnSuccess(secondResponse, secondStats, secondContext, null);
+                  },
+                  onError: callbacks.onError,
+                  onTimeout: callbacks.onTimeout
+                };
+                
+                // 修改context为最佳质量流的URL
+                const newContext = {
+                  ...context,
+                  url: bestStreamUrl
+                };
+                
+                // 使用原始load方法加载最佳质量流
+                return originalLoad(newContext, config, secondCallbacks);
+              }
+            }
+            
+            // 如果不是主播放列表或优选失败，直接过滤广告
+            const filteredContent = filterAdsFromM3U8(m3u8Content);
+            response.data = filteredContent;
+          }
+          
+          return originalOnSuccess(response, stats, context, null);
+        };
+      }
+      
+      // 执行原始load方法
+      return originalLoad(context, config, callbacks);
+    };
+  //---------------
+      /*const load = this.load.bind(this);
       this.load = function (context: any, config: any, callbacks: any) {
         // 拦截manifest和level请求
         if (
@@ -799,15 +809,15 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 	              m3u8Content = filterAdsFromM3u8(m3u8Content);
 	              response.data = m3u8Content;
 	            }
-	              /*// 过滤掉广告段 - 实现更精确的广告过滤逻辑
-	              response.data = filterAdsFromM3U8(response.data);*/
+	              // 过滤掉广告段 - 实现更精确的广告过滤逻辑
+				  //response.data = filterAdsFromM3U8(response.data);
             }
             return onSuccess(response, stats, context, null);
           };
         }
         // 执行原始load方法
         load(context, config, callbacks);
-      };
+      };*/
     }
   }
 
