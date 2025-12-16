@@ -1463,6 +1463,7 @@ useEffect(() => {
         text-shadow: 0 0 8px #000;
         pointer-events: none;
         z-index: 13;
+		display: none;
         ">${
           videoTitle
             ?(() => {
