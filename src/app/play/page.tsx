@@ -2230,7 +2230,8 @@ return () => {
 }, [videoTitle, currentEpisodeIndex,videoUrl]);
     
     //--------------切换集数、加载新视频时调用---------------------
-    
+
+	
 	// ---新增：监听播放器就绪状态和视频质量切换的 useEffect来恢复进度
 		useEffect(() => {
 				  if (!canPlay || !qualityReady) {
@@ -2258,6 +2259,45 @@ return () => {
 		
 				    // 情况2：恢复进度存在，跳过开启
 				    if (duration > 0 && resumeTime > 0 && introTime > 0) {
+				      const targetTime = Math.max(resumeTime, introTime);
+				      if (currentTime < targetTime) {
+		
+				        artPlayerRef.current.currentTime = targetTime;
+						console.log('成功恢复播放进度到:', targetTime);
+						  
+				        artPlayerRef.current.notice.show = targetTime === resumeTime 
+				          ? `已恢复进度 (${formatTime(resumeTime)})` 
+				          : `已跳过片头 (${formatTime(introTime)})`;
+				        resumeTimeRef.current = 0;
+				        return;
+				      }
+				    }
+				
+				    // 情况3：只有恢复进度
+				    if (duration > 0 && resumeTime > 0) {
+				      if (currentTime < resumeTime) {
+				        artPlayerRef.current.currentTime = resumeTime;
+						console.log('恢复播放进度:', resumeTime);
+						  
+				        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
+				        resumeTimeRef.current = 0;
+				        return;
+				      }
+				    }
+				
+				    // 情况4：只有跳过片头
+				    if (duration > 0 && introTime > 0) {
+				      if (currentTime < introTime) {
+				        artPlayerRef.current.currentTime = introTime;
+						console.log('跳过片头:', introTime);
+		
+				        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
+				        return;
+				      }
+				    }
+						setQualityReady(false);
+						setCanPlay(false);//恢复完进度，设置为false
+				  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 		}, [canPlay, qualityReady]);
 
   // 当组件卸载时清理定时器
