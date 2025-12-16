@@ -514,7 +514,98 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       video.removeAttribute('disableRemotePlayback');
     }
   };
+	//---新增：质量切换优选---
+		// 选择最佳质量视频流的URL（优化版）
+		function selectBestQualityStreamUrl(m3u8Content: string, baseUrl: string): string | null {
+		  const lines = m3u8Content.split('\n');
+		  const streams: Array<{
+		    bandwidth: number;
+		    resolution: string;
+		    resolutionWidth: number;
+		    resolutionHeight: number;
+		    url: string;
+		    codecs?: string;
+		  }> = [];
+		  
+		  // 解析所有视频流信息
+		  for (let i = 0; i < lines.length; i++) {
+		    const line = lines[i];
+		    if (line.startsWith('#EXT-X-STREAM-INF:')) {
+		      // 获取下一行的URL
+		      if (i + 1 < lines.length && !lines[i + 1].startsWith('#')) {
+		        const urlLine = lines[i + 1];
+		        const streamInfo = parseStreamInfo(line, urlLine, baseUrl);
+		        if (streamInfo) {
+		          streams.push(streamInfo);
+		        }
+		      }
+		    }
+		  }
+		  
+		  if (streams.length === 0) {
+		    console.log('未找到视频流信息');
+		    return null;
+		  }
+		  
+		  console.log(`找到 ${streams.length} 个视频流:`);
+		  streams.forEach((stream, index) => {
+		    console.log(`流 ${index + 1}: ${Math.round(stream.bandwidth/1000)}kbps, 分辨率: ${stream.resolution}`);
+		  });
+		  
+		  // 选择最佳流：优先最高带宽，其次最高分辨率
+		  const bestStream = streams.reduce((best, current) => {
+		    if (current.bandwidth > best.bandwidth) {
+		      return current;
+		    } else if (current.bandwidth === best.bandwidth) {
+		      // 带宽相同时，选择分辨率更高的
+		      const currentPixels = current.resolutionWidth * current.resolutionHeight;
+		      const bestPixels = best.resolutionWidth * best.resolutionHeight;
+		      if (currentPixels > bestPixels) {
+		        return current;
+		      }
+		    }
+		    return best;
+		  });
+		  
+		  console.log(`选择最佳质量: ${Math.round(bestStream.bandwidth/1000)}kbps, 分辨率: ${bestStream.resolution}`);
+		  
+		  return bestStream.url;
+		}
+		
+		// 解析流信息
+		function parseStreamInfo(infoLine: string, urlLine: string, baseUrl: string) {
+		  const info: any = {};
+		  
+		  // 解析带宽
+		  const bandwidthMatch = infoLine.match(/BANDWIDTH=(\d+)/);
+		  if (bandwidthMatch) {
+		    info.bandwidth = parseInt(bandwidthMatch[1], 10);
+		  }
+		  
+		  // 解析分辨率
+		  const resolutionMatch = infoLine.match(/RESOLUTION=(\d+x\d+)/);
+		  if (resolutionMatch) {
+		    info.resolution = resolutionMatch[1];
+		    const [width, height] = resolutionMatch[1].split('x').map(Number);
+		    info.resolutionWidth = width;
+		    info.resolutionHeight = height;
+		  }
+		  
+		  // 解析编码
+		  const codecsMatch = infoLine.match(/CODECS="([^"]+)"/);
+		  if (codecsMatch) {
+		    info.codecs = codecsMatch[1];
+		  }
+		  
+		  // 处理URL
+		  const absoluteUrl = new URL(urlLine.trim(), baseUrl).href;
+		  info.url = absoluteUrl;
+		  
+		  return info;
+		}
 
+	//---新增：质量切换优选---
+	
   // 去广告相关函数
   function filterAdsFromM3U8(m3u8Content: string): string {
     if (!m3u8Content) return '';
@@ -676,8 +767,40 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
           ) {
             // 如果是m3u8文件，处理内容以移除广告分段
             if (response.data && typeof response.data === 'string') {
-              // 过滤掉广告段 - 实现更精确的广告过滤逻辑
-              response.data = filterAdsFromM3U8(response.data);
+	            let m3u8Content = response.data;
+	            try {
+	              // 检查是否是主播放列表（包含#EXT-X-STREAM-INF）
+	              const isMasterPlaylist = m3u8Content.includes('#EXT-X-STREAM-INF');
+	              if (isMasterPlaylist) {
+	                console.log('检测到主播放列表，开始选择最佳质量视频流...');
+	                // 选择最佳质量视频流的URL
+	                const bestStreamUrl = selectBestQualityStreamUrl(m3u8Content, response.url);
+	                if (bestStreamUrl) {
+	                  console.log('获取最佳质量视频流:', bestStreamUrl);
+	                  // 请求最佳质量的视频流清单
+	                  const streamResponse = await fetch(bestStreamUrl);
+	                  if (streamResponse.ok) {
+	                    m3u8Content = await streamResponse.text();
+	                    console.log('成功获取视频分段列表');
+	                  } else {
+	                    console.warn('获取视频流失败，使用原始主播放列表');
+	                    // 如果获取失败，使用原始主播放列表
+	                  }
+	                }
+	              }
+	              
+	              // 统一进行广告过滤（无论是主播放列表还是视频分段列表）
+	              m3u8Content = filterAdsFromM3u8(m3u8Content);
+	              response.data = m3u8Content;
+	              
+	            } catch (error) {
+	              console.error('处理m3u8内容时出错:', error);
+	              // 出错时仍然尝试过滤广告
+	              m3u8Content = filterAdsFromM3u8(m3u8Content);
+	              response.data = m3u8Content;
+	            }
+	              /*// 过滤掉广告段 - 实现更精确的广告过滤逻辑
+	              response.data = filterAdsFromM3U8(response.data);*/
             }
             return onSuccess(response, stats, context, null);
           };
