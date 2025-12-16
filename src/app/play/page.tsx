@@ -55,6 +55,10 @@ function PlayPageClient() {
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const [qualityReady, setQualityReady] = useState(false);//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
   const [canPlay, setCanPlay] = useState(false);//新增：播放器可以播放
+  //全屏状态用来显示标题和时间
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isFullscreenWeb, setIsFullscreenWeb] = useState(false);
+  const [isControlBarVisible, setIsControlBarVisible] = useState(true);
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -2167,28 +2171,23 @@ useEffect(() => {
          
    	  const titleElement = document.getElementById('artplayer-title-layer'); 
       const timeElement = document.getElementById('artplayer-current-time');
-	    if (titleElement && timeElement){
+	    if (titleElement){
 		// 初始隐藏标题
 		titleElement.style.display  = 'none';
 		 }
-		
-		let isFullscreen = false;
-		let fullscreenWeb = false;
-	  // ========== 新增：记录控制栏当前状态 ==========
-	    let isControlBarVisible = true;
 
 		// 监听全屏切换事件fullscreen
 		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
-		isFullscreen = status;
-		isControlBarVisible = status;
+	      setIsFullscreen(status);
+	      setIsControlBarVisible(status); // 进入全屏时显示控制栏
 		// 全屏退出时强制隐藏标题
 		if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
 			}
 		});
 		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
-		fullscreenWeb = status;
-	    isControlBarVisible = status;
+	      setIsFullscreenWeb(status);
+	      setIsControlBarVisible(status);
 		// 全屏退出时强制隐藏标题
 			if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
@@ -2197,7 +2196,7 @@ useEffect(() => {
  
 
         artPlayerRef.current.on('control',  (show: boolean) => {
-		if (isFullscreen || fullscreenWeb) {
+		if (isFullscreen || isFullscreenWeb) {
         if (timeElement && titleElement) {
        if (show && !isControlBarVisible) {
 	          // 请求显示，且当前是隐藏状态 → 显示
