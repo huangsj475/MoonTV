@@ -56,9 +56,9 @@ function PlayPageClient() {
   const [qualityReady, setQualityReady] = useState(false);//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
   const [canPlay, setCanPlay] = useState(false);//新增：播放器可以播放
   //全屏状态用来显示标题和时间
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isFullscreenWeb, setIsFullscreenWeb] = useState(false);
-  const [isControlBarVisible, setIsControlBarVisible] = useState(true);
+const isControlBarVisibleRef = useRef(true);
+const isFullscreenRef = useRef(false);
+const isFullscreenWebRef = useRef(false);
 
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -2179,25 +2179,72 @@ useEffect(() => {
 
 		// 监听全屏切换事件fullscreen
 		artPlayerRef.current.on('fullscreen',  (status: boolean) => {
-	      setIsFullscreen(status);
-	      setIsControlBarVisible(status); // 进入全屏时显示控制栏
-		// 全屏退出时强制隐藏标题
-		if (!status && titleElement) {
+	    isFullscreenRef.current = status;
+	    isControlBarVisibleRef.current = status;// 进入全屏时显示控制栏
+			    if (titleElement && timeElement) {
+			      if (!status) {
+			        // 退出全屏：标题隐藏，时间显示
+			        titleElement.style.display = 'none';
+			        timeElement.style.display = 'block';
+			      } else {
+			        // 进入全屏：标题和时间根据控制栏状态
+			        if (isControlBarVisibleRef.current) {
+			          titleElement.style.display = 'block';
+			          timeElement.style.display = 'block';
+			        } else {
+			          titleElement.style.display = 'none';
+			          timeElement.style.display = 'none';
+			        }
+			      }
+			    }
+			// 全屏退出时强制隐藏标题
+			/*if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
-			}
+			}*/
 		});
 		artPlayerRef.current.on('fullscreenWeb',  (status: boolean) => {
-	      setIsFullscreenWeb(status);
-	      setIsControlBarVisible(status);
-		// 全屏退出时强制隐藏标题
-			if (!status && titleElement) {
+		    isFullscreenWebRef.current = status;
+		    isControlBarVisibleRef.current = status;
+		    if (titleElement && timeElement) {
+		      if (!status) {
+		        titleElement.style.display = 'none';
+		        timeElement.style.display = 'block';
+		      } else {
+		        if (isControlBarVisibleRef.current) {
+		          titleElement.style.display = 'block';
+		          timeElement.style.display = 'block';
+		        } else {
+		          titleElement.style.display = 'none';
+		          timeElement.style.display = 'none';
+		        }
+		      }
+		    }
+			// 全屏退出时强制隐藏标题
+			/*if (!status && titleElement) {
 			  titleElement.style.display  = 'none';
-			}
+			}*/
 		});
  
 
         artPlayerRef.current.on('control',  (show: boolean) => {
-		if (isFullscreen || isFullscreenWeb) {
+	    const isFullscreen = isFullscreenRef.current || isFullscreenWebRef.current;
+	    const currentVisible = isControlBarVisibleRef.current;
+		if (!isFullscreen) return; // 非全屏不处理
+	    if (titleElement && timeElement) {
+	      // 只有状态真正改变时才更新
+	      if (show && !currentVisible) {
+	        timeElement.style.display = 'block';
+	        titleElement.style.display = 'block';
+	        isControlBarVisibleRef.current = true;
+	        console.log('显示控制栏');
+	      } else if (!show && currentVisible) {
+	        timeElement.style.display = 'none';
+	        titleElement.style.display = 'none';
+	        isControlBarVisibleRef.current = false;
+	        console.log('隐藏控制栏');
+	      }
+	    }
+		/*if (isFullscreen || isFullscreenWeb) {
         if (timeElement && titleElement) {
        if (show && !isControlBarVisible) {
 	          // 请求显示，且当前是隐藏状态 → 显示
@@ -2214,7 +2261,7 @@ useEffect(() => {
 	          console.log('隐藏控制栏');
 	        }
         }
-		}
+		}*/
     });
 
  
