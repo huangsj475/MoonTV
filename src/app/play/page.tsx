@@ -1421,7 +1421,7 @@ useEffect(() => {
         volume: 0.7,
         isLive: false,
         muted: false,
-        autoplay: false,
+        autoplay: true,
         pip: true,
         autoSize: false,
         autoMini: false,
