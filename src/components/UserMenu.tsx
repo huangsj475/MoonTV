@@ -27,19 +27,19 @@ export const UserMenu: React.FC = () => {
   // 设置相关状态
   const [defaultAggregateSearch, setDefaultAggregateSearch] = useState(true);
   const [doubanProxyUrl, setDoubanProxyUrl] = useState('');
-  //const [imageProxyUrl, setImageProxyUrl] = useState('');
+  ///const [imageProxyUrl, setImageProxyUrl] = useState('');
   const [enableOptimization, setEnableOptimization] = useState(true);
   //const [enableImageProxy, setEnableImageProxy] = useState(false);
   //const [enableDoubanProxy, setEnableDoubanProxy] = useState(false);
   const [fluidSearch, setFluidSearch] = useState(true);//新增：流式选项
-  //豆瓣代理状态
+    //豆瓣代理状态
   const [doubanDataSource, setDoubanDataSource] = useState('direct');
   const [doubanImageProxyType, setDoubanImageProxyType] = useState('direct');
   const [doubanImageProxyUrl, setDoubanImageProxyUrl] = useState('');
   const [isDoubanDropdownOpen, setIsDoubanDropdownOpen] = useState(false);
   const [isDoubanImageProxyDropdownOpen, setIsDoubanImageProxyDropdownOpen] =
     useState(false);
-
+	
     // 豆瓣数据源选项
   const doubanDataSourceOptions = [
     { value: 'direct', label: '直连（服务器直接请求豆瓣）' },
@@ -51,8 +51,8 @@ export const UserMenu: React.FC = () => {
     { value: 'cmliussss-cdn-ali', label: '豆瓣 CDN By CMLiussss（阿里云）' },
     { value: 'custom', label: '自定义代理' },
   ];
-
-    // 豆瓣图片代理选项
+  
+      // 豆瓣图片代理选项
   const doubanImageProxyTypeOptions = [
     { value: 'direct', label: '直连（浏览器直接请求豆瓣）' },
     { value: 'server', label: '服务器代理（由服务器代理请求豆瓣）' },
@@ -64,7 +64,7 @@ export const UserMenu: React.FC = () => {
     { value: 'cmliussss-cdn-ali', label: '豆瓣 CDN By CMLiussss（阿里云）' },
     { value: 'custom', label: '自定义代理' },
   ];
-  
+
   // 修改密码相关状态
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -124,7 +124,7 @@ export const UserMenu: React.FC = () => {
       if (savedAggregateSearch !== null) {
         setDefaultAggregateSearch(JSON.parse(savedAggregateSearch));
       }
-
+	  
       const savedDoubanDataSource = localStorage.getItem('doubanDataSource');
       const defaultDoubanProxyType =
         (window as any).RUNTIME_CONFIG?.DOUBAN_PROXY_TYPE || '';
@@ -164,7 +164,6 @@ export const UserMenu: React.FC = () => {
         setDoubanImageProxyUrl(defaultDoubanImageProxyUrl);
       }
 
-      
       /*const savedEnableDoubanProxy = localStorage.getItem('enableDoubanProxy');
       const defaultDoubanProxy =
         (window as any).RUNTIME_CONFIG?.DOUBAN_PROXY || '';
@@ -226,8 +225,8 @@ export const UserMenu: React.FC = () => {
 
     checkUpdate();
   }, []);
-
-  // 点击外部区域关闭下拉框
+  
+    // 点击外部区域关闭下拉框
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isDoubanDropdownOpen) {
@@ -244,7 +243,7 @@ export const UserMenu: React.FC = () => {
         document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [isDoubanDropdownOpen]);
-
+  
     useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (isDoubanImageProxyDropdownOpen) {
@@ -409,9 +408,9 @@ export const UserMenu: React.FC = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('enableImageProxy', JSON.stringify(value));
     }
-  };*/
+  };
 
-  /*const handleDoubanProxyToggle = (value: boolean) => {
+  const handleDoubanProxyToggle = (value: boolean) => {
     setEnableDoubanProxy(value);
     if (typeof window !== 'undefined') {
       localStorage.setItem('enableDoubanProxy', JSON.stringify(value));
@@ -422,6 +421,7 @@ export const UserMenu: React.FC = () => {
     /*const defaultImageProxy = (window as any).RUNTIME_CONFIG?.IMAGE_PROXY || '';
     const defaultDoubanProxy =
       (window as any).RUNTIME_CONFIG?.DOUBAN_PROXY || '';*/
+	  
     const defaultDoubanProxyType =
       (window as any).RUNTIME_CONFIG?.DOUBAN_PROXY_TYPE || 'direct';
     const defaultDoubanProxy =
@@ -431,6 +431,7 @@ export const UserMenu: React.FC = () => {
     const defaultDoubanImageProxyUrl =
       (window as any).RUNTIME_CONFIG?.DOUBAN_IMAGE_PROXY || '';
 
+
     setDefaultAggregateSearch(true);
     setEnableOptimization(true);
     setFluidSearch(true);
@@ -439,17 +440,16 @@ export const UserMenu: React.FC = () => {
     setDoubanImageProxyType(defaultDoubanImageProxyType);
     setDoubanImageProxyUrl(defaultDoubanImageProxyUrl);
 
-
     if (typeof window !== 'undefined') {
       localStorage.setItem('defaultAggregateSearch', JSON.stringify(true));
       localStorage.setItem('enableOptimization', JSON.stringify(true));
       localStorage.setItem('fluidSearch', JSON.stringify(true));
-
+	  
       localStorage.setItem('doubanProxyUrl', defaultDoubanProxy);
       localStorage.setItem('doubanDataSource', defaultDoubanProxyType);
       localStorage.setItem('doubanImageProxyType', defaultDoubanImageProxyType);
       localStorage.setItem('doubanImageProxyUrl', defaultDoubanImageProxyUrl);
-      
+	  
       /*localStorage.setItem('doubanProxyUrl', defaultDoubanProxy);
       localStorage.setItem(
         'enableDoubanProxy',
@@ -792,6 +792,24 @@ export const UserMenu: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {/* 感谢信息 */}
+              {getThanksInfo(doubanDataSource) && (
+                <div className='mt-3'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      window.open(getThanksInfo(doubanDataSource)!.url, '_blank')
+                    }
+                    className='flex items-center justify-center gap-1.5 w-full px-3 text-xs text-gray-500 dark:text-gray-400 cursor-pointer'
+                  >
+                    <span className='font-medium'>
+                      {getThanksInfo(doubanDataSource)!.text}
+                    </span>
+                    <ExternalLink className='w-3.5 opacity-70' />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* 豆瓣代理地址设置 - 仅在选择自定义代理时显示 */}
@@ -879,6 +897,27 @@ export const UserMenu: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {/* 感谢信息 */}
+              {getThanksInfo(doubanImageProxyType) && (
+                <div className='mt-3'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      window.open(
+                        getThanksInfo(doubanImageProxyType)!.url,
+                        '_blank'
+                      )
+                    }
+                    className='flex items-center justify-center gap-1.5 w-full px-3 text-xs text-gray-500 dark:text-gray-400 cursor-pointer'
+                  >
+                    <span className='font-medium'>
+                      {getThanksInfo(doubanImageProxyType)!.text}
+                    </span>
+                    <ExternalLink className='w-3.5 opacity-70' />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* 豆瓣图片代理地址设置 - 仅在选择自定义代理时显示 */}
@@ -906,7 +945,9 @@ export const UserMenu: React.FC = () => {
 
             {/* 分割线 */}
             <div className='border-t border-gray-200 dark:border-gray-700'></div>
-              
+   
+        </div>
+
         {/* 底部说明 */}
         <div className='mt-6 pt-4 border-t border-gray-200 dark:border-gray-700'>
           <p className='text-xs text-gray-500 dark:text-gray-400 text-center'>
