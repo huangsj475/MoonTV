@@ -2,7 +2,7 @@
 
 'use client';
 
-import { KeyRound, LogOut, Settings, Shield, User, X } from 'lucide-react';
+import { Check, ChevronDown, KeyRound, LogOut, Settings, Shield, User, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
