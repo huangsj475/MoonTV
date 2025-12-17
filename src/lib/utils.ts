@@ -14,7 +14,7 @@ function getDoubanImageProxyConfig(): {
 } {
   const doubanImageProxyType =
     localStorage.getItem('doubanImageProxyType') ||
-    //(window as any).RUNTIME_CONFIG?.IMAGE_PROXY_TYPE ||
+    (window as any).RUNTIME_CONFIG?.DOUBAN_IMAGE_PROXY_TYPE ||
     'direct';
   const doubanImageProxy =
     localStorage.getItem('doubanImageProxyUrl') ||
