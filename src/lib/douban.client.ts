@@ -407,9 +407,9 @@ export async function getDoubanRecommends(
 
 async function fetchDoubanRecommends(
   params: DoubanRecommendsParams,
-  proxyUrl: string
-  useTencentCDN = false,//------
-  useAliCDN = false//------
+  proxyUrl: string,
+  useTencentCDN = false,
+  useAliCDN = false
 ): Promise<DoubanResult> {
   const { kind, pageLimit = 20, pageStart = 0 } = params;
   let { category, format, region, year, platform, sort, label } = params;
