@@ -26,7 +26,7 @@ export const UserMenu: React.FC = () => {
 
   // 设置相关状态
   const [defaultAggregateSearch, setDefaultAggregateSearch] = useState(true);
-  //const [doubanProxyUrl, setDoubanProxyUrl] = useState('');
+  const [doubanProxyUrl, setDoubanProxyUrl] = useState('');
   //const [imageProxyUrl, setImageProxyUrl] = useState('');
   const [enableOptimization, setEnableOptimization] = useState(true);
   //const [enableImageProxy, setEnableImageProxy] = useState(false);
@@ -435,9 +435,10 @@ export const UserMenu: React.FC = () => {
     setEnableOptimization(true);
     setFluidSearch(true);
     setDoubanProxyUrl(defaultDoubanProxy);
-    setEnableDoubanProxy(!!defaultDoubanProxy);
-    setEnableImageProxy(!!defaultImageProxy);
-    setImageProxyUrl(defaultImageProxy);
+    setDoubanDataSource(defaultDoubanProxyType);
+    setDoubanImageProxyType(defaultDoubanImageProxyType);
+    setDoubanImageProxyUrl(defaultDoubanImageProxyUrl);
+
 
     if (typeof window !== 'undefined') {
       localStorage.setItem('defaultAggregateSearch', JSON.stringify(true));
@@ -878,6 +879,27 @@ export const UserMenu: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {/* 感谢信息 */}
+              {getThanksInfo(doubanImageProxyType) && (
+                <div className='mt-3'>
+                  <button
+                    type='button'
+                    onClick={() =>
+                      window.open(
+                        getThanksInfo(doubanImageProxyType)!.url,
+                        '_blank'
+                      )
+                    }
+                    className='flex items-center justify-center gap-1.5 w-full px-3 text-xs text-gray-500 dark:text-gray-400 cursor-pointer'
+                  >
+                    <span className='font-medium'>
+                      {getThanksInfo(doubanImageProxyType)!.text}
+                    </span>
+                    <ExternalLink className='w-3.5 opacity-70' />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* 豆瓣图片代理地址设置 - 仅在选择自定义代理时显示 */}
@@ -902,6 +924,9 @@ export const UserMenu: React.FC = () => {
                 />
               </div>
             )}
+
+            {/* 分割线 */}
+            <div className='border-t border-gray-200 dark:border-gray-700'></div>
               
         {/* 底部说明 */}
         <div className='mt-6 pt-4 border-t border-gray-200 dark:border-gray-700'>
