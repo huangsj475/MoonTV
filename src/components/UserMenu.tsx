@@ -734,8 +734,6 @@ export const UserMenu: React.FC = () => {
           {/* 分割线 */}
           <div className='border-t border-gray-200 dark:border-gray-700'></div>
 
-          {/* 设置项 */}
-          <div className='space-y-6'>
             {/* 豆瓣数据源选择 */}
             <div className='space-y-3'>
               <div>
