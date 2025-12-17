@@ -119,9 +119,9 @@ function getDoubanProxyConfig(): {
  */
 export async function fetchDoubanCategories(
   params: DoubanCategoriesParams
-  proxyUrl: string,//----
-  useTencentCDN = false,//---
-  useAliCDN = false//----
+  proxyUrl: string,
+  useTencentCDN = false,
+  useAliCDN = false
 ): Promise<DoubanResult> {
   const { kind, category, type, pageLimit = 20, pageStart = 0 } = params;
 
