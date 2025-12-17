@@ -2278,7 +2278,7 @@ useEffect(() => {
       artPlayerRef.current.off('video:canplay');
     }
   };
-}, [artPlayerRef.current, videoUrl]);
+}, [artPlayerRef.current]);
 
   // 当组件卸载时清理定时器
   useEffect(() => {
