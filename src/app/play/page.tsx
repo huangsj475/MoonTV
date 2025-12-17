@@ -1420,7 +1420,7 @@ useEffect(() => {
         volume: 0.7,
         isLive: false,
         muted: false,
-        autoplay: true,
+        autoplay: false,
         pip: true,
         autoSize: false,
         autoMini: false,
@@ -2188,8 +2188,7 @@ useEffect(() => {
       typeof window !== 'undefined' &&
       typeof (window as any).webkitConvertPointFromNodeToPage === 'function';
 		
-  // 定义事件处理函数
-  const handleCanPlay = () => {
+    artPlayerRef.current.on('video:canplay', () => {
 	 if (!artPlayerRef.current) return;
     console.log('播放器canplay，当前切换质量状态:', qualityReadyRef.current);
     isChangingEpisodeRef.current = false;
@@ -2270,17 +2269,16 @@ useEffect(() => {
 		artPlayerRef.current.playbackRate = lastPlaybackRateRef.current;
 	  }
 	}, 0);
-  };
-      // 监听视频可播放事件，这时恢复播放进度更可靠
-      artPlayerRef.current.on('video:canplay', handleCanPlay);
+
+  });
 
   // 清理函数：移除事件监听器
   return () => {
     if (artPlayerRef.current) {
-      artPlayerRef.current.off('video:canplay', handleCanPlay);
+      artPlayerRef.current.off('video:canplay');
     }
   };
-}, [artPlayerRef.current, currentEpisodeIndex, videoUrl]);
+}, [artPlayerRef.current, videoUrl]);
 
   // 当组件卸载时清理定时器
   useEffect(() => {
