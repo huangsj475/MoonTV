@@ -665,11 +665,10 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
 	  const load = this.load.bind(this);
       this.load = function (context: any, config: any, callbacks: any) {
         // 拦截manifest和level请求
-       /* if (
+        if (
           (context as any).type === 'manifest' ||
           (context as any).type === 'level'
-        ) {*/
-        if ((context as any).type === 'level') {
+        ) {
           const onSuccess = callbacks.onSuccess;
           callbacks.onSuccess = function (
             response: any,
@@ -1783,7 +1782,7 @@ useEffect(() => {
       });
 		
       // 监听视频可播放事件，这时恢复播放进度更可靠
-      artPlayerRef.current.on('video:canplay', () => {
+      /*artPlayerRef.current.on('video:canplay', () => {
 		console.log('播放器canplay，当前切换质量状态:', qualityReadyRef.current);
 	    isChangingEpisodeRef.current = false;
 		  // 隐藏加载状态，显示播放器
@@ -1843,7 +1842,7 @@ useEffect(() => {
 		        artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
 		        return;
 		      }
-		    }
+		    }------------------*/
 	       //qualityReadyRef.current = false;//恢复完进度，设置为false
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
@@ -1895,7 +1894,7 @@ useEffect(() => {
           }
      }*/ 
 
-        setTimeout(() => {
+        /*----setTimeout(() => {
           if (
             Math.abs(artPlayerRef.current.volume - lastVolumeRef.current) > 0.01
           ) {
@@ -1911,7 +1910,7 @@ useEffect(() => {
           }
         }, 0);
 
-      });
+      });canplay结尾------*/
 		
       // 监听视频时间更新事件，实现跳过片头片尾
       artPlayerRef.current.on('video:timeupdate', () => {
@@ -2181,6 +2180,103 @@ return () => {
     
     //--------------切换集数、加载新视频时调用---------------------
 
+// 在 useEffect 中监听 canplay 事件 恢复进度
+useEffect(() => {
+	if (!artPlayerRef.current) return;
+		
+  // 定义事件处理函数
+  const handleCanPlay = () => {
+	 if (!artPlayerRef.current) return;
+    console.log('播放器canplay，当前切换质量状态:', qualityReadyRef.current);
+    isChangingEpisodeRef.current = false;
+    
+    // 隐藏加载状态，显示播放器
+    setIsVideoLoading(false);
+    
+	  const currentTime = artPlayerRef.current.currentTime || 0;
+	  const duration = artPlayerRef.current.duration || 0;
+
+	  const resumeTime = resumeTimeRef.current;
+	  const skipEnabled = skipConfigRef.current.enable;
+	  const introTime = skipConfigRef.current.intro_time;
+    
+    // ============= 处理跳过片头逻辑 =============
+    if (!qualityReadyRef.current) {
+      console.log('等待质量切换完成...');
+      return;
+    }
+    
+    // 情况1：跳过开关没开启并且没有恢复进度存在
+    if (!skipEnabled && resumeTime === 0) {
+      return;
+    }
+    
+    // 情况2：恢复进度存在，跳过开启
+	if (duration > 0 && resumeTime > 0 && introTime > 0) {
+	  const targetTime = Math.max(resumeTime, introTime);
+	  if (currentTime < targetTime) {
+
+		artPlayerRef.current.currentTime = targetTime;
+		console.log('成功恢复播放进度到:', targetTime);
+		  
+		artPlayerRef.current.notice.show = targetTime === resumeTime 
+		  ? `已恢复进度 (${formatTime(resumeTime)})` 
+		  : `已跳过片头 (${formatTime(introTime)})`;
+		resumeTimeRef.current = 0;
+		return;
+	  }
+	}
+    
+    // 情况3：只有恢复进度
+	if (duration > 0 && resumeTime > 0) {
+	  if (currentTime < resumeTime) {
+		artPlayerRef.current.currentTime = resumeTime;
+		console.log('恢复播放进度:', resumeTime);
+		  
+		artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
+		resumeTimeRef.current = 0;
+		return;
+	  }
+	}
+    
+    // 情况4：只有跳过片头
+	if (duration > 0 && introTime > 0) {
+	  if (currentTime < introTime) {
+		artPlayerRef.current.currentTime = introTime;
+		console.log('跳过片头:', introTime);
+
+		artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
+		return;
+	  }
+	}
+    
+    // 恢复音量和播放速率
+	setTimeout(() => {
+	  if (
+		Math.abs(artPlayerRef.current.volume - lastVolumeRef.current) > 0.01
+	  ) {
+		artPlayerRef.current.volume = lastVolumeRef.current;
+	  }
+	  if (
+		Math.abs(
+		  artPlayerRef.current.playbackRate - lastPlaybackRateRef.current
+		) > 0.01 &&
+		isWebkit
+	  ) {
+		artPlayerRef.current.playbackRate = lastPlaybackRateRef.current;
+	  }
+	}, 0);
+  };
+      // 监听视频可播放事件，这时恢复播放进度更可靠
+      artPlayerRef.current.on('video:canplay', handleCanPlay);
+
+  // 清理函数：移除事件监听器
+  return () => {
+    if (artPlayerRef.current) {
+      artPlayerRef.current.off('video:canplay', handleCanPlay);
+    }
+  };
+}, [artPlayerRef.current, currentEpisodeIndex, videoUrl]);
 
   // 当组件卸载时清理定时器
   useEffect(() => {
