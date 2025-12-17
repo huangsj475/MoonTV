@@ -2183,6 +2183,10 @@ return () => {
 // 在 useEffect 中监听 canplay 事件 恢复进度
 useEffect(() => {
 	if (!artPlayerRef.current) return;
+	    // 检测是否为WebKit浏览器
+    const isWebkit =
+      typeof window !== 'undefined' &&
+      typeof (window as any).webkitConvertPointFromNodeToPage === 'function';
 		
   // 定义事件处理函数
   const handleCanPlay = () => {
