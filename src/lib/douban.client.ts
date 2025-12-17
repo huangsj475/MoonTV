@@ -118,7 +118,7 @@ function getDoubanProxyConfig(): {
  * 浏览器端豆瓣分类数据获取函数
  */
 export async function fetchDoubanCategories(
-  params: DoubanCategoriesParams
+  params: DoubanCategoriesParams,
   proxyUrl: string,
   useTencentCDN = false,
   useAliCDN = false
