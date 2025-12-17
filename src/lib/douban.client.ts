@@ -271,7 +271,7 @@ export async function getDoubanList(
     }
 
     return response.json();
-  
+  }
 }
 
 export async function fetchDoubanList(
