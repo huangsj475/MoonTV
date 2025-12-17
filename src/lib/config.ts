@@ -334,7 +334,7 @@ export async function getConfig(): Promise<AdminConfig> {
       process.env.NEXT_PUBLIC_ENABLE_REGISTER === 'true';
   }
   if (!adminConfig.SiteConfig.DoubanProxyType) {
-    adminConfig.config.SiteConfig.DoubanProxyType =
+    adminConfig.SiteConfig.DoubanProxyType =
       process.env.NEXT_PUBLIC_DOUBAN_PROXY_TYPE || 'direct';
   }  
   if (!adminConfig.SiteConfig.DoubanProxy) {
