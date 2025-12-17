@@ -22,6 +22,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
+  Check,
   ChevronDown,
   ChevronUp,
   FolderOpen,
