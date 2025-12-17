@@ -226,7 +226,7 @@ export async function getDoubanCategories(
     }
 
     return response.json();
-  
+  }
 }
 
 interface DoubanListParams {
@@ -275,7 +275,7 @@ export async function getDoubanList(
 }
 
 export async function fetchDoubanList(
-  params: DoubanListParams
+  params: DoubanListParams,
   proxyUrl: string,//-----
   useTencentCDN = false,//-----
   useAliCDN = false//-----
@@ -402,6 +402,7 @@ export async function getDoubanRecommends(
     }
       return response.json();
   
+  }
 }
 
 async function fetchDoubanRecommends(
@@ -482,7 +483,10 @@ async function fetchDoubanRecommends(
   const target = `${baseUrl}?${reqParams.toString()}`;
   console.log(target);
   try {
-    const response = await fetchWithTimeout(target);
+    const response = await fetchWithTimeout(
+      target,
+      useTencentCDN || useAliCDN ? '' : proxyUrl
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
