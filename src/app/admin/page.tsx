@@ -2404,6 +2404,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             选择获取豆瓣数据的方式
           </p>
+        </div>
 
         {/* 豆瓣代理地址设置 - 仅在选择自定义代理时显示 */}
         {siteSettings.DoubanProxyType === 'custom' && (
@@ -2494,6 +2495,7 @@ const SiteConfigComponent = ({ config }: { config: AdminConfig | null }) => {
           <p className='mt-1 text-xs text-gray-500 dark:text-gray-400'>
             选择获取豆瓣图片的方式
           </p>
+        </div>
 
         {/* 豆瓣代理地址设置 - 仅在选择自定义代理时显示 */}
         {siteSettings.DoubanImageProxyType === 'custom' && (
