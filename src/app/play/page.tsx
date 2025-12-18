@@ -1769,7 +1769,7 @@ useEffect(() => {
 		    //如果视频质量没切换，这里做稍微延迟设置状态
 			qualityReadyRef.current = true;
 			console.log('播放器ready，当前切换质量状态:', true);
-		  }, 1100);
+		  }, 1200);
 
       });
    
@@ -1807,7 +1807,7 @@ useEffect(() => {
     
     // 设置检查间隔
     let checkCount = 0;
-    const maxChecks = 10; // 最多检查50次（5秒）
+    const maxChecks = 15; // 最多检查50次（5秒）
     const checkInterval = 100; // 每100ms检查一次
     
     const intervalId = setInterval(() => {
