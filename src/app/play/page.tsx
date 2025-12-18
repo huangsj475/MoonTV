@@ -164,7 +164,7 @@ const extractEpisodeTitle = (
   // 2. 判断是否为综艺类型（包含"综艺"）
   if (typeName && typeName.includes('综艺')) {
     // 综艺：显示原名称
-    return episodeName;
+    return `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
   }
   
   // 3. 如果type_name为空，用正则判断
@@ -184,13 +184,13 @@ const extractEpisodeTitle = (
       return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
     } else {
       // 不匹配电视剧格式，认为属于综艺，显示原名称
-      return episodeName;
+      return `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
     }
   }
   
   // 4. 其他情况（既不是剧也不是综艺，比如电影、动漫等）
   // 选项A：显示原名称
-  return episodeName;
+  return `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
   
   // 选项B：对于非剧非综艺也显示数字格式（比如电影只有1集）
   // return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
@@ -1591,17 +1591,11 @@ useEffect(() => {
 
             video.hls = hls;
             ensureVideoSource(video, url);
-			  //分片加载
-			hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
+			  //数据进入缓冲区
+			hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
 				videoReadyRef.current = true;
-				console.log('分片加载，当前视频状态:',videoReadyRef.current);
-			    if (typeof window !== 'undefined') {
-			      window.dispatchEvent(
-			        new CustomEvent('globalError', {
-			          detail: { message: '分片加载',type: 'info'  },
-			        })
-			      );
-			    }
+				console.log('视频缓冲，当前视频状态:',videoReadyRef.current);
+
 			});
 
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
