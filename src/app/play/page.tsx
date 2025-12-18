@@ -1594,7 +1594,6 @@ useEffect(() => {
 			  //数据进入缓冲区
 			hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
 				videoReadyRef.current = true;
-				console.log('视频缓冲，当前视频状态:',videoReadyRef.current);
 
 			});
 
@@ -1828,7 +1827,7 @@ useEffect(() => {
 		
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-  console.log('播放器canplay，当前分片加载状态:', videoReadyRef.current);
+  console.log('播放器canplay，当前缓冲后加载状态:', videoReadyRef.current);
   isChangingEpisodeRef.current = false;
   
   // 隐藏加载状态，显示播放器
