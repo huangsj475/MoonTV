@@ -53,7 +53,7 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
-  const qualityReadyRef = useRef(false)//新增：切换质量，由于手机端总是切换视频质量，导致恢复进度后被重置
+  const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载视频总是加载2次hls，导致恢复进度后被重置
 
 
   // 收藏状态
@@ -141,6 +141,61 @@ function PlayPageClient() {
     videoYear,
   ]);
 
+// 智能提取剧集/期数名称
+const extractEpisodeTitle = (
+  originalUrl: string, 
+  currentEpisodeIndex: number, 
+  totalEpisodes: number,
+  typeName?: string // 从detail.type_name获取
+): string => {
+  const { episodeName } = parseEpisodeUrl(originalUrl);
+  
+  // 如果没有集名称，直接返回数字格式
+  if (!episodeName) {
+    return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+  }
+  
+  // 1. 判断是否为电视剧类型（包含"剧"字）
+  if (typeName && typeName.includes('剧')) {
+    // 电视剧：强制显示"第 X/X 集"格式
+    return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+  }
+  
+  // 2. 判断是否为综艺类型（包含"综艺"）
+  if (typeName && typeName.includes('综艺')) {
+    // 综艺：显示原名称
+    return episodeName;
+  }
+  
+  // 3. 如果type_name为空，用正则判断
+  if (!typeName) {
+    // 正则匹配电视剧常见格式
+    const tvPatterns = [
+      /^第?\s*\d+\s*集$/,      // 第1集, 第01集, 1集, 01集
+      /^第?\s*\d+\s*$/,        // 第1, 01
+      /^\d{1,3}$/,            // 1, 01, 123（1-3位数字）
+    ];
+    
+    // 检查是否匹配电视剧格式
+    const isTVFormat = tvPatterns.some(pattern => pattern.test(episodeName));
+    
+    if (isTVFormat) {
+      // 匹配电视剧格式，显示数字格式
+      return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+    } else {
+      // 不匹配电视剧格式，认为属于综艺，显示原名称
+      return episodeName;
+    }
+  }
+  
+  // 4. 其他情况（既不是剧也不是综艺，比如电影、动漫等）
+  // 选项A：显示原名称
+  return episodeName;
+  
+  // 选项B：对于非剧非综艺也显示数字格式（比如电影只有1集）
+  // return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+};
+	
   //------------手机端播放双击事件优化----------------
   
   //左边快退，中间暂停，右边快进
@@ -1363,7 +1418,7 @@ useEffect(() => {
     console.log(videoUrl);
 	  //视频播放前设置正在切换状态，否则播放器会自动触发暂停，然后保存进度
     isChangingEpisodeRef.current = true;
-    qualityReadyRef.current = false;
+    videoReadyRef.current = false;
   
     // 检测是否为WebKit浏览器
     const isWebkit =
@@ -1378,13 +1433,14 @@ useEffect(() => {
 	  const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
       const { videoUrl: realVideoUrl } = parseEpisodeUrl(originalUrl);
 	  artPlayerRef.current.switch = realVideoUrl;
-	  const { episodeName } = parseEpisodeUrl(videoUrl);
-      const showEpisodeName = episodeName && episodeName.length >= 4;
-	  artPlayerRef.current.title = `${videoTitle} - ${
-    showEpisodeName 
-      ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-      : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-  }`;
+
+	  const episodeText = extractEpisodeTitle(
+	    originalUrl,
+	    currentEpisodeIndex,
+	    totalEpisodes,
+	    detail?.type_name
+	  );
+	  artPlayerRef.current.title = `${videoTitle} - ${episodeText}`;
       
       artPlayerRef.current.poster = videoCover;
 		if (artPlayerRef.current?.video) {
@@ -1462,19 +1518,18 @@ useEffect(() => {
         text-shadow: 0 0 8px #000;
         pointer-events: none;
         z-index: 13;
-        ">${
-          videoTitle
-            ?(() => {
-		const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
-        const { episodeName } = parseEpisodeUrl(originalUrl);
-        return `${videoTitle} - ${
-          episodeName && episodeName.length >=4
-            ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-            : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-        }`;
-      })()
-            : '影片标题'
-        }</div>`,
+        ">
+      ${(() => {
+        const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
+        const episodeText = extractEpisodeTitle(
+          originalUrl,
+          currentEpisodeIndex,
+          totalEpisodes,
+          detail?.type_name
+        );
+        return `${videoTitle || '影片标题'} - ${episodeText}`;
+      })()}
+		</div>`,
     },
            // 新增时间显示层
     {
@@ -1519,11 +1574,11 @@ useEffect(() => {
               lowLatencyMode: true, // 开启低延迟 LL-HLS
 
               /* 缓冲/内存相关 */
-              maxBufferLength: 40, // 前向缓冲最大 30s，过大容易导致高延迟
-              backBufferLength: 20, // 仅保留 30s 已播放内容，避免内存占用
+              maxBufferLength: 40, // 向前缓存=这个值-backBufferLength，过大容易导致高延迟
+              backBufferLength: 20, // 仅保留 20s 已播放内容，避免内存占用
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
-			  maxMaxBufferLength: 70,//绝对的最大允许缓冲区长度，>=backBufferLength + maxBufferLength
+			  maxMaxBufferLength: 60,//绝对的最大允许缓冲区长度
 
               /* 自定义loader */
               loader: blockAdEnabledRef.current
@@ -1536,18 +1591,19 @@ useEffect(() => {
 
             video.hls = hls;
             ensureVideoSource(video, url);
-			  
-		    hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
-				qualityReadyRef.current = true;
-				console.log('切换视频质量，当前切换质量状态:', true);
+			  //分片加载
+			hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
+				videoReadyRef.current = true;
+				console.log('分片加载，当前视频状态:',videoReadyRef.current);
 			    if (typeof window !== 'undefined') {
 			      window.dispatchEvent(
 			        new CustomEvent('globalError', {
-			          detail: { message: '切换视频质量',type: 'info'  },
+			          detail: { message: '分片加载',type: 'info'  },
 			        })
 			      );
 			    }
-		    });
+			});
+
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
 				// 无论是否致命错误，都尝试隐藏加载蒙层
 				  setIsVideoLoading(false);
@@ -1765,11 +1821,6 @@ useEffect(() => {
       artPlayerRef.current.on('ready', () => {
         setError(null);
        	isChangingEpisodeRef.current = false;
-		  setTimeout(() => {
-		    //如果视频质量没切换，这里做稍微延迟设置状态
-			qualityReadyRef.current = true;
-			console.log('播放器ready，当前切换质量状态:', true);
-		  }, 1200);
 
       });
    
@@ -1783,7 +1834,7 @@ useEffect(() => {
 		
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-  console.log('播放器canplay，当前切换质量状态:', qualityReadyRef.current);
+  console.log('播放器canplay，当前分片加载状态:', videoReadyRef.current);
   isChangingEpisodeRef.current = false;
   
   // 隐藏加载状态，显示播放器
@@ -1802,7 +1853,7 @@ useEffect(() => {
   }
   
   // ============ 新增：使用setInterval检查质量状态 ============
-  if (!qualityReadyRef.current) {
+  if (!videoReadyRef.current) {
     console.log('视频质量未稳定，等待质量切换完成...');
     
     // 设置检查间隔
@@ -1814,7 +1865,7 @@ useEffect(() => {
       checkCount++;
       
       // 如果质量已准备好
-      if (qualityReadyRef.current) {
+      if (videoReadyRef.current) {
         console.log(`第${checkCount}次检查：质量已稳定`);
         clearInterval(intervalId);
         executeProgressRestoration();
@@ -1825,7 +1876,7 @@ useEffect(() => {
       if (checkCount >= maxChecks) {
         console.warn(`超过${maxChecks}次检查，强制恢复`);
         clearInterval(intervalId);
-        qualityReadyRef.current = true; // 强制标记为已准备
+        videoReadyRef.current = true; // 强制标记为已准备
         executeProgressRestoration();
         return;
       }
@@ -1890,7 +1941,7 @@ useEffect(() => {
       }
     }
   }
-		/*console.log('播放器canplay，当前切换质量状态:', qualityReadyRef.current);
+		/*
 	    isChangingEpisodeRef.current = false;
 		  // 隐藏加载状态，显示播放器
         setIsVideoLoading(false);
@@ -1906,7 +1957,7 @@ useEffect(() => {
 		  if (!skipEnabled && resumeTime === 0) {
 		    return;
 		  }
-		if (!qualityReadyRef.current){
+		if (!videoReadyRef.current){
 			return;
 		}
 		  // ============= 处理跳过片头逻辑 =============
@@ -1949,7 +2000,7 @@ useEffect(() => {
 		        return;
 		      }
 		    }------------------*/
-	       //qualityReadyRef.current = false;//恢复完进度，设置为false
+	       
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
         /*// 若存在需要恢复的播放进度，则跳转
@@ -2270,12 +2321,13 @@ return () => {
     const titleLayer = document.getElementById('artplayer-title-layer'); 
     if (titleLayer) {
 	const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
-    const { episodeName } = parseEpisodeUrl(originalUrl);
-    titleLayer.innerText = `${videoTitle} - ${
-      episodeName && episodeName.length >= 4 
-        ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-        : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-    }`;
+    const episodeText = extractEpisodeTitle(
+      originalUrl,
+      currentEpisodeIndex,
+      detail?.episodes?.length || 0,
+      detail?.type_name
+    );
+    titleLayer.innerText = `${videoTitle} - ${episodeText}`;
     }
 }
   useEffect(() => {
@@ -2466,17 +2518,16 @@ return () => {
             {videoTitle || '影片标题'}
             {totalEpisodes > 1 && (
               <span className='text-gray-500 dark:text-gray-400'>
-                {/* 显示播放地址的当前集的名称，匹配失败则显示数字 */}
-				{` > ${
-				  (() => {
-					// 使用原始的URL（detail.episodes中的URL）来解析集名称
-					const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
-					const { episodeName } = parseEpisodeUrl(originalUrl);
-					return episodeName && episodeName.length >= 4 
-					  ? `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`
-					  : `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`; // 修复这里的显示逻辑
-				  })()
-				}`}
+                {/* 显示当前集的名称 */}
+		        {` > ${(() => {
+		          const originalUrl = detail?.episodes[currentEpisodeIndex] || '';
+		          return extractEpisodeTitle(
+		            originalUrl, 
+		            currentEpisodeIndex, 
+		            totalEpisodes,
+		            detail?.type_name
+		          );
+		        })()}`}
               </span>
             )}
           </h1>
