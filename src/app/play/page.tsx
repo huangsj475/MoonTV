@@ -51,8 +51,8 @@ function PlayPageClient() {
   const [error, setError] = useState<string | null>(null);
   const [detail, setDetail] = useState<SearchResult | null>(null);
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
-  //const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
-  const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
+  const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
+  //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载视频总是加载2次hls，导致恢复进度后被重置
 
 
@@ -1081,7 +1081,6 @@ useEffect(() => {
   const handleEpisodeChange = async (episodeindexNumber: number) => {
   if (episodeindexNumber >= 0 && episodeindexNumber < totalEpisodes) {
 	  
-	  outroCheckStartedRef.current = false;
     // 在更换集数前保存当前播放进度
     /*if (artPlayerRef.current && artPlayerRef.current.paused) {
       saveCurrentPlayProgress();
@@ -1108,8 +1107,6 @@ useEffect(() => {
         saveCurrentPlayProgress();
 		console.log('上一集---播放进度已保存');
       }*/
-	
-	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx - 1);
     }
   };
@@ -1123,7 +1120,6 @@ useEffect(() => {
 		console.log('下一集---播放进度已保存');
       }*/
 
-	  outroCheckStartedRef.current = false;
       setCurrentEpisodeIndex(idx + 1);
     }
   };
@@ -1425,8 +1421,8 @@ useEffect(() => {
       typeof window !== 'undefined' &&
       typeof (window as any).webkitConvertPointFromNodeToPage === 'function';
 
-	      // 切换视频后重置片尾检查状态
-  	outroCheckStartedRef.current = false;
+	      // 切换视频后重置跳过状态
+	skipIntroProcessedRef.current = false;
 	  
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
    if (!isWebkit && artPlayerRef.current) {
@@ -1839,7 +1835,11 @@ useEffect(() => {
   const resumeTime = resumeTimeRef.current;
   const skipEnabled = skipConfigRef.current.enable;
   const introTime = skipConfigRef.current.intro_time;
-
+	//如果已经跳过开头或者恢复进度，停止跳过，避免用户想回看片头，又跳过开头
+	if (skipIntroProcessedRef.current) {
+		return;
+	}
+		
   // 情况1：跳过开关没开启并且没有恢复进度存在
   if (!skipEnabled && resumeTime === 0) {
     return;
@@ -1907,6 +1907,7 @@ useEffect(() => {
           ? `已恢复进度 (${formatTime(resumeTime)})` 
           : `已跳过片头 (${formatTime(introTime)})`;
         resumeTimeRef.current = 0;
+		skipIntroProcessedRef.current = true;//表示已经恢复进度或跳过开头
         return;
       }
     }
@@ -1919,6 +1920,7 @@ useEffect(() => {
         
         artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
         resumeTimeRef.current = 0;
+		skipIntroProcessedRef.current = true;//表示已经恢复进度或跳过开头
         return;
       }
     }
@@ -1930,6 +1932,7 @@ useEffect(() => {
         console.log('跳过片头:', introTime);
 
         artPlayerRef.current.notice.show = `已跳过片头 (${formatTime(introTime)})`;
+		skipIntroProcessedRef.current = true;//表示已经恢复进度或跳过开头
         return;
       }
     }
@@ -2067,6 +2070,10 @@ useEffect(() => {
 		  const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
 		  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
+		  //如果没开启跳过开关，或者没有片尾配置（负数）
+		  if (!skipEnabled || outroTime >= 0) {
+		    return;
+		  }
 		
 		  /*
 		  const resumeTime = resumeTimeRef.current;
@@ -2134,9 +2141,6 @@ useEffect(() => {
 		  }*/
 		
 		  // ============= 处理跳过结尾逻辑（延迟检查） =============
-		  
-		  // 跳过片尾：只有跳过开关开启且设置了片尾时间
-		  if (outroTime < 0 && duration > 0) {
 		    // 计算片尾开始时间（负值变正）
 		    const outroStartTime = duration + outroTime; // outroTime是负值，如 -60 → 300-60=240
 		    
@@ -2148,9 +2152,11 @@ useEffect(() => {
 		    if (currentTime < checkStartTime) {
 		      return;
 		    }
-			  
+		  
+		  // 跳过片尾：只有跳过开关开启且设置了片尾时间
+		  if (outroTime < 0 && duration > 0) {	  
 		    // 现在才真正检查是否进入片尾区域
-		    if (!outroCheckStartedRef.current && currentTime > outroStartTime) {
+		    if (currentTime > outroStartTime) {
 		      if (
 		        currentEpisodeIndexRef.current <
 		        (detailRef.current?.episodes?.length || 1) - 1
@@ -2160,7 +2166,6 @@ useEffect(() => {
 		        artPlayerRef.current.pause();
 		      }
 		      artPlayerRef.current.notice.show = `已跳过片尾`;
-			  outroCheckStartedRef.current = true;
 		    }
 		  }
       });
