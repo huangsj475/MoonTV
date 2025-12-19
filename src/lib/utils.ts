@@ -478,7 +478,7 @@ async function testWithHlsJs(
       // 尝试播放以触发加载
       setTimeout(() => {
         if (video.paused) {
-          video.play().catch(() => {});
+          video.play().catch(() => {// 静音播放失败是正常的});
         }
       }, 500);
       
@@ -529,7 +529,7 @@ async function testWithHlsJs(
       if (hls) {
         try {
           hls.destroy();
-        } catch (e) {}
+        } catch (e) {console.warn('清理HLS时出错:', e);}
       }
       if (video && video.parentNode) {
         video.parentNode.removeChild(video);
