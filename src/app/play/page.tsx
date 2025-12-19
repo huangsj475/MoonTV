@@ -1621,7 +1621,7 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
-                    //hls.startLoad();
+                    hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
