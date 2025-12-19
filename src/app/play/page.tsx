@@ -2069,6 +2069,7 @@ useEffect(() => {
       artPlayerRef.current.on('video:timeupdate', () => {
 		  const currentTime = artPlayerRef.current.currentTime || 0;
 		  const duration = artPlayerRef.current.duration || 0;
+		  const skipEnabled = skipConfigRef.current.enable;
 		  const outroTime = skipConfigRef.current.outro_time; // 负值，如 -60
 		  //如果没开启跳过开关，或者没有片尾配置（负数）
 		  if (!skipEnabled || outroTime >= 0) {
