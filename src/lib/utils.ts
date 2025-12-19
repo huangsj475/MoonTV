@@ -478,7 +478,9 @@ async function testWithHlsJs(
       // 尝试播放以触发加载
       setTimeout(() => {
         if (video.paused) {
-          video.play().catch(() => {// 静音播放失败是正常的});
+         video.play().catch(() => {
+            // 静音播放失败是正常的
+          });
         }
       }, 500);
       
