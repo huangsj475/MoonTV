@@ -53,7 +53,7 @@ function PlayPageClient() {
   const isChangingEpisodeRef = useRef(false)//---新增：是否正在切换集数
   const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
-  const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载视频总是加载2次hls，导致恢复进度后被重置
+  const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载hls会初始化，加载2次hls，导致恢复进度后被重置
 
 
   // 收藏状态
@@ -1834,7 +1834,7 @@ useEffect(() => {
 		
       // 监听视频可播放事件，这时恢复播放进度更可靠
       artPlayerRef.current.on('video:canplay', () => {
-  console.log('播放器canplay，当前缓冲后加载状态:', videoReadyRef.current);
+  console.log('播放器canplay，当前开始创建缓冲区-状态:', videoReadyRef.current);
   isChangingEpisodeRef.current = false;
   
   // 隐藏加载状态，显示播放器
@@ -1929,7 +1929,7 @@ useEffect(() => {
         artPlayerRef.current.currentTime = resumeTime;
         console.log('恢复播放进度:', resumeTime);
         
-        artPlayerRef.current.notice.show = `已恢复播放进度 (${formatTime(resumeTime)})`;
+        artPlayerRef.current.notice.show = `恢复播放进度 (${formatTime(resumeTime)})`;
         resumeTimeRef.current = 0;
 		skipIntroProcessedRef.current = true;//表示已经恢复进度或跳过开头
         return;
