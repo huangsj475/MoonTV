@@ -677,7 +677,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
                 outro_time: outroTime,
               };
               handleSkipConfigChange(newConfig);
-              return `${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`;
+              return `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`;
             }
           },
         });
@@ -1734,7 +1734,7 @@ useEffect(() => {
 					  outro_time: outroTime,
 					};
 					handleSkipConfigChange(newConfig);
-					return `${formatTime(artPlayerRef.current?.currentTime)}(点击删除)`;
+					return `-${formatTime(-skipConfigRef.current.outro_time)}(点击删除)`;
 				  }
 				},
 			  },
