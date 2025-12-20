@@ -706,52 +706,32 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 }
 
 function extractTsNumber(name: string): number | null {
-  // 常见的ts文件名模式：
-  // 1. 纯数字: "000001", "123456"
-  // 2. hash+数字: "e16a353b0cb320c9594c4b15ffe43e6a" (这种情况没有数字)
-  // 3. 前缀+数字: "video000009", "episode001"
-  // 4. 数字+后缀: "000009ts", "001video"
-  // 5. 混合: "hsidai000009ts"
+  console.log(`[提取] 文件名: "${name}"`);
   
-  // 移除可能的文件扩展名（如果还有的话）
-  const cleanName = name.replace(/\.(ts|mp4|avi|mkv|flv)$/, '');
-  
-  // 模式1：纯数字
-  if (/^\d+$/.test(cleanName)) {
-    return parseInt(cleanName, 10);
+  // 先检查是否是纯hash格式（32位十六进制）
+  if (/^[0-9a-f]{32}$/i.test(name)) {
+    console.log(`[提取] 是hash格式，不提取数字`);
+    return null;
   }
   
-  // 模式2：以数字结尾（最常见）
-  const endDigits = cleanName.match(/(\d+)$/);
+  // 检查是否是纯数字
+  if (/^\d+$/.test(name)) {
+    const num = parseInt(name, 10);
+    console.log(`[提取] 纯数字: ${num}`);
+    return num;
+  }
+  
+  // 对于包含字母和数字的混合文件名
+  // 策略：优先找末尾的连续数字
+  const endDigits = name.match(/(\d+)$/);
   if (endDigits) {
-    return parseInt(endDigits[1], 10);
+    const num = parseInt(endDigits[1], 10);
+    console.log(`[提取] 末尾数字: ${num}`);
+    return num;
   }
   
-  // 模式3：以数字开头
-  const startDigits = cleanName.match(/^(\d+)/);
-  if (startDigits) {
-    return parseInt(startDigits[1], 10);
-  }
-  
-  // 模式4：包含长数字序列（>=3位）
-  const allDigits = cleanName.match(/\d+/g);
-  if (allDigits) {
-    // 找最长的数字序列
-    let longest = '';
-    for (const digits of allDigits) {
-      if (digits.length > longest.length) {
-        longest = digits;
-      }
-    }
-    
-    if (longest.length >= 3) {
-      return parseInt(longest, 10);
-    }
-    
-    // 否则取第一个数字序列
-    return parseInt(allDigits[0], 10);
-  }
-  
+
+  console.log(`[提取] 未找到有效数字`);
   return null;
 }
 
