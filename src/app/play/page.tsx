@@ -1481,11 +1481,7 @@ useEffect(() => {
         loop: false,
         flip: false,
         playbackRate: true,
-		  aspectRatio: {
-		    default: false,  // 画面比例默认不显示
-		    autoHide: true,  // 自动隐藏提示
-		    name: '',        // 清空显示名称
-		  },
+		aspectRatio: false,
         fullscreen: true,
         fullscreenWeb: true,
         subtitleOffset: false,
