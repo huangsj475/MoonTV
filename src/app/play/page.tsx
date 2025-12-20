@@ -577,91 +577,134 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   
   const lines = m3u8Content.split('\n');
   
+  // 定义类型
+  type Section = {
+    start: number;
+    count: number;
+    lines: number[];
+  };
+  
   // 1. 条件1：检查所有ts文件名数字是否连续递增
+  console.log('检查条件1...');
   const allTsNums: number[] = [];
+  
   for (let i = 0; i < lines.length; i++) {
-    if (lines[i].trim().startsWith('#EXTINF:')) {
+    const line = lines[i].trim();
+    if (line.startsWith('#EXTINF:')) {
       if (i + 1 < lines.length) {
         const tsLine = lines[i + 1].trim();
         if (tsLine.endsWith('.ts')) {
           const name = tsLine.replace('.ts', '');
           const num = extractTsNumber(name);
+          console.log(`ts: ${name}, 数字: ${num}`);
           if (num !== null) {
             allTsNums.push(num);
           } else {
-            // 有ts文件没有数字，条件1不满足
-            allTsNums.push(-1); // 标记为无效
+            allTsNums.push(-1);
           }
         }
       }
     }
   }
   
-  // 检查是否所有ts都有数字且连续递增
+  console.log(`所有ts数字: ${allTsNums}`);
+  
+  // 检查条件1
   if (allTsNums.length >= 2 && allTsNums.every(n => n > 0)) {
     let isSequential = true;
     for (let i = 1; i < allTsNums.length; i++) {
       if (allTsNums[i] !== allTsNums[i-1] + 1) {
         isSequential = false;
+        console.log(`不连续: ${allTsNums[i-1]} -> ${allTsNums[i]}`);
         break;
       }
     }
     
     if (isSequential) {
-      console.log('条件1满足：所有ts文件名数字连续递增');
+      console.log('√ 条件1满足：所有ts文件名数字连续递增');
       // 只删除所有 #EXT-X-DISCONTINUITY 标签
-      return lines.filter(line => line.trim() !== '#EXT-X-DISCONTINUITY').join('\n');
+      const result = lines.filter(line => line.trim() !== '#EXT-X-DISCONTINUITY');
+      console.log(`删除了 discontinuity 标签，行数: ${lines.length} -> ${result.length}`);
+      return result.join('\n');
     }
   }
   
+  console.log('× 条件1不满足，执行条件2...');
+  
   // 2. 条件2：按discontinuity分组检查ts数量
-  const sections = [];
-  let currentSection: any = null;
+  const sections: Section[] = [];
+  let currentSection: Section | null = null;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     
     if (line === '#EXT-X-DISCONTINUITY') {
-      if (currentSection) sections.push(currentSection);
-      currentSection = { start: i, count: 0, lines: [] };
-      currentSection.lines.push(i);
+      if (currentSection) {
+        sections.push(currentSection);
+      }
+      currentSection = {
+        start: i,
+        count: 0,
+        lines: [i] // 包含discontinuity标签行
+      };
     } else if (currentSection && line.startsWith('#EXTINF:')) {
       currentSection.count++;
-      currentSection.lines.push(i);
+      currentSection.lines.push(i); // EXTINF行
+      
       if (i + 1 < lines.length && lines[i + 1].trim().endsWith('.ts')) {
-        currentSection.lines.push(i + 1);
+        currentSection.lines.push(i + 1); // ts文件行
         i++;
       }
     }
   }
-  if (currentSection) sections.push(currentSection);
+  
+  if (currentSection) {
+    sections.push(currentSection);
+  }
+  
+  console.log(`找到 ${sections.length} 个discontinuity段`);
+  sections.forEach((section, idx) => {
+    console.log(`段 ${idx + 1}: ${section.count}个ts文件`);
+  });
   
   const linesToRemove = new Set<number>();
   
   if (sections.length > 1) {
     const counts = sections.map(s => s.count);
     const maxCount = Math.max(...counts);
+    console.log(`最大ts数量: ${maxCount}`);
     
-    // 找出广告段：ts数量明显少于最大值
+    // 找出广告段
     for (let i = 0; i < sections.length; i++) {
-      if (sections[i].count < 10 && sections[i].count < maxCount / 5) {
-        // 广告段，删除整个段
-        sections[i].lines.forEach(line => linesToRemove.add(line));
+      const section = sections[i];
+      
+      // 广告段判断：ts数量少于10且小于最大值的1/5
+      if (section.count < 10 && section.count < maxCount / 5) {
+        console.log(`√ 段 ${i + 1} 是广告段: ${section.count}个ts`);
+        // 删除整个广告段
+        section.lines.forEach((lineNum: number) => {
+          linesToRemove.add(lineNum);
+        });
       } else {
-        // 正常段，只删除discontinuity标签
-        linesToRemove.add(sections[i].start);
+        console.log(`× 段 ${i + 1} 是正常段: ${section.count}个ts`);
+        // 正常段只删除discontinuity标签
+        linesToRemove.add(section.start);
       }
     }
   } else if (sections.length === 1) {
+    console.log('只有一个段，只删除discontinuity标签');
     linesToRemove.add(sections[0].start);
   }
   
-  // 构建结果
-  const result = [];
+  // 3. 构建结果
+  const result: string[] = [];
   for (let i = 0; i < lines.length; i++) {
-    if (!linesToRemove.has(i)) result.push(lines[i]);
+    if (!linesToRemove.has(i)) {
+      result.push(lines[i]);
+    }
   }
   
+  console.log(`过滤完成: ${lines.length}行 -> ${result.length}行`);
   return result.join('\n');
 }
 
