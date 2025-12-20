@@ -1587,22 +1587,14 @@ useEffect(() => {
 
             video.hls = hls;
             ensureVideoSource(video, url);
-			  
-			 /*  ---在BUFFER_APPENDED缓冲时，恢复进度，
-				导致hls空洞错误（即已经缓冲一部分hls流，恢复进度到未缓冲的地方，
-				hls一开始就清空旧的缓冲，开始新缓冲，所以在BUFFER_APPENDING缓冲时跳转
-			 */
-			  //视频开始缓冲
-			hls.on(Hls.Events.BUFFER_APPENDING, (event, data) => {
-				
-					videoReadyRef.current = true;
+		
+			  //数据进入缓冲区
+			hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
+				if(!videoReadyRef.current){
+				 videoReadyRef.current = true;
+				}
 				
 			});
-			  //数据进入缓冲区
-			/*hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
-				videoReadyRef.current = true;
-
-			});*/
 
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
 				// 无论是否致命错误，都尝试隐藏加载蒙层
