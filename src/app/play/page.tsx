@@ -627,9 +627,9 @@ function filterAdsFromM3U8(m3u8Content: string): string {
       const numbers = allTsInfo.map(info => info.num!);
       console.log(`数字序列: [${numbers.join(', ')}]`);
       
-      // 检查是否递增（每个数字都比前一个大）
+      // 检查是否递增（每个数字都比前一个大）只看前5个是否是连续即可
       let isIncreasing = true;
-      for (let i = 1; i < numbers.length; i++) {
+      for (let i = 1; i < numbers[5]; i++) {
         if (numbers[i] <= numbers[i-1]) {
           isIncreasing = false;
           console.log(`不递增: ${numbers[i-1]} -> ${numbers[i]}`);
