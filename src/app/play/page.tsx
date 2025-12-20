@@ -576,11 +576,25 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   if (!m3u8Content) return '';
   
   console.log('=== 开始过滤广告 ===');
-  console.log('原始内容行数:', m3u8Content.split('\n').length);
   
   const lines = m3u8Content.split('\n');
-  const sections = [];
-  let currentSection = null;
+  
+  // 定义类型
+  type TsInfo = {
+    extinf: number;
+    ts: number;
+    name: string;
+    num: number | null;
+  };
+  
+  type Section = {
+    start: number;
+    ts: TsInfo[];
+    lineNumber: number;
+  };
+  
+  const sections: Section[] = [];
+  let currentSection: Section | null = null;
   
   console.log('1. 解析M3U8文件，收集discontinuity段...');
   
@@ -595,8 +609,8 @@ function filterAdsFromM3U8(m3u8Content: string): string {
       }
       currentSection = { 
         start: i, 
-        ts: [],
-        lineNumber: sections.length + 1  // 段编号
+        ts: [],  // 明确指定为TsInfo数组
+        lineNumber: sections.length + 1
       };
     } else if (currentSection && line.startsWith('#EXTINF:')) {
       if (i + 1 < lines.length) {
@@ -607,12 +621,15 @@ function filterAdsFromM3U8(m3u8Content: string): string {
           
           console.log(`  段${currentSection.lineNumber} 添加ts: ${name}.ts (提取数字: ${extractedNum})`);
           
-          currentSection.ts.push({
+          // 创建TsInfo对象
+          const tsInfo: TsInfo = {
             extinf: i,
             ts: i + 1,
             name: name,
             num: extractedNum
-          });
+          };
+          
+          currentSection.ts.push(tsInfo);
           i++; // 跳过ts行
         }
       }
@@ -625,12 +642,6 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   }
   
   console.log(`\n2. 分析完成，共找到 ${sections.length} 个 discontinuity 段:`);
-  sections.forEach((section, idx) => {
-    console.log(`  段${idx + 1}: 开始行 ${section.start + 1}, ${section.ts.length}个ts文件`);
-    section.ts.forEach((ts, tsIdx) => {
-      console.log(`    ts${tsIdx + 1}: ${ts.name}.ts (数字:${ts.num})`);
-    });
-  });
   
   const linesToRemove = new Set<number>();
   
@@ -644,15 +655,12 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     
     if (isSeq) {
       console.log('  √ 触发条件1：发现数字连续递增的段！');
-      console.log(`    段${section.lineNumber} 是数字连续递增的，处理这个段...`);
       
       // 删除discontinuity标签
       linesToRemove.add(section.start);
-      console.log(`    标记删除 discontinuity 标签 (行 ${section.start + 1})`);
       
       // 找出并删除不连续的ts
       const sequence = findLongestSequence(section.ts);
-      console.log(`    最长连续序列: 从索引 ${sequence.start} 开始，长度 ${sequence.length}`);
       
       for (let i = 0; i < section.ts.length; i++) {
         const ts = section.ts[i];
@@ -660,21 +668,11 @@ function filterAdsFromM3U8(m3u8Content: string): string {
           // 不在最长连续序列中，删除
           linesToRemove.add(ts.extinf);
           linesToRemove.add(ts.ts);
-          console.log(`    标记删除不连续的ts: ${ts.name}.ts (行 ${ts.extinf + 1}, ${ts.ts + 1})`);
-        } else {
-          console.log(`    保留连续ts: ${ts.name}.ts (行 ${ts.extinf + 1}, ${ts.ts + 1})`);
         }
       }
       
-      console.log('\n  √ 条件1满足，直接返回过滤结果（不检查条件2和3）');
-      console.log('  总标记删除行数:', linesToRemove.size);
-      
-      const result = buildResult(lines, linesToRemove);
-      console.log(`=== 过滤完成 ===`);
-      console.log(`原始行数: ${lines.length}`);
-      console.log(`过滤后行数: ${result.split('\n').length}`);
-      console.log(`删除行数: ${linesToRemove.size}`);
-      return result;
+      console.log('  √ 条件1满足，直接返回过滤结果');
+      return buildResult(lines, linesToRemove);
     }
   }
   
@@ -686,47 +684,25 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     const counts = sections.map(s => s.ts.length);
     const maxCount = Math.max(...counts);
     
-    console.log(`  各段ts数量: [${counts.join(', ')}]`);
-    console.log(`  最大ts数量: ${maxCount}`);
-    
     for (const section of sections) {
       const diff = Math.abs(section.ts.length - maxCount);
-      console.log(`\n  处理段${section.lineNumber}:`);
-      console.log(`    ts数量: ${section.ts.length}, 与最大差值: ${diff}`);
       
       if (diff > 8 && section.ts.length < maxCount) {
         // 广告段，删除整个段
-        console.log(`    √ 是广告段（差值${diff} > 8且小于最大值），删除整个段`);
         linesToRemove.add(section.start);
-        console.log(`      标记删除 discontinuity 标签 (行 ${section.start + 1})`);
-        
         section.ts.forEach(t => {
           linesToRemove.add(t.extinf);
           linesToRemove.add(t.ts);
-          console.log(`      标记删除 ts: ${t.name}.ts (行 ${t.extinf + 1}, ${t.ts + 1})`);
         });
       } else {
         // 正常段，只删除discontinuity标签
-        console.log(`    × 是正常段，只删除discontinuity标签`);
         linesToRemove.add(section.start);
-        console.log(`      标记删除 discontinuity 标签 (行 ${section.start + 1})`);
-        console.log(`      保留所有 ${section.ts.length} 个ts文件`);
       }
     }
-  } else {
-    console.log('  没有找到discontinuity段，无需处理');
   }
   
-  console.log('\n5. 条件3：已自动处理（正常段只删除discontinuity标签）');
-  console.log('  总标记删除行数:', linesToRemove.size);
-  
-  const result = buildResult(lines, linesToRemove);
-  console.log(`=== 过滤完成 ===`);
-  console.log(`原始行数: ${lines.length}`);
-  console.log(`过滤后行数: ${result.split('\n').length}`);
-  console.log(`删除行数: ${linesToRemove.size}`);
-  
-  return result;
+  console.log('\n5. 构建最终结果...');
+  return buildResult(lines, linesToRemove);
 }
 
 function extractTsNumber(name: string): number | null {
