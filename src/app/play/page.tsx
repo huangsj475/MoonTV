@@ -1595,8 +1595,8 @@ useEffect(() => {
 			  // 关键：sn >= 0 表示真正的视频数据分片
 			  if (data.frag.sn >= 0) {
 			    // 这是第二次加载的标志
-			    if (!qualityReadyRef.current) {
-			      qualityReadyRef.current = true;
+			    if (!videoReadyRef.current) {
+			      videoReadyRef.current = true;
 			      
 			    }
 			  }
