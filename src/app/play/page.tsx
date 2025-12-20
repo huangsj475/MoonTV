@@ -1155,7 +1155,7 @@ useEffect(() => {
     }
 
     // 左箭头 = 快退
-    if (!e.altKey && e.key === 'ArrowLeft') {
+    if (!e.altKey && e.key === 'ArrowLeft' && !e.ctrlKey && !e.metaKey) {
       if (artPlayerRef.current && artPlayerRef.current.currentTime > 5) {
         artPlayerRef.current.currentTime -= 10;
         e.preventDefault();
@@ -1163,7 +1163,7 @@ useEffect(() => {
     }
 
     // 右箭头 = 快进
-    if (!e.altKey && e.key === 'ArrowRight') {
+    if (!e.altKey && e.key === 'ArrowRight' && !e.ctrlKey && !e.metaKey) {
       if (
         artPlayerRef.current &&
         artPlayerRef.current.currentTime < artPlayerRef.current.duration - 5
@@ -1174,7 +1174,7 @@ useEffect(() => {
     }
 
     // 上箭头 = 音量+
-    if (e.key === 'ArrowUp') {
+    if (e.key === 'ArrowUp' && !e.altKey && !e.ctrlKey && !e.metaKey) {
       if (artPlayerRef.current && artPlayerRef.current.volume < 1) {
         artPlayerRef.current.volume =
           Math.round((artPlayerRef.current.volume + 0.1) * 10) / 10;
@@ -1186,7 +1186,7 @@ useEffect(() => {
     }
 
     // 下箭头 = 音量-
-    if (e.key === 'ArrowDown') {
+    if (e.key === 'ArrowDown' && !e.altKey && !e.ctrlKey && !e.metaKey) {
       if (artPlayerRef.current && artPlayerRef.current.volume > 0) {
         artPlayerRef.current.volume =
           Math.round((artPlayerRef.current.volume - 0.1) * 10) / 10;
@@ -1198,7 +1198,7 @@ useEffect(() => {
     }
 
     // 空格 = 播放/暂停
-    if (e.key === ' ') {
+    if (e.key === ' ' && !e.altKey && !e.ctrlKey && !e.metaKey) {
       if (artPlayerRef.current) {
         artPlayerRef.current.toggle();
         e.preventDefault();
@@ -1206,7 +1206,7 @@ useEffect(() => {
     }
 
     // f 键 = 切换全屏
-    if (e.key === 'f' || e.key === 'F') {
+    if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
       if (artPlayerRef.current) {
         artPlayerRef.current.fullscreen = !artPlayerRef.current.fullscreen;
         e.preventDefault();
@@ -1481,7 +1481,11 @@ useEffect(() => {
         loop: false,
         flip: false,
         playbackRate: true,
-        aspectRatio: false,
+		  aspectRatio: {
+		    default: false,  // 画面比例默认不显示
+		    autoHide: true,  // 自动隐藏提示
+		    name: '',        // 清空显示名称
+		  },
         fullscreen: true,
         fullscreenWeb: true,
         subtitleOffset: false,
@@ -2010,53 +2014,6 @@ useEffect(() => {
 	       
 		  // ============= 处理跳过结尾逻辑 由于要实时监测，放在timeupdate=============
 
-        /*// 若存在需要恢复的播放进度，则跳转
-        if (resumeTimeRef.current && resumeTimeRef.current > 0) {
-          try {
-            const target = resumeTimeRef.current;
-				setTimeout(() => {
-				  // 使用setInterval持续检查条件
-				  let isCompleted = false;
-				  const checkInterval = setInterval(() => {
-					  if (isCompleted) return;
-				      const player = artPlayerRef.current;
-				      if (!player?.video || player.video.readyState < 2) {
-				          console.log('等待播放器视频就绪...');
-				          return;
-				        }
-				      const duration = player.duration;
-				      if (!duration || duration <= 0) {
-				          console.log('等待视频时长加载...');
-				          return;
-				        }
-
-					  const finalTarget = target >= duration - 2 ? Math.max(0, duration - 5) : target;
-					  player.currentTime = finalTarget;
-					  console.log('成功恢复播放进度到:', finalTarget);
-					  resumeTimeRef.current = 0;
-					  				      
-						if (!isCompleted) {
-						  clearInterval(checkInterval);
-						  console.log('恢复播放进度，已清除定时器');
-						  isCompleted = true;
-						}
-				     
-				  }, 100); // 每100ms检查一次
-				  
-				  // 设置超时，3秒后强制清除
-				  setTimeout(() => {
-					if (!isCompleted) {
-					  clearInterval(checkInterval);
-					  resumeTimeRef.current = 0;
-					  console.log('检查超过3s后，已清除定时器');
-					}
-				  }, 3000);
-				}, 400);
-          } catch (err) {
-            console.warn('恢复播放进度失败:', err);
-			resumeTimeRef.current = 0;
-          }
-     }*/ 
 
         setTimeout(() => {
           if (
