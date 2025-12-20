@@ -1595,7 +1595,7 @@ useEffect(() => {
 			    setTimeout(() => {
 			      videoReadyRef.current = true;
 				  console.log('第一次切换，延迟后状态',videoReadyRef.current);
-			    }, 1200);
+			    }, 1100);
 			  }
 			  // 如果是第二次及以后的切换
 			  if (levelSwitchCountRef.current >= 2) {
@@ -1604,7 +1604,7 @@ useEffect(() => {
 			  }
 				 setTimeout(() => {
 			      levelSwitchCountRef.current = 0;
-			    }, 8000);
+			    }, 5000);
 				 
 			  });
 	
