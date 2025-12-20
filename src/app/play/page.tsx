@@ -54,6 +54,7 @@ function PlayPageClient() {
   const skipIntroProcessedRef = useRef(false);//---新增：是否跳过片头或者恢复进度
   //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载hls会初始化，加载2次hls，导致恢复进度后被重置
+  const levelSwitchCountRef = useRef(0);
 
 
   // 收藏状态
@@ -1588,20 +1589,23 @@ useEffect(() => {
             video.hls = hls;
             ensureVideoSource(video, url);
 
-			  hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
-			  // 只关心视频分片
-			  if (data.frag.type !== 'main') return;
-			  
-			  // 关键：sn >= 0 表示真正的视频数据分片
-			  if (data.frag.sn >= 0) {
-			    // 这是第二次加载的标志
-			    if (!videoReadyRef.current) {
+			  hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+			  levelSwitchCountRef.current++;
+			  levelSwitchTimersRef.current.count++;
+			  if (levelSwitchCountRef.current === 1) {
+			    setTimeout(() => {
 			      videoReadyRef.current = true;
-			      
-			    }
+				  console.log('第一次切换，延迟后状态',videoReadyRef.current);
+			    }, 1200);
 			  }
-			});
-
+			  // 如果是第二次及以后的切换
+			  if (levelSwitchCountRef.current >= 2) {
+				videoReadyRef.current = true;
+				console.log('第二次切换，状态',videoReadyRef.current);
+			  }
+				 
+			  });
+	
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
 				// 无论是否致命错误，都尝试隐藏加载蒙层
 				  setIsVideoLoading(false);
