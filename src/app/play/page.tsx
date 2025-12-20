@@ -1590,9 +1590,9 @@ useEffect(() => {
 		
 			  //数据进入缓冲区
 			hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
-				if(!videoReadyRef.current){
+				
 				 videoReadyRef.current = true;
-				}
+				
 				
 			});
 
