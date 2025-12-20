@@ -576,18 +576,21 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   if (!m3u8Content) return '';
   
   const lines = m3u8Content.split('\n');
+  const linesToRemove = new Set<number>();
   
-  // 定义类型
-  type Section = {
-    start: number;
-    count: number;
-    lines: number[];
-  };
-  
+  // 收集所有ts文件信息（包含行号）
+  const allTsInfo: Array<{
+    extinfLine: number;  // #EXTINF行号
+    tsLine: number;      // ts文件行号
+    name: string;       // 文件名（不含.ts）
+    num: number | null; // 提取的数字
+  }> = [];
+
   // 1. 条件1：检查所有ts文件名数字是否连续递增
   console.log('检查条件1...');
-  const allTsNums: number[] = [];
+
   
+  console.log('收集所有ts文件信息...');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (line.startsWith('#EXTINF:')) {
@@ -596,42 +599,91 @@ function filterAdsFromM3U8(m3u8Content: string): string {
         if (tsLine.endsWith('.ts')) {
           const name = tsLine.replace('.ts', '');
           const num = extractTsNumber(name);
-          console.log(`ts: ${name}, 数字: ${num}`);
-          if (num !== null) {
-            allTsNums.push(num);
-          } else {
-            allTsNums.push(-1);
-          }
+          
+          console.log(`  ts${allTsInfo.length + 1}: ${name}.ts (行${i+2}), 数字: ${num}`);
+          
+          allTsInfo.push({
+            extinfLine: i,      // #EXTINF行
+            tsLine: i + 1,      // ts文件行
+            name: name,
+            num: num
+          });
+          i++; // 跳过ts行
         }
       }
     }
   }
   
-  console.log(`所有ts数字: ${allTsNums}`);
+  console.log(`共找到 ${allTsInfo.length} 个ts文件`);
   
-  // 检查条件1
-  if (allTsNums.length >= 2 && allTsNums.every(n => n > 0)) {
-    let isSequential = true;
-    for (let i = 1; i < allTsNums.length; i++) {
-      if (allTsNums[i] !== allTsNums[i-1] + 1) {
-        isSequential = false;
-        console.log(`不连续: ${allTsNums[i-1]} -> ${allTsNums[i]}`);
-        break;
-      }
-    }
+  // 条件1：检查ts文件名数字是否连续递增
+  console.log('\n检查条件1：ts文件名数字是否连续递增...');
+  
+  if (allTsInfo.length >= 2) {
+    // 检查是否所有ts都有数字
+    const allHaveNumbers = allTsInfo.every(info => info.num !== null);
     
-    if (isSequential) {
-      console.log('√ 条件1满足：所有ts文件名数字连续递增');
-      // 只删除所有 #EXT-X-DISCONTINUITY 标签
-      const result = lines.filter(line => line.trim() !== '#EXT-X-DISCONTINUITY');
-      console.log(`删除了 discontinuity 标签，行数: ${lines.length} -> ${result.length}`);
-      return result.join('\n');
+    if (allHaveNumbers) {
+      const numbers = allTsInfo.map(info => info.num!);
+      console.log(`数字序列: [${numbers.join(', ')}]`);
+      
+      // 检查是否递增（每个数字都比前一个大）
+      let isIncreasing = true;
+      for (let i = 1; i < numbers.length; i++) {
+        if (numbers[i] <= numbers[i-1]) {
+          isIncreasing = false;
+          console.log(`不递增: ${numbers[i-1]} -> ${numbers[i]}`);
+          break;
+        }
+      }
+      
+      if (isIncreasing) {
+        console.log('√ 条件1触发：ts文件名数字递增');
+        console.log('删除不连续的ts文件和所有 discontinuity 标签...');
+        
+        // 1. 删除所有 #EXT-X-DISCONTINUITY 标签
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
+            linesToRemove.add(i);
+            console.log(`  删除 discontinuity 标签 (行 ${i + 1})`);
+          }
+        }
+        
+        // 2. 删除不连续的ts文件
+        // 遍历所有ts，当发现不连续时，删除当前ts
+        for (let i = 1; i < numbers.length; i++) {
+          if (numbers[i] !== numbers[i-1] + 1) {
+            // 不连续！删除这个ts文件（#EXTINF行和ts行）
+            const tsInfo = allTsInfo[i];
+            linesToRemove.add(tsInfo.extinfLine); // 删除 #EXTINF 行
+            linesToRemove.add(tsInfo.tsLine);     // 删除 ts 文件行
+            
+            console.log(`  删除不连续的ts: ${tsInfo.name}.ts (行 ${tsInfo.extinfLine + 1}, ${tsInfo.tsLine + 1})`);
+            console.log(`    原因: ${numbers[i-1]} -> ${numbers[i]} 不连续`);
+          }
+        }
+        
+        console.log('条件1完成，返回过滤结果');
+        return buildResult(lines, linesToRemove);
+      } else {
+        console.log('× 条件1不满足：ts文件名数字不递增');
+      }
+    } else {
+      console.log('× 条件1不满足：有ts文件没有数字');
     }
+  } else {
+    console.log('× 条件1不满足：ts文件少于2个');
   }
   
   console.log('× 条件1不满足，执行条件2...');
   
   // 2. 条件2：按discontinuity分组检查ts数量
+    // 定义类型
+  type Section = {
+    start: number;
+    count: number;
+    lines: number[];
+  };
   const sections: Section[] = [];
   let currentSection: Section | null = null;
   
@@ -667,7 +719,6 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     console.log(`段 ${idx + 1}: ${section.count}个ts文件`);
   });
   
-  const linesToRemove = new Set<number>();
   
   if (sections.length > 1) {
     const counts = sections.map(s => s.count);
