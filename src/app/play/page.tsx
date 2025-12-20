@@ -1591,7 +1591,6 @@ useEffect(() => {
 
 			  hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
 			  levelSwitchCountRef.current++;
-			  levelSwitchTimersRef.current.count++;
 			  if (levelSwitchCountRef.current === 1) {
 			    setTimeout(() => {
 			      videoReadyRef.current = true;
@@ -1603,6 +1602,9 @@ useEffect(() => {
 				videoReadyRef.current = true;
 				console.log('第二次切换，状态',videoReadyRef.current);
 			  }
+				 setTimeout(() => {
+			      levelSwitchCountRef.current = 0;
+			    }, 8000);
 				 
 			  });
 	
