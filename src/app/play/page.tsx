@@ -571,8 +571,216 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     }
   };
 
+	// 新版去广告函数
+	function filterAdsFromM3U8(m3u8Content: string): string {
+	  if (!m3u8Content) return '';
+	  
+	  // 按行分割
+	  const lines = m3u8Content.split('\n');
+	  const filteredLines: string[] = [];
+	  
+	  // 步骤1: 全局分析所有ts文件的命名模式
+	  const allTSFiles: Array<{filename: string, lineIndex: number}> = [];
+	  
+	  for (let i = 0; i < lines.length; i++) {
+	    const line = lines[i];
+	    if (line.includes('.ts') && line.trim() && !line.startsWith('#')) {
+	      allTSFiles.push({
+	        filename: line.trim(),
+	        lineIndex: i
+	      });
+	    }
+	  }
+	  
+	  // 判断全局是否有数字递增规律
+	  const globalHasNumberSequence = checkNumberSequence(allTSFiles.map(t => t.filename));
+	  
+	  // 步骤2: 找出所有DISCONTINUITY块
+	  const discontinuityBlocks: Array<{
+	    startLine: number;      // DISCONTINUITY所在行
+	    endLine: number;        // 块结束行
+	    tsFiles: string[];      // 该块中的ts文件名
+	    segmentCount: number;   // 该块中的片段数量
+	  }> = [];
+	  
+	  let currentBlock: typeof discontinuityBlocks[0] | null = null;
+	  let segmentCount = 0;
+	  let currentTSFiles: string[] = [];
+	  
+	  for (let i = 0; i < lines.length; i++) {
+	    const line = lines[i];
+	    
+	    if (line.includes('#EXT-X-DISCONTINUITY')) {
+	      // 保存前一个块
+	      if (currentBlock) {
+	        currentBlock.endLine = i - 1;
+	        currentBlock.tsFiles = currentTSFiles;
+	        currentBlock.segmentCount = segmentCount;
+	        discontinuityBlocks.push(currentBlock);
+	      }
+	      
+	      // 开始新块
+	      currentBlock = {
+	        startLine: i,
+	        endLine: lines.length - 1, // 临时值
+	        tsFiles: [],
+	        segmentCount: 0
+	      };
+	      segmentCount = 0;
+	      currentTSFiles = [];
+	    } 
+	    else if (currentBlock) {
+	      // 统计片段
+	      if (line.startsWith('#EXTINF:')) {
+	        segmentCount++;
+	      }
+	      // 收集ts文件名
+	      else if (line.includes('.ts') && line.trim() && !line.startsWith('#')) {
+	        currentTSFiles.push(line.trim());
+	      }
+	      
+	    }
+	  }
+	  
+		  // 处理最后一个块（如果有）
+		if (currentBlock) {
+		  currentBlock.endLine = lines.length - 1;
+		  currentBlock.tsFiles = currentTSFiles;
+		  currentBlock.segmentCount = segmentCount;
+		  discontinuityBlocks.push(currentBlock);
+		}
+	  console.log('发现DISCONTINUITY块:', discontinuityBlocks.length);
+	  
+	  // 步骤3: 计算典型的片段数量（用于情况2判断）
+	  let typicalSegmentCount = 0;
+	  if (discontinuityBlocks.length > 0) {
+	    const counts = discontinuityBlocks.map(b => b.segmentCount);
+	    // 取中位数作为典型值
+	    counts.sort((a, b) => a - b);
+	    typicalSegmentCount = counts[Math.floor(counts.length / 2)];
+	  }
+	  console.log('典型片段数量:', typicalSegmentCount);
+	  
+	  // 步骤4: 处理每一行
+	  let skipMode = false;
+	  let currentBlockIndex = -1;
+	  
+	  for (let i = 0; i < lines.length; i++) {
+	    const line = lines[i];
+	    
+	    // 检查是否进入DISCONTINUITY块
+	    if (line.includes('#EXT-X-DISCONTINUITY')) {
+	      // 找到对应的块信息
+	      const block = discontinuityBlocks.find(b => b.startLine === i);
+	      currentBlockIndex = discontinuityBlocks.findIndex(b => b.startLine === i);
+	      
+	      if (block) {
+	        // 情况1: 检查文件名是否不连续
+	        let isNamingInconsistent = false;
+	        if (globalHasNumberSequence && block.tsFiles.length > 0) {
+	          const blockHasNumberSequence = checkNumberSequence(block.tsFiles);
+	          // 全局有数字递增，但当前块没有，说明不连续
+	          if (!blockHasNumberSequence) {
+	            isNamingInconsistent = true;
+	            console.log(`块${currentBlockIndex}: 文件名不连续，识别为广告`);
+	          }
+	        }
+	        
+	        // 情况2: 检查片段数量是否远少于典型值
+	        let isCountTooSmall = false;
+	        if (typicalSegmentCount > 0 && block.segmentCount > 0) {
+	          // 如果数量少于典型的30%，认为是广告
+	          if (block.segmentCount < typicalSegmentCount * 0.3) {
+	            isCountTooSmall = true;
+	            console.log(`块${currentBlockIndex}: 片段数量${block.segmentCount}远少于典型值${typicalSegmentCount}，识别为广告`);
+	          }
+	        }
+	        
+	        // 判断是否需要跳过整个块
+	        if (isNamingInconsistent || isCountTooSmall) {
+	          skipMode = true;
+	          // 跳过DISCONTINUITY标签本身
+	          continue;
+	        } else {
+	          // 情况3: 无法确定是否为广告，只去除DISCONTINUITY标签
+	          console.log(`块${currentBlockIndex}: 无法确定，只移除DISCONTINUITY标签`);
+	          continue; // 跳过这一行（即去除DISCONTINUITY标签）
+	        }
+	      }
+	    }
+	    
+	    // 如果处于跳过模式，检查是否需要结束跳过
+	    if (skipMode) {
+	      const block = currentBlockIndex >= 0 ? discontinuityBlocks[currentBlockIndex] : null;
+	      if (block && i >= block.endLine) {
+	        skipMode = false;
+	        currentBlockIndex = -1;
+	      }
+	      continue; // 跳过广告内容
+	    }
+	    
+	    // 添加正常内容
+	    filteredLines.push(line);
+	  }
+	  
+	  return filteredLines.join('\n');
+	}
+	
+	// 辅助函数：检查文件名是否有数字递增序列
+	function checkNumberSequence(filenames: string[]): boolean {
+	  if (filenames.length < 2) return false;
+	  
+	  const numbers: number[] = [];
+	  
+	  // 提取所有文件名中的数字
+	  for (const filename of filenames) {
+	    const num = extractNumberFromTSFilename(filename);
+	    if (num !== null) {
+	      numbers.push(num);
+	    } else {
+	      // 无法提取数字，返回false
+	      return false;
+	    }
+	  }
+	  
+	  // 检查是否递增
+	  for (let i = 1; i < numbers.length; i++) {
+	    if (numbers[i] !== numbers[i-1] + 1) {
+	      return false;
+	    }
+	  }
+	  
+	  return numbers.length > 0;
+	}
+	
+	// 辅助函数：从ts文件名中提取数字
+	function extractNumberFromTSFilename(filename: string): number | null {
+	  // 移除.ts扩展名
+	  const name = filename.replace(/\.ts$/i, '');
+	  
+	  // 尝试多种模式匹配数字
+	  // 模式1: 纯数字文件名，如 001.ts
+	  if (/^\d+$/.test(name)) {
+	    return parseInt(name, 10);
+	  }
+	  
+	  // 模式2: 末尾数字，如 segment001.ts, part001.ts
+	  const endMatch = name.match(/(\d+)$/);
+	  if (endMatch) {
+	    return parseInt(endMatch[1], 10);
+	  }
+	  
+	  // 模式3: 中间数字，如 video_001_abc.ts
+	  const anyMatch = name.match(/\d+/);
+	  if (anyMatch) {
+	    return parseInt(anyMatch[0], 10);
+	  }
+	  
+	  return null;
+	}
+
   // 去广告相关函数
-  function filterAdsFromM3U8(m3u8Content: string): string {
+  /*function filterAdsFromM3U8(m3u8Content: string): string {
     if (!m3u8Content) return '';
 
     // 按行分割M3U8内容
@@ -588,7 +796,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       }	  
     }
     return filteredLines.join('\n');
-  }
+  }*/
 
   // 跳过片头片尾配置相关函数
   const handleSkipConfigChange = async (newConfig: {
