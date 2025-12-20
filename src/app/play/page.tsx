@@ -1587,13 +1587,19 @@ useEffect(() => {
 
             video.hls = hls;
             ensureVideoSource(video, url);
-		
-			  //数据进入缓冲区
-			hls.on(Hls.Events.BUFFER_APPENDED, (event, data) => {
-				
-				 videoReadyRef.current = true;
-				
-				
+
+			  hls.on(Hls.Events.FRAG_LOADED, (event, data) => {
+			  // 只关心视频分片
+			  if (data.frag.type !== 'main') return;
+			  
+			  // 关键：sn >= 0 表示真正的视频数据分片
+			  if (data.frag.sn >= 0) {
+			    // 这是第二次加载的标志
+			    if (!qualityReadyRef.current) {
+			      qualityReadyRef.current = true;
+			      
+			    }
+			  }
 			});
 
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
