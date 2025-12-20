@@ -746,17 +746,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     console.log('只有一个段，只删除discontinuity标签');
     linesToRemove.add(sections[0].start);
   }
-  
-  // 3. 构建结果
-  const result: string[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    if (!linesToRemove.has(i)) {
-      result.push(lines[i]);
-    }
-  }
-  
-  console.log(`过滤完成: ${lines.length}行 -> ${result.length}行`);
-  return result.join('\n');
+ return buildResult(lines, linesToRemove);
 }
 
 function extractTsNumber(name: string): number | null {
@@ -778,6 +768,23 @@ function extractTsNumber(name: string): number | null {
   }
   
   return null;
+}
+function buildResult(lines: string[], linesToRemove: Set<number>): string {
+  const result: string[] = [];
+  let keptCount = 0;
+  let removedCount = 0;
+  
+  for (let i = 0; i < lines.length; i++) {
+    if (!linesToRemove.has(i)) {
+      result.push(lines[i]);
+      keptCount++;
+    } else {
+      removedCount++;
+    }
+  }
+  
+  console.log(`原始行数: ${lines.length}, 保留行数: ${keptCount}, 删除行数: ${removedCount}`);
+  return result.join('\n');
 }
 	
   // 去广告相关函数
