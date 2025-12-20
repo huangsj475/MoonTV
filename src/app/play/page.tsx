@@ -661,7 +661,10 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	        // 开始一个新的不连续块
 	        inDiscontinuousBlock = true;
 	        blockStartIndex = i; // 从当前不连续的ts开始
-	        console.log(`  发现不连续块开始: 位置 ${i}, ${numbers[i-1]} -> ${numbers[i]}`);
+        console.log(`\n  发现不连续块开始:`);
+        console.log(`    位置: ${i} (第${i+1}个ts文件)`);
+        console.log(`    数字序列: ${numbers[i-1]} -> ${numbers[i]}`);
+        console.log(`    文件名: ${allTsInfo[i-1].name}.ts -> ${allTsInfo[i].name}.ts`);
 	      }
 	    } else if (inDiscontinuousBlock) {
 	      // 恢复连续了，结束不连续块
@@ -672,7 +675,11 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	        const tsInfo = allTsInfo[j];
 	        linesToRemove.add(tsInfo.extinfLine);
 	        linesToRemove.add(tsInfo.tsLine);
-	        console.log(`    删除ts: ${tsInfo.name}.ts (数字:${numbers[j]})`);
+        console.log(`    [${j - blockStartIndex + 1}] 第${j+1}个ts文件:`);
+        console.log(`      文件名: ${tsInfo.name}.ts`);
+        console.log(`      数字: ${numbers[j]}`);
+        console.log(`      #EXTINF行: ${tsInfo.extinfLine + 1}`);
+        console.log(`      TS文件行: ${tsInfo.tsLine + 1}`);
 	      }
 	      
 	      inDiscontinuousBlock = false;
@@ -682,17 +689,27 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  
 	  // 处理最后一个不连续块（如果文件末尾仍然在不连续块中）
 	  if (inDiscontinuousBlock) {
-	    console.log(`  不连续块持续到文件末尾: 从位置 ${blockStartIndex} 到 ${numbers.length - 1}`);
+    console.log(`\n  不连续块持续到文件末尾:`);
+    console.log(`    从位置 ${blockStartIndex} 到 ${numbers.length - 1}`);
+    console.log(`    共 ${numbers.length - blockStartIndex} 个ts文件`);
+    console.log(`    删除以下ts文件:`);
 	    for (let j = blockStartIndex; j < numbers.length; j++) {
 	      const tsInfo = allTsInfo[j];
 	      linesToRemove.add(tsInfo.extinfLine);
 	      linesToRemove.add(tsInfo.tsLine);
-	      console.log(`    删除ts: ${tsInfo.name}.ts (数字:${numbers[j]})`);
+      console.log(`    [${j - blockStartIndex + 1}] 第${j+1}个ts文件:`);
+      console.log(`      文件名: ${tsInfo.name}.ts`);
+      console.log(`      数字: ${numbers[j]}`);
+      console.log(`      #EXTINF行: ${tsInfo.extinfLine + 1}`);
+      console.log(`      TS文件行: ${tsInfo.tsLine + 1}`);
 	    }
 	  }
 	  
 	  console.log('条件1完成，返回过滤结果');
-	  return buildResult(lines, linesToRemove);
+	  //return buildResult(lines, linesToRemove);
+	  const result = buildResult(lines, linesToRemove);
+	  return result;
+	  console.log(result);
 	} else {
         console.log('× 条件1不满足：ts文件名数字不递增');
       }
