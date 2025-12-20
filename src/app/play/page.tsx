@@ -655,7 +655,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  let blockStartIndex = -1;
 	  
 	  for (let i = 1; i < numbers.length; i++) {
-	    if (numbers[i] !== numbers[i-1] + 1 && numbers[i-1] < numbers[i]) {
+	    if (numbers[i] !== numbers[i-1] + 1) {
 	      // 发现不连续点
 	      if (!inDiscontinuousBlock) {
 	        // 开始一个新的不连续块
