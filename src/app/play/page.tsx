@@ -660,13 +660,10 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  
 	  console.log('条件1完成，返回过滤结果');
 	  return buildResult(lines, linesToRemove);
-	} else {
+		} else {
         console.log('× 条件1不满足：ts文件名数字不递增');
-      }
+		}
     } else {
-      console.log('× 条件1不满足：有ts文件没有数字');
-    }
-  } else {
     console.log('× 条件1不满足：ts文件少于2个');
   }
   
