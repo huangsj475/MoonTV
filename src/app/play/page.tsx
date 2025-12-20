@@ -706,24 +706,53 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 }
 
 function extractTsNumber(name: string): number | null {
-  console.log(`    [提取数字] 文件名: ${name}`);
+  // 常见的ts文件名模式：
+  // 1. 纯数字: "000001", "123456"
+  // 2. hash+数字: "e16a353b0cb320c9594c4b15ffe43e6a" (这种情况没有数字)
+  // 3. 前缀+数字: "video000009", "episode001"
+  // 4. 数字+后缀: "000009ts", "001video"
+  // 5. 混合: "hsidai000009ts"
   
-  // 取最后一个数字序列
-  const matches = name.match(/\d+$/);
-  if (!matches) {
-    // 尝试找任意位置的数字
-    const allMatches = name.match(/\d+/g);
-    if (allMatches) {
-      const num = parseInt(allMatches[allMatches.length - 1], 10);
-      console.log(`    [提取数字] 匹配中间数字: ${num} (从 ${allMatches[allMatches.length - 1]})`);
-      return num;
-    }
-    console.log(`    [提取数字] 未找到数字: ${name}`);
-    return null;
+  // 移除可能的文件扩展名（如果还有的话）
+  const cleanName = name.replace(/\.(ts|mp4|avi|mkv|flv)$/, '');
+  
+  // 模式1：纯数字
+  if (/^\d+$/.test(cleanName)) {
+    return parseInt(cleanName, 10);
   }
-  const num = parseInt(matches[0], 10);
-  console.log(`    [提取数字] 匹配末尾数字: ${num} (从 ${matches[0]})`);
-  return num;
+  
+  // 模式2：以数字结尾（最常见）
+  const endDigits = cleanName.match(/(\d+)$/);
+  if (endDigits) {
+    return parseInt(endDigits[1], 10);
+  }
+  
+  // 模式3：以数字开头
+  const startDigits = cleanName.match(/^(\d+)/);
+  if (startDigits) {
+    return parseInt(startDigits[1], 10);
+  }
+  
+  // 模式4：包含长数字序列（>=3位）
+  const allDigits = cleanName.match(/\d+/g);
+  if (allDigits) {
+    // 找最长的数字序列
+    let longest = '';
+    for (const digits of allDigits) {
+      if (digits.length > longest.length) {
+        longest = digits;
+      }
+    }
+    
+    if (longest.length >= 3) {
+      return parseInt(longest, 10);
+    }
+    
+    // 否则取第一个数字序列
+    return parseInt(allDigits[0], 10);
+  }
+  
+  return null;
 }
 
 function isNumberSequence(tsList: Array<{num: number | null}>): boolean {
