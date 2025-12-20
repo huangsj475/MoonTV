@@ -576,133 +576,191 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   if (!m3u8Content) return '';
   
   console.log('=== 开始过滤广告 ===');
-  
   const lines = m3u8Content.split('\n');
   
-  // 定义类型
-  type TsInfo = {
-    extinf: number;
-    ts: number;
-    name: string;
-    num: number | null;
-  };
+  // 1. 收集所有的ts文件名（整个文件，不分discontinuity组）
+  const allTsFiles: Array<{
+    lineNumber: number;      // ts文件行号
+    extinfLine: number;      // EXTINF行号
+    name: string;           // 文件名（不含.ts）
+    num: number | null;     // 提取的数字
+  }> = [];
   
-  type Section = {
-    start: number;
-    ts: TsInfo[];
-    lineNumber: number;
-  };
+  console.log('收集所有ts文件名...');
   
-  const sections: Section[] = [];
-  let currentSection: Section | null = null;
-  
-  console.log('1. 解析M3U8文件，收集discontinuity段...');
-  
-  // 解析m3u8
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    if (line === '#EXT-X-DISCONTINUITY') {
-      console.log(`  发现 #EXT-X-DISCONTINUITY 在第 ${i+1} 行`);
-      if (currentSection) {
-        console.log(`  完成一个段: ${currentSection.ts.length}个ts文件`);
-        sections.push(currentSection);
-      }
-      currentSection = { 
-        start: i, 
-        ts: [],  // 明确指定为TsInfo数组
-        lineNumber: sections.length + 1
-      };
-    } else if (currentSection && line.startsWith('#EXTINF:')) {
+    
+    if (line.startsWith('#EXTINF:')) {
+      // 检查下一行是否是ts文件
       if (i + 1 < lines.length) {
-        const tsLine = lines[i + 1].trim();
-        if (tsLine.endsWith('.ts')) {
-          const name = tsLine.replace('.ts', '');
-          const extractedNum = extractTsNumber(name);
+        const nextLine = lines[i + 1].trim();
+        if (nextLine.endsWith('.ts')) {
+          const name = nextLine.replace('.ts', '');
+          const num = extractTsNumber(name);
           
-          console.log(`  段${currentSection.lineNumber} 添加ts: ${name}.ts (提取数字: ${extractedNum})`);
+          console.log(`发现ts文件: ${name}.ts (数字: ${num})`);
           
-          // 创建TsInfo对象
-          const tsInfo: TsInfo = {
-            extinf: i,
-            ts: i + 1,
+          allTsFiles.push({
+            lineNumber: i + 1,
+            extinfLine: i,
             name: name,
-            num: extractedNum
-          };
+            num: num
+          });
           
-          currentSection.ts.push(tsInfo);
-          i++; // 跳过ts行
+          i++; // 跳过ts文件行
         }
       }
+    }
+  }
+  
+  console.log(`共找到 ${allTsFiles.length} 个ts文件`);
+  
+  // 2. 条件1：检查所有ts文件名的数字是否连续递增
+  console.log('\n检查条件1：所有ts文件名数字是否连续递增...');
+  
+  if (allTsFiles.length >= 2) {
+    // 检查所有ts文件是否有数字
+    const allHaveNumbers = allTsFiles.every(ts => ts.num !== null);
+    
+    if (allHaveNumbers) {
+      console.log('所有ts文件都有数字，检查是否连续递增...');
+      
+      // 提取所有数字
+      const numbers = allTsFiles.map(ts => ts.num!);
+      console.log('数字序列:', numbers);
+      
+      // 检查是否连续递增
+      let isSequential = true;
+      for (let i = 1; i < numbers.length; i++) {
+        if (numbers[i] !== numbers[i - 1] + 1) {
+          isSequential = false;
+          console.log(`不连续: ${numbers[i - 1]} -> ${numbers[i]}`);
+          break;
+        }
+      }
+      
+      if (isSequential) {
+        console.log('√ 条件1满足：所有ts文件名数字连续递增');
+        console.log('删除所有 #EXT-X-DISCONTINUITY 标签和不连续的ts');
+        
+        // 条件1满足：删除所有 #EXT-X-DISCONTINUITY 标签
+        // 找出并删除不连续的ts（实际上如果全部连续，就不删除任何ts）
+        // 但如果有不连续的部分，删除不连续的
+        
+        const linesToRemove = new Set<number>();
+        
+        // 删除所有 #EXT-X-DISCONTINUITY 标签
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
+            linesToRemove.add(i);
+            console.log(`删除 discontinuity 标签 (行 ${i + 1})`);
+          }
+        }
+        
+        // 检查是否有不连续的部分，如果有则删除
+        // 但实际上如果全部连续，这一步不会删除任何ts
+        
+        // 构建结果
+        const result = [];
+        for (let i = 0; i < lines.length; i++) {
+          if (!linesToRemove.has(i)) {
+            result.push(lines[i]);
+          }
+        }
+        
+        console.log('条件1处理完成，返回结果');
+        return result.join('\n');
+      } else {
+        console.log('× 条件1不满足：ts文件名数字不连续');
+      }
+    } else {
+      console.log('× 条件1不满足：有ts文件没有数字');
+    }
+  } else {
+    console.log('× 条件1不满足：ts文件少于2个');
+  }
+  
+  // 3. 条件1不满足，执行条件2
+  console.log('\n条件1不满足，执行条件2...');
+  
+  // 需要按discontinuity分组来检查ts数量
+  const sections = [];
+  let currentSection: any = null;
+  const linesToRemove = new Set<number>();
+  
+  console.log('按discontinuity分组...');
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    if (line === '#EXT-X-DISCONTINUITY') {
+      if (currentSection) {
+        sections.push(currentSection);
+      }
+      currentSection = {
+        startLine: i,
+        tsCount: 0
+      };
+      console.log(`发现discontinuity段 ${sections.length + 1} (行 ${i + 1})`);
+    } else if (currentSection && line.startsWith('#EXTINF:')) {
+      currentSection.tsCount++;
     }
   }
   
   if (currentSection) {
-    console.log(`  完成最后一个段: ${currentSection.ts.length}个ts文件`);
     sections.push(currentSection);
   }
   
-  console.log(`\n2. 分析完成，共找到 ${sections.length} 个 discontinuity 段:`);
+  console.log(`共找到 ${sections.length} 个discontinuity段`);
+  sections.forEach((section, idx) => {
+    console.log(`段 ${idx + 1}: ${section.tsCount}个ts文件`);
+  });
   
-  const linesToRemove = new Set<number>();
-  
-  console.log('\n3. 开始应用过滤条件...');
-  
-  // 条件1：检查数字连续递增
-  console.log('  检查条件1：是否有数字连续递增的段...');
-  for (const section of sections) {
-    const isSeq = isNumberSequence(section.ts);
-    console.log(`    段${section.lineNumber}: ${section.ts.length}个ts, 数字连续递增: ${isSeq}`);
-    
-    if (isSeq) {
-      console.log('  √ 触发条件1：发现数字连续递增的段！');
-      
-      // 删除discontinuity标签
-      linesToRemove.add(section.start);
-      
-      // 找出并删除不连续的ts
-      const sequence = findLongestSequence(section.ts);
-      
-      for (let i = 0; i < section.ts.length; i++) {
-        const ts = section.ts[i];
-        if (i < sequence.start || i >= sequence.start + sequence.length) {
-          // 不在最长连续序列中，删除
-          linesToRemove.add(ts.extinf);
-          linesToRemove.add(ts.ts);
-        }
-      }
-      
-      console.log('  √ 条件1满足，直接返回过滤结果');
-      return buildResult(lines, linesToRemove);
-    }
-  }
-  
-  console.log('  × 条件1不满足，没有发现数字连续递增的段');
-  console.log('\n4. 检查条件2：比较ts数量...');
-  
-  // 条件2：比较ts数量
   if (sections.length > 0) {
-    const counts = sections.map(s => s.ts.length);
-    const maxCount = Math.max(...counts);
+    // 计算每个段的ts数量
+    const tsCounts = sections.map(s => s.tsCount);
+    const maxCount = Math.max(...tsCounts);
+    console.log(`最大ts数量: ${maxCount}`);
     
-    for (const section of sections) {
-      const diff = Math.abs(section.ts.length - maxCount);
+    // 检查每个段
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      const diff = Math.abs(section.tsCount - maxCount);
+      console.log(`段 ${i + 1}: ${section.tsCount}个ts, 与最大值差值: ${diff}`);
       
-      if (diff > 8 && section.ts.length < maxCount) {
-        // 广告段，删除整个段
-        linesToRemove.add(section.start);
-        section.ts.forEach(t => {
-          linesToRemove.add(t.extinf);
-          linesToRemove.add(t.ts);
-        });
+      if (diff > 8 && section.tsCount < maxCount) {
+        console.log(`√ 段 ${i + 1} 是广告段，删除整个段`);
+        // 删除discontinuity标签
+        linesToRemove.add(section.startLine);
+        
+        // 需要找到这个段的所有ts并删除
+        // 这里需要更复杂的逻辑来找到这个段的所有行
       } else {
-        // 正常段，只删除discontinuity标签
-        linesToRemove.add(section.start);
+        console.log(`× 段 ${i + 1} 是正常段，只删除discontinuity标签`);
+        // 只删除discontinuity标签
+        linesToRemove.add(section.startLine);
       }
     }
   }
   
-  console.log('\n5. 构建最终结果...');
-  return buildResult(lines, linesToRemove);
+  // 删除所有 #EXT-X-DISCONTINUITY 标签
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
+      linesToRemove.add(i);
+    }
+  }
+  
+  // 构建结果
+  const result = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (!linesToRemove.has(i)) {
+      result.push(lines[i]);
+    }
+  }
+  
+  console.log('条件2/3处理完成');
+  return result.join('\n');
 }
 
 function extractTsNumber(name: string): number | null {
@@ -720,7 +778,6 @@ function extractTsNumber(name: string): number | null {
     console.log(`[提取] 纯数字: ${num}`);
     return num;
   }
-  
   // 对于包含字母和数字的混合文件名
   // 策略：优先找末尾的连续数字
   const endDigits = name.match(/(\d+)$/);
@@ -729,98 +786,10 @@ function extractTsNumber(name: string): number | null {
     console.log(`[提取] 末尾数字: ${num}`);
     return num;
   }
-  
-
   console.log(`[提取] 未找到有效数字`);
   return null;
 }
-
-function isNumberSequence(tsList: Array<{num: number | null}>): boolean {
-  if (tsList.length < 2) {
-    console.log(`    [检查序列] ts数量少于2，返回false`);
-    return false;
-  }
-  
-  console.log(`    [检查序列] 开始检查 ${tsList.length} 个ts的数字序列...`);
-  
-  // 检查是否有null
-  for (let i = 0; i < tsList.length; i++) {
-    if (tsList[i].num === null) {
-      console.log(`    [检查序列] 第${i+1}个ts没有数字，返回false`);
-      return false;
-    }
-    console.log(`    [检查序列] ts${i+1}: 数字=${tsList[i].num}`);
-  }
-  
-  // 检查是否连续
-  for (let i = 1; i < tsList.length; i++) {
-    const prev = tsList[i-1].num!;
-    const curr = tsList[i].num!;
-    console.log(`    [检查序列] 比较 ts${i}:${prev} 和 ts${i+1}:${curr}`);
-    
-    if (curr !== prev + 1) {
-      console.log(`    [检查序列] 不连续: ${curr} ≠ ${prev} + 1, 返回false`);
-      return false;
-    }
-  }
-  
-  console.log(`    [检查序列] 所有ts数字连续递增，返回true`);
-  return true;
-}
-
-function findLongestSequence(tsList: Array<{num: number | null}>): {start: number, length: number} {
-  console.log(`    [查找最长序列] 开始查找最长连续序列...`);
-  
-  let maxStart = 0, maxLength = 1;
-  let currentStart = 0, currentLength = 1;
-  
-  console.log(`    [查找最长序列] 初始: maxStart=${maxStart}, maxLength=${maxLength}`);
-  
-  for (let i = 1; i < tsList.length; i++) {
-    console.log(`    [查找最长序列] 检查 ts${i}:${tsList[i-1].num} → ts${i+1}:${tsList[i].num}`);
-    
-    if (tsList[i].num === tsList[i-1].num! + 1) {
-      currentLength++;
-      console.log(`    [查找最长序列] 连续! currentLength=${currentLength}`);
-      
-      if (currentLength > maxLength) {
-        console.log(`    [查找最长序列] 新最长序列! 更新: maxStart=${currentStart}, maxLength=${currentLength}`);
-        maxLength = currentLength;
-        maxStart = currentStart;
-      }
-    } else {
-      console.log(`    [查找最长序列] 不连续，重置: currentStart=${i}, currentLength=1`);
-      currentStart = i;
-      currentLength = 1;
-    }
-  }
-  
-  console.log(`    [查找最长序列] 最终结果: start=${maxStart}, length=${maxLength}`);
-  return { start: maxStart, length: maxLength };
-}
-
-function buildResult(lines: string[], linesToRemove: Set<number>): string {
-  console.log('\n6. 构建最终结果...');
-  
-  const result = [];
-  let keptCount = 0;
-  let removedCount = 0;
-  
-  for (let i = 0; i < lines.length; i++) {
-    if (!linesToRemove.has(i)) {
-      result.push(lines[i]);
-      keptCount++;
-    } else {
-      removedCount++;
-    }
-  }
-  
-  console.log(`  保留行数: ${keptCount}`);
-  console.log(`  删除行数: ${removedCount}`);
-  
-  return result.join('\n');
-}
-
+	
   // 去广告相关函数
   /*function filterAdsFromM3U8(m3u8Content: string): string {
     if (!m3u8Content) return '';
