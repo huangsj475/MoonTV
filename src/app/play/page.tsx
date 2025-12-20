@@ -583,7 +583,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     extinfLine: number;  // #EXTINF行号
     tsLine: number;      // ts文件行号
     name: string;       // 文件名（不含.ts）
-    num: number | null; // 提取的数字
+    num: number | -1; // 提取的数字
   }> = [];
 
   // 1. 条件1：检查所有ts文件名数字是否连续递增
@@ -651,7 +651,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  for (let i = 0; i < allTsInfo.length; i++) {
 		  const num = numbers[i];
 		  
-		if (num === null || num > 100000) {
+		if (num === -1 || num > 100000) {
       linesToRemove.add(tsInfo.extinfLine);
       linesToRemove.add(tsInfo.tsLine);
 		}
@@ -741,10 +741,10 @@ function filterAdsFromM3U8(m3u8Content: string): string {
  return buildResult(lines, linesToRemove);
 }
 
-function extractTsNumber(name: string): number | null {
+function extractTsNumber(name: string): number | -1 {
   // 先检查是否是纯hash格式（32位十六进制）
   if (/^[0-9a-f]{32}$/i.test(name)) {
-    return null;
+    return -1;
   }
   // 检查是否是纯数字
   if (/^\d+$/.test(name)) {
@@ -759,7 +759,7 @@ function extractTsNumber(name: string): number | null {
     return num;
   }
   
-  return null;
+  return -1;
 }
 function buildResult(lines: string[], linesToRemove: Set<number>): string {
   const result: string[] = [];
