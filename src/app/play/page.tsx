@@ -572,8 +572,241 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     }
   };
 
+	// 新版去广告函数
+function filterAdsFromM3U8(m3u8Content: string): string {
+  if (!m3u8Content) return '';
+  
+  const lines = m3u8Content.split('\n');
+  const linesToRemove = new Set<number>();
+  
+  // 收集所有ts文件信息（包含行号）
+  const allTsInfo: Array<{
+    extinfLine: number;  // #EXTINF行号
+    tsLine: number;      // ts文件行号
+    name: string;       // 文件名（不含.ts）
+    num: number; // 提取的数字
+  }> = [];
+
+  // 1. 条件1：检查所有ts文件名数字是否连续递增
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('#EXTINF:')) {
+      if (i + 1 < lines.length) {
+        const tsLine = lines[i + 1].trim();
+        if (tsLine.endsWith('.ts')) {
+          const name = tsLine.replace('.ts', '');
+          const num = extractTsNumber(name);
+          
+          allTsInfo.push({
+            extinfLine: i,      // #EXTINF行
+            tsLine: i + 1,      // ts文件行
+            name: name,
+            num: num
+          });
+          i++; // 跳过ts行
+        }
+      }
+    }
+  }
+  
+  console.log(`共找到 ${allTsInfo.length} 个ts文件`);
+  
+  // 条件1：检查ts文件名数字是否连续递增
+  console.log('检查条件1：ts文件名数字是否连续递增...');
+  
+  if (allTsInfo.length >= 2) {
+  
+      const numbers = allTsInfo.map(info => info.num!);
+	  //const names = allTsInfo.map(info => info.name!);
+      //console.log(`数字序列: [${numbers.join(', ')}]`);
+	  //console.log(`ts名序列: [${names.join(', ')}]`);
+      
+      // 检查是否递增（每个数字都比前一个大）只看前5个是否是连续即可
+      let isIncreasing = true;
+      for (let i = 1; i < 6; i++) {
+        if (numbers[i] <= numbers[i-1]) {
+          isIncreasing = false;
+          console.log(`不递增: ${numbers[i-1]} -> ${numbers[i]}`);
+          break;
+        }
+      }
+      
+	if (isIncreasing) {
+	  console.log('√ 条件1触发：ts文件名数字递增');
+	  console.log('删除不连续的ts文件和所有 discontinuity 标签...');
+	  
+	  // 1. 删除所有 #EXT-X-DISCONTINUITY 标签
+		let totaldiscontinuity = 0;
+	  for (let i = 0; i < lines.length; i++) {
+	    if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
+	      linesToRemove.add(i);
+		  totaldiscontinuity++;
+	    }
+	  }
+		if (totaldiscontinuity > 0) {
+		  console.log(`✓ 总计删除了 ${totaldiscontinuity} 个 discontinuity 标签`);
+		} else {
+		  console.log('× 未找到 discontinuity 标签');
+		}
+	  // 2. 删除不连续的ts文件块
+	  // 找到所有不连续的段落
+		const removedFiles: string[] = [];
+	  for (let i = 1; i < numbers.length; i++) {
+		  const num = numbers[i];
+		  
+		if (num === 0 || num > 100000) {
+			const tsInfo = allTsInfo[i];
+      linesToRemove.add(tsInfo.extinfLine);
+      linesToRemove.add(tsInfo.tsLine);
+	  removedFiles.push(`${tsInfo.name}.ts (行${tsInfo.tsLine + 1}, 数字: ${num})`);
+		}
+	  }
+        if (removedFiles.length > 0) {
+          console.log('删除的异常ts文件:');
+          removedFiles.forEach(file => console.log(` - ${file}`));
+        } else {
+          console.log('没有发现异常的ts文件');
+        }
+	  
+	  console.log('条件1完成，返回过滤结果');
+	  return buildResult(lines, linesToRemove);
+	} else {
+        console.log('× 条件1不满足：ts文件名数字不递增');
+      }
+     
+  } else {
+    console.log('× 条件1不满足：ts文件少于2个');
+  }
+  
+  console.log('× 条件1不满足，执行条件2...');
+  
+  // 2. 条件2：按discontinuity分组检查ts数量
+    // 定义类型
+  type Section = {
+    start: number;
+    count: number;
+    lines: number[];
+  };
+  const sections: Section[] = [];
+  let currentSection: Section | null = null;
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    
+    if (line === '#EXT-X-DISCONTINUITY') {
+      if (currentSection) {
+        sections.push(currentSection);
+      }
+      currentSection = {
+        start: i,
+        count: 0,
+        lines: [i] // 包含discontinuity标签行
+      };
+    } else if (currentSection && line.startsWith('#EXTINF:')) {
+      currentSection.count++;
+      currentSection.lines.push(i); // EXTINF行
+      
+      if (i + 1 < lines.length && lines[i + 1].trim().endsWith('.ts')) {
+        currentSection.lines.push(i + 1); // ts文件行
+        i++;
+      }
+    }
+  }
+  
+  if (currentSection) {
+    sections.push(currentSection);
+  }
+  
+  console.log(`找到 ${sections.length} 个discontinuity段`);
+  /*sections.forEach((section, idx) => {
+    console.log(`段 ${idx + 1}: ${section.count}个ts文件`);
+  });*/
+  
+  
+  if (sections.length > 1) {
+    const counts = sections.map(s => s.count);
+    const maxCount = Math.max(...counts);
+    console.log(`最大ts数量: ${maxCount}`);
+
+	  // 分别存储正常段和广告段信息
+	  const normalSections: Array<{index: number, section: Section}> = [];
+	  const adSections: Array<{index: number, section: Section}> = [];
+    // 找出广告段
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+
+      // 广告段判断：ts数量少于10且小于最大值的1/5
+      if (section.count < 10 && section.count < maxCount / 5) {
+		  adSections.push({index: i + 1, section});
+        //console.log(`√ 段 ${i + 1} 是广告段: ${section.count}个ts`);
+        // 删除整个广告段
+        section.lines.forEach((lineNum: number) => {
+          linesToRemove.add(lineNum);
+        });
+      } else {
+		  normalSections.push({index: i + 1, section});
+        //console.log(`× 段 ${i + 1} 是正常段: ${section.count}个ts`);
+        // 正常段只删除discontinuity标签
+        linesToRemove.add(section.start);
+      }
+    }
+		    // 输出正常段
+	  if (normalSections.length > 0) {
+	  const normalList = normalSections.map(item => `段${item.index}:${item.section.count}个ts`).join(', ');
+	  console.log(`${normalSections.length}个正常段: [${normalList}]`);
+	  }
+	  // 输出广告段
+	  if (adSections.length > 0) {
+	  const adList = adSections.map(item => `段${item.index}:${item.section.count}个ts`).join(', ');
+	  console.log(`${adSections.length}个广告段: [${adList}]`);
+	  }
+  } else if (sections.length === 1) {
+    console.log('只有一个段，只删除discontinuity标签');
+    linesToRemove.add(sections[0].start);
+  }
+ return buildResult(lines, linesToRemove);
+}
+
+function extractTsNumber(name: string): number {
+  // 先检查是否是纯hash格式（32位十六进制）
+  if (/^[0-9a-f]{32}$/i.test(name)) {
+    return 0;
+  }
+  // 检查是否是纯数字
+  if (/^\d+$/.test(name)) {
+    const num = parseInt(name, 10);
+    return num;
+  }
+  // 对于包含字母和数字的混合文件名
+  // 策略：优先找末尾的连续数字
+  const endDigits = name.match(/(\d+)$/);
+  if (endDigits) {
+    const num = parseInt(endDigits[1], 10);
+    return num;
+  }
+  
+  return 0;
+}
+function buildResult(lines: string[], linesToRemove: Set<number>): string {
+  const result: string[] = [];
+  let keptCount = 0;
+  let removedCount = 0;
+  
+  for (let i = 0; i < lines.length; i++) {
+    if (!linesToRemove.has(i)) {
+      result.push(lines[i]);
+      keptCount++;
+    } else {
+      removedCount++;
+    }
+  }
+  
+  console.log(`原始行数: ${lines.length}, 保留行数: ${keptCount}, 删除行数: ${removedCount}`);
+  return result.join('\n');
+}
+	
   // 去广告相关函数
-  function filterAdsFromM3U8(m3u8Content: string): string {
+  /*function filterAdsFromM3U8(m3u8Content: string): string {
     if (!m3u8Content) return '';
 
     // 按行分割M3U8内容
@@ -589,7 +822,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       }	  
     }
     return filteredLines.join('\n');
-  }
+  }*/
 
   // 跳过片头片尾配置相关函数
   const handleSkipConfigChange = async (newConfig: {
