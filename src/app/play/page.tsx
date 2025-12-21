@@ -1154,6 +1154,7 @@ useEffect(() => {
       
       if (typeof artPlayerRef.current.destroy === 'function') {
         artPlayerRef.current.destroy();
+		artPlayerRef.current = null;
 		console.log('播放进度已保存后---播放器销毁');
       }
     }
