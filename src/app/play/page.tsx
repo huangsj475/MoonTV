@@ -648,8 +648,6 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  
 	  // 2. 删除不连续的ts文件块
 	  // 找到所有不连续的段落
-	  let inDiscontinuousBlock = false;
-	  let blockStartIndex = -1;
 	  
 	  for (let i = 1; i < numbers.length; i++) {
 		  const num = numbers[i];
