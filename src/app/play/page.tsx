@@ -616,9 +616,9 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   if (allTsInfo.length >= 2) {
   
       const numbers = allTsInfo.map(info => info.num!);
-	  const names = allTsInfo.map(info => info.name!);
-      console.log(`数字序列: [${numbers.join(', ')}]`);
-	  console.log(`ts名序列: [${names.join(', ')}]`);
+	  //const names = allTsInfo.map(info => info.name!);
+      //console.log(`数字序列: [${numbers.join(', ')}]`);
+	  //console.log(`ts名序列: [${names.join(', ')}]`);
       
       // 检查是否递增（每个数字都比前一个大）只看前5个是否是连续即可
       let isIncreasing = true;
@@ -717,33 +717,54 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   }
   
   console.log(`找到 ${sections.length} 个discontinuity段`);
-  sections.forEach((section, idx) => {
+  /*sections.forEach((section, idx) => {
     console.log(`段 ${idx + 1}: ${section.count}个ts文件`);
-  });
+  });*/
   
   
   if (sections.length > 1) {
     const counts = sections.map(s => s.count);
     const maxCount = Math.max(...counts);
     console.log(`最大ts数量: ${maxCount}`);
-    
+
+	  // 分别存储正常段和广告段信息
+	  const normalSections: Array<{index: number, section: Section}> = [];
+	  const adSections: Array<{index: number, section: Section}> = [];
     // 找出广告段
     for (let i = 0; i < sections.length; i++) {
       const section = sections[i];
-      
+
       // 广告段判断：ts数量少于10且小于最大值的1/5
       if (section.count < 10 && section.count < maxCount / 5) {
-        console.log(`√ 段 ${i + 1} 是广告段: ${section.count}个ts`);
+		  adSections.push({index: i + 1, section});
+        //console.log(`√ 段 ${i + 1} 是广告段: ${section.count}个ts`);
         // 删除整个广告段
         section.lines.forEach((lineNum: number) => {
           linesToRemove.add(lineNum);
         });
       } else {
-        console.log(`× 段 ${i + 1} 是正常段: ${section.count}个ts`);
+		  normalSections.push({index: i + 1, section});
+        //console.log(`× 段 ${i + 1} 是正常段: ${section.count}个ts`);
         // 正常段只删除discontinuity标签
         linesToRemove.add(section.start);
       }
     }
+		    // 输出正常段
+	  if (normalSections.length > 0) {
+	    console.log('======== 正常段 ========');
+	    normalSections.forEach(item => {
+	      console.log(`段 ${item.index}: ${item.section.count}个ts`);
+	    });
+	    console.log(`总计: ${normalSections.length}个正常段`);
+	  }
+	  // 输出广告段
+	  if (adSections.length > 0) {
+	    console.log('======== 广告段 ========');
+	    adSections.forEach(item => {
+	      console.log(`段 ${item.index}: ${item.section.count}个ts`);
+	    });
+	    console.log(`总计: ${adSections.length}个广告段`);
+	  }
   } else if (sections.length === 1) {
     console.log('只有一个段，只删除discontinuity标签');
     linesToRemove.add(sections[0].start);
