@@ -583,7 +583,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     extinfLine: number;  // #EXTINF行号
     tsLine: number;      // ts文件行号
     name: string;       // 文件名（不含.ts）
-    num: number; // 提取的数字
+    num: number | null; // 提取的数字
   }> = [];
 
   // 1. 条件1：检查所有ts文件名数字是否连续递增
@@ -620,9 +620,10 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   console.log('\n检查条件1：ts文件名数字是否连续递增...');
   
   if (allTsInfo.length >= 2) {
-    // 检查是否所有ts都有数字
-    const numbers = allTsInfo.every(info => info.num!== null);
-	
+  
+      const numbers = allTsInfo.map(info => info.num!);
+      console.log(`数字序列: [${numbers.join(', ')}]`);
+      
       // 检查是否递增（每个数字都比前一个大）只看前5个是否是连续即可
       let isIncreasing = true;
       for (let i = 1; i < 6; i++) {
@@ -647,23 +648,25 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  
 	  // 2. 删除不连续的ts文件块
 	  // 找到所有不连续的段落
-
-	  for (let i = 0; i < allTsInfo.length; i++) {
+	  let inDiscontinuousBlock = false;
+	  let blockStartIndex = -1;
+	  
+	  for (let i = 1; i < numbers.length; i++) {
 		  const num = numbers[i];
 		  
-		if (num === 0 || num > 100000) {
+		if (num === null || num > 100000) {
       linesToRemove.add(tsInfo.extinfLine);
       linesToRemove.add(tsInfo.tsLine);
 		}
-
 	  }
 	  
 	  console.log('条件1完成，返回过滤结果');
 	  return buildResult(lines, linesToRemove);
-		} else {
+	} else {
         console.log('× 条件1不满足：ts文件名数字不递增');
-		}
-    } else {
+      }
+     
+  } else {
     console.log('× 条件1不满足：ts文件少于2个');
   }
   
