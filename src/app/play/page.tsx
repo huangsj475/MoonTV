@@ -648,15 +648,23 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  
 	  // 2. 删除不连续的ts文件块
 	  // 找到所有不连续的段落
-	  
+		const removedFiles: string[] = [];
 	  for (let i = 1; i < numbers.length; i++) {
 		  const num = numbers[i];
 		  
 		if (num === null || num > 100000) {
+			const tsInfo = allTsInfo[i];
       linesToRemove.add(tsInfo.extinfLine);
       linesToRemove.add(tsInfo.tsLine);
+	  removedFiles.push(`${tsInfo.name}.ts (行${tsInfo.tsLine + 1}, 数字: ${num})`);
 		}
 	  }
+        if (removedFiles.length > 0) {
+          console.log('\n删除的异常ts文件:');
+          removedFiles.forEach(file => console.log(`  - ${file}`));
+        } else {
+          console.log('没有发现异常的ts文件');
+        }
 	  
 	  console.log('条件1完成，返回过滤结果');
 	  return buildResult(lines, linesToRemove);
