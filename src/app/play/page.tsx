@@ -583,14 +583,10 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     extinfLine: number;  // #EXTINF行号
     tsLine: number;      // ts文件行号
     name: string;       // 文件名（不含.ts）
-    num: number | null; // 提取的数字
+    num: number; // 提取的数字
   }> = [];
 
   // 1. 条件1：检查所有ts文件名数字是否连续递增
-  console.log('检查条件1...');
-
-  
-  console.log('收集所有ts文件信息...');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
     if (line.startsWith('#EXTINF:')) {
@@ -599,8 +595,6 @@ function filterAdsFromM3U8(m3u8Content: string): string {
         if (tsLine.endsWith('.ts')) {
           const name = tsLine.replace('.ts', '');
           const num = extractTsNumber(name);
-          
-          console.log(`  ts${allTsInfo.length + 1}: ${name}.ts (行${i+2}), 数字: ${num}`);
           
           allTsInfo.push({
             extinfLine: i,      // #EXTINF行
@@ -617,12 +611,14 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   console.log(`共找到 ${allTsInfo.length} 个ts文件`);
   
   // 条件1：检查ts文件名数字是否连续递增
-  console.log('\n检查条件1：ts文件名数字是否连续递增...');
+  console.log('检查条件1：ts文件名数字是否连续递增...');
   
   if (allTsInfo.length >= 2) {
   
       const numbers = allTsInfo.map(info => info.num!);
+	  const names = allTsInfo.map(info => info.name!);
       console.log(`数字序列: [${numbers.join(', ')}]`);
+	  console.log(`ts名序列: [${names.join(', ')}]`);
       
       // 检查是否递增（每个数字都比前一个大）只看前5个是否是连续即可
       let isIncreasing = true;
@@ -639,20 +635,25 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 	  console.log('删除不连续的ts文件和所有 discontinuity 标签...');
 	  
 	  // 1. 删除所有 #EXT-X-DISCONTINUITY 标签
+		let totaldiscontinuity = 0;
 	  for (let i = 0; i < lines.length; i++) {
 	    if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
 	      linesToRemove.add(i);
-	      console.log(`  删除 discontinuity 标签 (行 ${i + 1})`);
+		  totaldiscontinuity++;
 	    }
 	  }
-	  
+		if (totaldiscontinuity > 0) {
+		  console.log(`✓ 总计删除了 ${totaldiscontinuity} 个 discontinuity 标签`);
+		} else {
+		  console.log('× 未找到 discontinuity 标签');
+		}
 	  // 2. 删除不连续的ts文件块
 	  // 找到所有不连续的段落
 		const removedFiles: string[] = [];
 	  for (let i = 1; i < numbers.length; i++) {
 		  const num = numbers[i];
 		  
-		if (num === null || num > 100000) {
+		if (num === 0 || num > 100000) {
 			const tsInfo = allTsInfo[i];
       linesToRemove.add(tsInfo.extinfLine);
       linesToRemove.add(tsInfo.tsLine);
@@ -660,8 +661,8 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 		}
 	  }
         if (removedFiles.length > 0) {
-          console.log('\n删除的异常ts文件:');
-          removedFiles.forEach(file => console.log(`  - ${file}`));
+          console.log('删除的异常ts文件:');
+          removedFiles.forEach(file => console.log(` - ${file}`));
         } else {
           console.log('没有发现异常的ts文件');
         }
