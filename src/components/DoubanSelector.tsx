@@ -512,7 +512,8 @@ const DoubanSelector: React.FC<DoubanSelectorProps> = ({
               {renderCapsuleSelector(
                 animePrimaryOptions,
                 primarySelection || animePrimaryOptions[0].value,
-                onPrimaryChange
+                onPrimaryChange,
+                true
               )}
             </div>
           </div>
