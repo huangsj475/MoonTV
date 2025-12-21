@@ -1424,6 +1424,7 @@ useEffect(() => {
 
 	      // 切换视频后重置跳过状态
 	skipIntroProcessedRef.current = false;
+	  levelSwitchCountRef.current = 0;
 	  
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
    if (!isWebkit && artPlayerRef.current) {
@@ -1602,10 +1603,7 @@ useEffect(() => {
 				videoReadyRef.current = true;
 				console.log('第二次切换，状态',videoReadyRef.current);
 			  }
-				 setTimeout(() => {
-			      levelSwitchCountRef.current = 0;
-			    }, 5000);
-				 
+				
 			  });
 	
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
