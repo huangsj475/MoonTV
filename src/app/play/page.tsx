@@ -751,19 +751,13 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     }
 		    // 输出正常段
 	  if (normalSections.length > 0) {
-	    console.log('======== 正常段 ========');
-	    normalSections.forEach(item => {
-	      console.log(`段 ${item.index}: ${item.section.count}个ts`);
-	    });
-	    console.log(`总计: ${normalSections.length}个正常段`);
+	  const normalList = normalSections.map(item => `段${item.index}:${item.section.count}个ts`).join(', ');
+	  console.log(`${normalSections.length}个正常段: [${normalList}]`);
 	  }
 	  // 输出广告段
 	  if (adSections.length > 0) {
-	    console.log('======== 广告段 ========');
-	    adSections.forEach(item => {
-	      console.log(`段 ${item.index}: ${item.section.count}个ts`);
-	    });
-	    console.log(`总计: ${adSections.length}个广告段`);
+	  const adList = adSections.map(item => `段${item.index}:${item.section.count}个ts`).join(', ');
+	  console.log(`${adSections.length}个广告段: [${adList}]`);
 	  }
   } else if (sections.length === 1) {
     console.log('只有一个段，只删除discontinuity标签');
