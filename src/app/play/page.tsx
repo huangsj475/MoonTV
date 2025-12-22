@@ -1146,35 +1146,11 @@ useEffect(() => {
       saveCurrentPlayProgress();
 	  console.log('播放器销毁前---播放进度已保存');
 
-		  try {
-		    // 1. 先获取所有需要的引用到局部变量
-		    const player = artPlayerRef.current;
-		    const videoElement = player.video as HTMLVideoElement;
-		    
-		    // 2. 检查并清理 HLS
-		    if (videoElement?.hls) {
-		      const hlsInstance = videoElement.hls;
-		      hlsInstance.destroy();
-		      delete videoElement.hls;  // 现在安全了
-		      console.log('已清理 video 元素的 hls 引用');
-		    }
-		    
-		    // 3. 清理 Artplayer 实例上的引用
-		    if (player.hls) {
-		      player.hls.destroy();
-		      delete player.hls;
-		      console.log('已清理 Artplayer 实例的 hls 引用');
-		    }
-		    
-		  } catch (error) {
-		    console.error('HLS 清理过程中发生错误:', error);
-		  }
-		
-      /*if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
+      if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
         artPlayerRef.current.video.hls.destroy();
 		delete artPlayerRef.current.video.hls;
 		console.log('播放进度已保存后---播放器视频流hls销毁');
-      }*/
+      }
       
       if (typeof artPlayerRef.current.destroy === 'function') {
         artPlayerRef.current.destroy();
