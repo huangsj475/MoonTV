@@ -1797,7 +1797,7 @@ useEffect(() => {
               
             if (video.hls) {
               video.hls.destroy();
-			  video.hls = null;
+			  delete video.hls;
             }
             
             const hls = new Hls({
