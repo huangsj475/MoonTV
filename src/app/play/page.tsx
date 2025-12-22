@@ -1148,7 +1148,6 @@ useEffect(() => {
 
       if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
         artPlayerRef.current.video.hls.destroy();
-		delete artPlayerRef.current.video.hls;
 		console.log('播放进度已保存后---播放器视频流hls销毁');
       }
       
