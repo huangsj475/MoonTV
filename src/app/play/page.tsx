@@ -1797,6 +1797,7 @@ useEffect(() => {
               
             if (video.hls) {
               video.hls.destroy();
+			  video.hls = null;
             }
             
             const hls = new Hls({
@@ -2098,7 +2099,7 @@ useEffect(() => {
     
     // 设置检查间隔
     let checkCount = 0;
-    const maxChecks = 15; // 最多检查50次（5秒）
+    const maxChecks = 14; // 最多检查50次（5秒）
     const checkInterval = 100; // 每100ms检查一次
     
     const intervalId = setInterval(() => {
