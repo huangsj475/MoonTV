@@ -55,6 +55,7 @@ function PlayPageClient() {
   //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载hls会初始化，加载2次hls，导致恢复进度后被重置
   const levelSwitchCountRef = useRef(0);
+  
 
 
   // 收藏状态
@@ -308,7 +309,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     useState(false);
 
   // 换源加载状态
-  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [videoLoadingStage, setVideoLoadingStage] = useState<
     'initing' | 'sourceChanging'
   >('initing');
@@ -981,7 +982,7 @@ function buildResult(lines: string[], linesToRemove: Set<number>): string {
   // 当集数索引变化时自动更新视频地址
   useEffect(() => {
     updateVideoUrl(detail, currentEpisodeIndex);
-	  
+	  videoReadyRef.current = true;//切换集数可以立即恢复进度
   }, [detail, currentEpisodeIndex]);
 
   // 进入页面时直接获取全部源信息
@@ -1328,7 +1329,7 @@ useEffect(() => {
     } else {
       resumeTimeRef.current = 0;
     }
-	videoReadyRef.current = true;//切换集数可以立即恢复进度
+	
     setCurrentEpisodeIndex(episodeindexNumber);
   }
 };
