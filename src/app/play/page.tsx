@@ -1503,10 +1503,18 @@ useEffect(() => {
   };
 
       useEffect(() => {
-    // 页面即将卸载时保存播放进度
+    // 页面即将卸载时保存播放进度(刷新)
     const handleBeforeUnload = () => {
       saveCurrentPlayProgress();
 	  console.log('页面即将卸载时---播放进度已保存');
+    if (artPlayerRef.current) {
+      if (artPlayerRef.current.video && artPlayerRef.current.video.hls) {
+        artPlayerRef.current.video.hls.destroy();
+      }
+      // 销毁播放器实例
+      //artPlayerRef.current.destroy();
+      //artPlayerRef.current = null;
+    }
     };
 
  
