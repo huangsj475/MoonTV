@@ -1866,10 +1866,12 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
+					artPlayerRef.current?.notice.show = '网络错误，尝试恢复...';
                     hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
+					artPlayerRef.current?.notice.show = '媒体错误，尝试恢复...';
                     hls.recoverMediaError();
                     break;
                   default:
