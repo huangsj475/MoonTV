@@ -308,7 +308,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     useState(false);
 
   // 换源加载状态
-  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
   const [videoLoadingStage, setVideoLoadingStage] = useState<
     'initing' | 'sourceChanging'
   >('initing');
@@ -1328,7 +1328,7 @@ useEffect(() => {
     } else {
       resumeTimeRef.current = 0;
     }
-
+	videoReadyRef.current = true;//切换集数可以立即恢复进度
     setCurrentEpisodeIndex(episodeindexNumber);
   }
 };
