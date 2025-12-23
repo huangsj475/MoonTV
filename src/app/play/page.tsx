@@ -982,7 +982,7 @@ function buildResult(lines: string[], linesToRemove: Set<number>): string {
   // 当集数索引变化时自动更新视频地址
   useEffect(() => {
     updateVideoUrl(detail, currentEpisodeIndex);
-	  videoReadyRef.current = true;//切换集数可以立即恢复进度
+	  
   }, [detail, currentEpisodeIndex]);
 
   // 进入页面时直接获取全部源信息
@@ -1329,7 +1329,7 @@ useEffect(() => {
     } else {
       resumeTimeRef.current = 0;
     }
-	
+	videoReadyRef.current = true;//切换集数可以立即恢复进度
     setCurrentEpisodeIndex(episodeindexNumber);
   }
 };
@@ -1342,6 +1342,7 @@ useEffect(() => {
         saveCurrentPlayProgress();
 		console.log('上一集---播放进度已保存');
       }*/
+	  videoReadyRef.current = true;//切换集数可以立即恢复进度
       setCurrentEpisodeIndex(idx - 1);
     }
   };
@@ -1354,7 +1355,7 @@ useEffect(() => {
         saveCurrentPlayProgress();
 		console.log('下一集---播放进度已保存');
       }*/
-
+	  videoReadyRef.current = true;//切换集数可以立即恢复进度
       setCurrentEpisodeIndex(idx + 1);
     }
   };
