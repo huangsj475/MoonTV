@@ -1839,7 +1839,7 @@ useEffect(() => {
 			    setTimeout(() => {
 			      videoReadyRef.current = true;
 				  console.log('第一次切换，延迟后状态',videoReadyRef.current);
-			    }, 1100);
+			    }, 900);
 			  }
 			  // 如果是第二次及以后的切换
 			  if (levelSwitchCountRef.current >= 2) {
@@ -1866,12 +1866,16 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
-					artPlayerRef.current?.notice.show = '网络错误，尝试恢复...';
+					  if (artPlayerRef.current) {
+					    artPlayerRef.current.notice.show = '网络错误，尝试恢复...';
+					  }
                     hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
-					artPlayerRef.current?.notice.show = '媒体错误，尝试恢复...';
+					  if (artPlayerRef.current) {
+					    artPlayerRef.current.notice.show = '媒体错误，尝试恢复...';
+					  }
                     hls.recoverMediaError();
                     break;
                   default:
