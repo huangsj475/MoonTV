@@ -1650,7 +1650,6 @@ useEffect(() => {
     console.log(videoUrl);
 	  //视频播放前设置正在切换状态，否则播放器会自动触发暂停，然后保存进度
     isChangingEpisodeRef.current = true;
-    videoReadyRef.current = false;
   
     // 检测是否为WebKit浏览器
     const isWebkit =
@@ -2111,6 +2110,7 @@ useEffect(() => {
         console.log(`第${checkCount}次检查：质量已稳定`);
         clearInterval(intervalId);
         executeProgressRestoration();
+		videoReadyRef.current = false;
         return;
       }
       
@@ -2118,8 +2118,8 @@ useEffect(() => {
       if (checkCount >= maxChecks) {
         console.warn(`超过${maxChecks}次检查，强制恢复`);
         clearInterval(intervalId);
-        videoReadyRef.current = true; // 强制标记为已准备
         executeProgressRestoration();
+		videoReadyRef.current = false;
         return;
       }
     }, checkInterval);
@@ -2134,7 +2134,7 @@ useEffect(() => {
   
   // 如果质量已经准备好，直接执行恢复逻辑
   executeProgressRestoration();
-  
+  videoReadyRef.current = false;
   // ============ 恢复进度函数 ============
   function executeProgressRestoration() {
     const currentTime = artPlayerRef.current.currentTime || 0;
