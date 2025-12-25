@@ -1866,11 +1866,11 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
-                    //hls.startLoad();
+                    hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
-                    //hls.recoverMediaError();
+                    hls.recoverMediaError();
                     break;
                   default:
                     console.log('无法恢复的错误');
@@ -2085,12 +2085,8 @@ useEffect(() => {
   // 隐藏加载状态，显示播放器
   setIsVideoLoading(false);
 
-  const currentTime = artPlayerRef.current.currentTime || 0;
-  const duration = artPlayerRef.current.duration || 0;
-
   const resumeTime = resumeTimeRef.current;
   const skipEnabled = skipConfigRef.current.enable;
-  const introTime = skipConfigRef.current.intro_time;
 	//如果已经跳过开头或者恢复进度，停止跳过，避免用户想回看片头，又跳过开头
 	if (skipIntroProcessedRef.current) {
 		return;
@@ -2147,10 +2143,14 @@ useEffect(() => {
   function executeProgressRestoration() {
     const currentTime = artPlayerRef.current.currentTime || 0;
     const duration = artPlayerRef.current.duration || 0;
-    const resumeTime = resumeTimeRef.current;
+    let resumeTime = resumeTimeRef.current;
     const skipEnabled = skipConfigRef.current.enable;
     const introTime = skipConfigRef.current.intro_time;
-
+						//如果恢复进度末尾的前2秒内，调整往前5秒，避免太靠后
+            if (duration && resumeTime >= duration - 2) {
+              resumeTime = Math.max(0, duration - 5);
+            }
+	  
     // ============= 处理跳过片头逻辑 =============
 
     // 情况2：恢复进度存在，跳过开启
