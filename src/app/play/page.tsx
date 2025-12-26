@@ -1750,7 +1750,7 @@ useEffect(() => {
       html: `<div id="artplayer-title-layer" style="
         position: absolute;
         top: 8px;
-        left: 70px;
+        left: 75px;
         width: 100%;
         font-size: 1rem;
         font-weight: bold;
