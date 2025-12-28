@@ -1817,7 +1817,7 @@ useEffect(() => {
               /* 缓冲/内存相关 */
               maxBufferLength: 40, // 向前缓存=这个值-backBufferLength，过大容易导致高延迟
               backBufferLength: 10, // 仅保留 20s 已播放内容，避免内存占用
-              maxBufferSize: 70 * 1000 * 1000, // 约 60MB，超出后触发清理
+              maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 60,//绝对的最大允许缓冲区长度
 
@@ -1852,24 +1852,32 @@ useEffect(() => {
             hls.on(Hls.Events.ERROR, function (event: any, data: any) {
 				// 无论是否致命错误，都尝试隐藏加载蒙层
 				  setIsVideoLoading(false);
-				//hls 全局错误提示
-			    if (typeof window !== 'undefined') {
-			      window.dispatchEvent(
-			        new CustomEvent('globalError', {
-			          detail: { message: '网络延迟或加载错误'},
-			        })
-			      );
-			    }
 
               console.error('HLS Error:', event, data);
               if (data.fatal) {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
+					//hls 全局错误提示
+				    if (typeof window !== 'undefined') {
+				      window.dispatchEvent(
+				        new CustomEvent('globalError', {
+				          detail: { message: '网络延迟'},
+				        })
+				      );
+				    }
                     hls.startLoad();
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
+					//hls 全局错误提示
+				    if (typeof window !== 'undefined') {
+				      window.dispatchEvent(
+				        new CustomEvent('globalError', {
+				          detail: { message: '视频错误，尝试恢复...'},
+				        })
+				      );
+				    }
                     hls.recoverMediaError();
                     break;
                   default:
