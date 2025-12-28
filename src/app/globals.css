@@ -212,3 +212,14 @@ div[data-media-provider] video {
     margin-left: 8px !important;
   }
 }
+/* 播放器进度条样式 */
+.art-progress .art-progress-handle {
+  width: 3px !important;
+  height: 16px !important;
+  border-radius: 1.5px !important;
+  background: white !important;
+}
+/* 让缓冲进度更明显 */
+.art-progress .art-progress-buffered {
+  background: rgba(255, 255, 255, 0.4) !important;
+}
