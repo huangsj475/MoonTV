@@ -213,13 +213,13 @@ div[data-media-provider] video {
   }
 }
 /* 播放器进度条样式 */
-.art-progress .art-progress-handle {
+.art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-indicator {
   width: 3px !important;
   height: 16px !important;
   border-radius: 1.5px !important;
   background: white !important;
 }
 /* 让缓冲进度更明显 */
-.art-progress .art-progress-buffered {
+.art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-loaded {
   background: rgba(255, 255, 255, 0.4) !important;
 }
