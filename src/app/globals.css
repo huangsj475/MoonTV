@@ -212,14 +212,15 @@ div[data-media-provider] video {
     margin-left: 8px !important;
   }
 }
-/* 播放器进度条样式 */
+/* 播放器进度条滑块样式-竖线 */
 .art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-indicator {
   width: 3px !important;
-  height: 16px !important;
+  height: 14px !important;
   border-radius: 1.5px !important;
   background: white !important;
+  margin-left: -1.5px !important;
 }
 /* 让缓冲进度更明显 */
 .art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-loaded {
-  background: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
 }
