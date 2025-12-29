@@ -393,10 +393,7 @@ function SearchPageClient() {
       }
 
       if (currentFluidSearch) {
-		  if (trimmed === currentQueryRef.current) {
-		    // 相同查询，保持现有结果
-		    return;
-		  }
+
         // 流式搜索：打开新的流式连接
         const es = new EventSource(`/api/search/ws?q=${encodeURIComponent(trimmed)}`);
         eventSourceRef.current = es;
