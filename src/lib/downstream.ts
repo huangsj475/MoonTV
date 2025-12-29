@@ -91,7 +91,7 @@ export async function searchFromApi(
 
       const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
       const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
-	  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks); 
+	  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks)?.replace(/-[()【】]/g, '') || ''; 
       return {
         id: String(decodeUnicodeIfNeeded(item.vod_id)),
         title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
@@ -170,7 +170,7 @@ export async function searchFromApi(
 
               const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
               const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
-			  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks); 
+			  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks)?.replace(/-[()【】]/g, '') || ''; 
               return {
                 id: String(decodeUnicodeIfNeeded(item.vod_id)),
                 title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
