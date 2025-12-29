@@ -345,7 +345,7 @@ function SearchPageClient() {
 	const trimmed = query.trim();
 
     if (trimmed) {
-	  if (trimmed === currentQueryRef.current && searchResults.length > 0) {
+	  if (trimmed === currentQueryRef.current) {
 	    // 相同查询，保持现有结果
 	    // 确保显示结果
 	    if (!showResults) {
