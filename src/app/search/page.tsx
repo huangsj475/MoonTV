@@ -342,21 +342,8 @@ function SearchPageClient() {
     // 当搜索参数变化时更新搜索状态
     const query = searchParams.get('q') || '';
     
-	const trimmed = query.trim();
-
-    if (trimmed) {
-	    // 从 sessionStorage 获取上次搜索状态
-	    const lastSearch = sessionStorage.getItem('lastSearch');
-	    
-	    // 如果搜索过相同的查询，跳过
-	    if (lastSearch && lastSearch === trimmed) {
-	      setIsLoading(false);
-	      setShowResults(true);
-	        return;
-	    }
-	    // 记录本次搜索
-	    sessionStorage.setItem('lastSearch', trimmed);
-		
+    if (query) {
+	  const trimmed = query.trim();
 	  currentQueryRef.current = query.trim();
       setSearchQuery(query);
       // 新搜索：关闭旧连接并清空结果
