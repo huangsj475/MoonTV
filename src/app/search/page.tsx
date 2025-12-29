@@ -342,7 +342,19 @@ function SearchPageClient() {
     // 当搜索参数变化时更新搜索状态
     const query = searchParams.get('q') || '';
     currentQueryRef.current = query.trim();
-
+	const trimmed = query.trim();
+  if (trimmed && trimmed === currentQueryRef.current) {
+    // 相同查询，保持现有结果
+    // 确保显示结果
+    if (!showResults) {
+      setShowResults(true);
+    }
+    // 确保不在加载状态
+    if (isLoading) {
+      setIsLoading(false);
+    }
+    return;
+  }
     if (query) {
       setSearchQuery(query);
       // 新搜索：关闭旧连接并清空结果
@@ -362,7 +374,7 @@ function SearchPageClient() {
       setIsLoading(true);
       setShowResults(true);
 
-      const trimmed = query.trim();
+      
 
       // 每次搜索时重新读取设置，确保使用最新的配置
       let currentFluidSearch = useFluidSearch;
@@ -387,7 +399,7 @@ function SearchPageClient() {
           if (!event.data) return;
           try {
             const payload = JSON.parse(event.data);
-            if (currentQueryRef.current !== trimmed) return;
+            //if (currentQueryRef.current !== trimmed) return;
             switch (payload.type) {
               case 'start':
                 setTotalSources(payload.totalSources || 0);
