@@ -86,7 +86,7 @@ export async function searchFromApi(
         //link = link.substring(1); // 去掉开头的 $
         //const parenIndex = link.indexOf('(');
         //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
-		return link.replace(/[()【】]/g, ''); // 移除多种括号
+		return link.replace(/-[()【】]/g, ''); // 移除多种括号
       });
 
       const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
@@ -165,7 +165,7 @@ export async function searchFromApi(
                 //link = link.substring(1); // 去掉开头的 $
                 //const parenIndex = link.indexOf('(');
                 //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
-				return link.replace(/[()【】]/g, ''); // 移除多种括号
+				return link.replace(/-[()【】]/g, ''); // 移除多种括号
               });
 
               const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
@@ -332,7 +332,7 @@ async function handleSpecialSourceDetail(
     //link = link.substring(1); // 去掉开头的 $
     //const parenIndex = link.indexOf('(');
     //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
-	return link.replace(/[()【】]/g, ''); // 移除多种括号
+	return link.replace(/-[()【】]/g, ''); // 移除多种括号
   });
 
   // 提取标题
