@@ -341,21 +341,23 @@ function SearchPageClient() {
   useEffect(() => {
     // 当搜索参数变化时更新搜索状态
     const query = searchParams.get('q') || '';
-    currentQueryRef.current = query.trim();
+    
 	const trimmed = query.trim();
-  if (trimmed && trimmed === currentQueryRef.current) {
-    // 相同查询，保持现有结果
-    // 确保显示结果
-    if (!showResults) {
-      setShowResults(true);
-    }
-    // 确保不在加载状态
-    if (isLoading) {
-      setIsLoading(false);
-    }
-    return;
-  }
-    if (query) {
+
+    if (trimmed) {
+	  if (trimmed === currentQueryRef.current && searchResults.length > 0) {
+	    // 相同查询，保持现有结果
+	    // 确保显示结果
+	    if (!showResults) {
+	      setShowResults(true);
+	    }
+	    // 确保不在加载状态
+	    if (isLoading) {
+	      setIsLoading(false);
+	    }
+	    return;
+	  }
+	  currentQueryRef.current = query.trim();
       setSearchQuery(query);
       // 新搜索：关闭旧连接并清空结果
       if (eventSourceRef.current) {
