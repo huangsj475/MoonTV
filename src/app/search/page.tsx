@@ -345,18 +345,18 @@ function SearchPageClient() {
 	const trimmed = query.trim();
 
     if (trimmed) {
-	  if (trimmed === currentQueryRef.current) {
-	    // 相同查询，保持现有结果
-	    // 确保显示结果
-	    if (!showResults) {
-	      setShowResults(true);
-	    }
-	    // 确保不在加载状态
-	    if (isLoading) {
+	    // 从 sessionStorage 获取上次搜索状态
+	    const lastSearch = sessionStorage.getItem('lastSearch');
+	    
+	    // 如果搜索过相同的查询，跳过
+	    if (lastSearch && lastSearch === trimmed) {
 	      setIsLoading(false);
+	      setShowResults(true);
+	        return;
 	    }
-	    return;
-	  }
+	    // 记录本次搜索
+	    sessionStorage.setItem('lastSearch', trimmed);
+		
 	  currentQueryRef.current = query.trim();
       setSearchQuery(query);
       // 新搜索：关闭旧连接并清空结果
@@ -393,6 +393,10 @@ function SearchPageClient() {
       }
 
       if (currentFluidSearch) {
+		  if (trimmed === currentQueryRef.current) {
+		    // 相同查询，保持现有结果
+		    return;
+		  }
         // 流式搜索：打开新的流式连接
         const es = new EventSource(`/api/search/ws?q=${encodeURIComponent(trimmed)}`);
         eventSourceRef.current = es;
