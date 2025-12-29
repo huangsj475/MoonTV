@@ -222,5 +222,5 @@ div[data-media-provider] video {
 }
 /* 让缓冲进度更明显 */
 .art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-loaded {
-  background: rgba(255, 255, 255, 0.4) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
 }
