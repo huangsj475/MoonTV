@@ -1817,7 +1817,7 @@ useEffect(() => {
               /* 缓冲/内存相关 */
               maxBufferLength: 50, // 向前缓存=这个值-backBufferLength，过大容易导致高延迟
               backBufferLength: 20, // 仅保留 20s 已播放内容，避免内存占用
-              maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
+              maxBufferSize: 70 * 1000 * 1000, // 约 60MB，超出后触发清理
 
 			  maxMaxBufferLength: 70,//绝对的最大允许缓冲区长度
 
