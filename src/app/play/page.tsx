@@ -1861,7 +1861,7 @@ useEffect(() => {
 				    if (typeof window !== 'undefined') {
 				      window.dispatchEvent(
 				        new CustomEvent('globalError', {
-				          detail: { message: '网络延迟'},
+				          detail: { message: '网络错误，尝试恢复...'},
 				        })
 				      );
 				    }
