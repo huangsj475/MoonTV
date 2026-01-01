@@ -191,11 +191,9 @@ const extractEpisodeTitle = (
   }
   
   // 4. 其他情况（既不是剧也不是综艺，比如电影、动漫等）
-  // 选项A：显示原名称
-  return `${episodeName} - 第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
+  // 对于非剧非综艺也显示数字格式（比如电影只有1集）
+  return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
   
-  // 选项B：对于非剧非综艺也显示数字格式（比如电影只有1集）
-  // return `第 ${currentEpisodeIndex + 1}/${totalEpisodes} 集`;
 };
 	
   //------------手机端播放双击事件优化----------------
@@ -1750,7 +1748,7 @@ useEffect(() => {
       name: 'custom-title-layer',
       html: `<div id="artplayer-title-layer" style="
         position: absolute;
-        top: 8px;
+        top: 10px;
         left: 75px;
         width: 100%;
         font-size: 1rem;
@@ -1786,7 +1784,7 @@ useEffect(() => {
           text-shadow: 0 0 8px #000;
           pointer-events: none;
           z-index: 13;
-          padding: 4px 8px;
+          padding: 2px 5px;
           border-radius: 4px;
           background-color: rgba(0,0,0,0.3);
         "></div>
