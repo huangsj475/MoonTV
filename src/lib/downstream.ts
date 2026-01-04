@@ -86,12 +86,12 @@ export async function searchFromApi(
         //link = link.substring(1); // 去掉开头的 $
         //const parenIndex = link.indexOf('(');
         //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
-		return link.replace(/[()【】]/g, ''); // 移除多种括号
+		return link.replace(/[()【】.]/g, ''); // 移除多种括号
       });
 
       const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
       const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
-	  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks)?.replace(/[-()【】]/g, '') || ''; 
+	  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks)?.replace(/[-()【】.]/g, '') || ''; 
       return {
         id: String(decodeUnicodeIfNeeded(item.vod_id)),
         title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
@@ -165,12 +165,12 @@ export async function searchFromApi(
                 //link = link.substring(1); // 去掉开头的 $
                 //const parenIndex = link.indexOf('(');
                 //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
-				return link.replace(/[()【】]/g, ''); // 移除多种括号
+				return link.replace(/[()【】.]/g, ''); // 移除多种括号
               });
 
               const decodedYear = decodeUnicodeIfNeeded(item.vod_year);
               const decodedContent = decodeUnicodeIfNeeded(item.vod_content);
-			  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks)?.replace(/[-()【】]/g, '') || ''; 
+			  const decodedRemarks = decodeUnicodeIfNeeded(item.vod_remarks)?.replace(/[-()【】.]/g, '') || ''; 
               return {
                 id: String(decodeUnicodeIfNeeded(item.vod_id)),
                 title: decodeUnicodeIfNeeded(item.vod_name).trim().replace(/\s+/g, ' '),
@@ -332,7 +332,7 @@ async function handleSpecialSourceDetail(
     //link = link.substring(1); // 去掉开头的 $
     //const parenIndex = link.indexOf('(');
     //return parenIndex > 0 ? link.substring(0, parenIndex) : link;
-	return link.replace(/[()【】]/g, ''); // 移除多种括号
+	return link.replace(/[()【】.]/g, ''); // 移除多种括号
   });
 
   // 提取标题
