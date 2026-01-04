@@ -760,8 +760,21 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   } else if (sections.length === 1) {
     console.log('只有一个段，只删除discontinuity标签');
     linesToRemove.add(sections[0].start);
-  }
- return buildResult(lines, linesToRemove);*/
+  }*/
+	  //  其他条件：删除所有 #EXT-X-DISCONTINUITY 标签
+		let totaldiscontinuity = 0;
+	  for (let i = 0; i < lines.length; i++) {
+	    if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
+	      linesToRemove.add(i);
+		  totaldiscontinuity++;
+	    }
+	  }
+		if (totaldiscontinuity > 0) {
+		  console.log(`✓ 总计删除了 ${totaldiscontinuity} 个 discontinuity 标签`);
+		} else {
+		  console.log('× 未找到 discontinuity 标签');
+		}
+ return buildResult(lines, linesToRemove);
 }
 
 function extractTsNumber(name: string): number {
