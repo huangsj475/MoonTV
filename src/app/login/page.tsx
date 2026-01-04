@@ -42,7 +42,7 @@ function SecurityWarning({ show, onConfirm }: {
         </ul>
         <div className="flex gap-3">
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => setShowSecurityWarning(false)}
             className="flex-1 py-2 text-sm border border-gray-300 dark:border-zinc-600 rounded-lg"
           >
             取消
