@@ -187,16 +187,18 @@ function LoginPageClient() {
   const handleRememberMeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isChecked = e.target.checked;
     
-    if (isChecked && password) {
-      // 如果勾选记住密码且有密码输入，显示安全警告
-      setShowSecurityWarning(true);
-    } else {
-      // 取消勾选或没有密码时直接处理
-      setRememberMe(isChecked);
-      if (!isChecked) {
-        clearRememberedData();
-      }
-    }
+	  setRememberMe(isChecked);
+	  // 取消勾选时立即清除
+	  if (!isChecked) {
+		clearRememberedData();
+	  }
+	  // 勾选时：如果有输入用户名密码但还没保存过，显示警告
+	  else if (username && password) {
+		const hasSavedPassword = localStorage.getItem(REMEMBERED_PASSWORD_KEY);
+		if (!hasSavedPassword) {
+		  setShowSecurityWarning(true);
+		}
+	  }
   };
 
     // 清除保存的数据
@@ -353,7 +355,7 @@ function LoginPageClient() {
                     type='checkbox'
                     checked={rememberMe}
                     onChange={handleRememberMeChange}
-                    className='h-4 w-4 text-green-600 rounded border-gray-300 focus:ring-green-500 dark:focus:ring-green-400'
+                    className='h-4 w-4 text-green-600 rounded border-blue-500 focus:ring-green-500 dark:focus:ring-green-400'
                   />
                   <label
                     htmlFor='remember-me'
@@ -363,23 +365,6 @@ function LoginPageClient() {
                   </label>
                 </div>
                 
-                {/* 清除保存的密码按钮 */}
-                {rememberMe && localStorage.getItem(REMEMBERED_PASSWORD_KEY) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      localStorage.removeItem(REMEMBERED_PASSWORD_KEY);
-                      setPassword('');
-                      if (!username) {
-                        setRememberMe(false);
-                        localStorage.removeItem(REMEMBER_ME_KEY);
-                      }
-                    }}
-                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-red-500"
-                  >
-                    清除保存的密码
-                  </button>
-                )}
               </div>
             )}
 
