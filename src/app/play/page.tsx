@@ -247,7 +247,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       
       // 检查是否是m3u8 URL
       if (partUrl.includes('.m3u8')) {
-		partepisodeName = partepisodeName.replace(/-/g, '');// 移除episodeName中的所有短横线
+		partepisodeName = partepisodeName.replace(/-./g, '');// 移除episodeName中的所有短横线
         return {
           episodeName: partepisodeName,
           videoUrl: partUrl
@@ -1814,7 +1814,7 @@ useEffect(() => {
               lowLatencyMode: true, // 开启低延迟 LL-HLS
 
               /* 缓冲/内存相关 */
-              maxBufferLength: 50, // 向前缓存=这个值-backBufferLength，过大容易导致高延迟
+              maxBufferLength: 55, // 向前缓存=这个值-backBufferLength，过大容易导致高延迟
               backBufferLength: 20, // 仅保留 20s 已播放内容，避免内存占用
               maxBufferSize: 60 * 1000 * 1000, // 约 60MB，超出后触发清理
 
