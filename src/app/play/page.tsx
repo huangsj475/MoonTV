@@ -679,10 +679,11 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   }
   
   console.log('× 条件1不满足，执行条件2...');
-  
+
+	//条件2不完善，先暂时不用
   // 2. 条件2：按discontinuity分组检查ts数量
     // 定义类型
-  type Section = {
+  /*type Section = {
     start: number;
     count: number;
     lines: number[];
@@ -718,11 +719,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
   }
   
   console.log(`找到 ${sections.length} 个discontinuity段`);
-  /*sections.forEach((section, idx) => {
-    console.log(`段 ${idx + 1}: ${section.count}个ts文件`);
-  });*/
-  
-  
+
   if (sections.length > 1) {
     const counts = sections.map(s => s.count);
     const maxCount = Math.max(...counts);
@@ -764,7 +761,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     console.log('只有一个段，只删除discontinuity标签');
     linesToRemove.add(sections[0].start);
   }
- return buildResult(lines, linesToRemove);
+ return buildResult(lines, linesToRemove);*/
 }
 
 function extractTsNumber(name: string): number {
