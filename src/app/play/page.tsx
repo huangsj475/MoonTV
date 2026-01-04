@@ -593,8 +593,9 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     if (line.startsWith('#EXTINF:')) {
       if (i + 1 < lines.length) {
         const tsLine = lines[i + 1].trim();
-        if (tsLine.endsWith('.ts')) {
-          const name = tsLine.replace('.ts', '');
+        const tsMatch = tsLine.match(/^([^?]+)\.ts(\?.*)?$/);
+        if (tsMatch) {
+          const name = tsMatch[1]; // 获取.ts前的文件名部分
           const num = extractTsNumber(name);
           
           allTsInfo.push({
