@@ -247,7 +247,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
       
       // 检查是否是m3u8 URL
       if (partUrl.includes('.m3u8')) {
-		partepisodeName = partepisodeName.replace(/[.\s-]/g, '');// 移除episodeName中的所有短横线，小数点，空格
+		partepisodeName = partepisodeName.replace(/-|\.|\s/g, '');// 移除episodeName中的所有短横线，小数点，空格
         return {
           episodeName: partepisodeName,
           videoUrl: partUrl
