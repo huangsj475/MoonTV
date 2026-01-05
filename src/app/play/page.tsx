@@ -573,7 +573,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
   };
 
 	// 新版去广告函数
-function filterAdsFromM3U8(m3u8Content: string): string {
+/*function filterAdsFromM3U8(m3u8Content: string): string {
   if (!m3u8Content) return '';
   
   const lines = m3u8Content.split('\n');
@@ -763,7 +763,7 @@ function filterAdsFromM3U8(m3u8Content: string): string {
     linesToRemove.add(sections[0].start);
   }*/
 	  //  其他条件：删除所有 #EXT-X-DISCONTINUITY 标签
-		let totaldiscontinuity = 0;
+		/*let totaldiscontinuity = 0;
 	  for (let i = 0; i < lines.length; i++) {
 	    if (lines[i].trim() === '#EXT-X-DISCONTINUITY') {
 	      linesToRemove.add(i);
@@ -776,9 +776,9 @@ function filterAdsFromM3U8(m3u8Content: string): string {
 		  console.log('× 未找到 discontinuity 标签');
 		}
  return buildResult(lines, linesToRemove);
-}
+}*/
 
-function extractTsNumber(name: string): number {
+/*function extractTsNumber(name: string): number {
   // 先检查是否是纯hash格式（32位十六进制）
   if (/^[0-9a-f]{32}$/i.test(name)) {
     return 0;
@@ -797,8 +797,8 @@ function extractTsNumber(name: string): number {
   }
   
   return 0;
-}
-function buildResult(lines: string[], linesToRemove: Set<number>): string {
+}*/
+/*function buildResult(lines: string[], linesToRemove: Set<number>): string {
   const result: string[] = [];
   let keptCount = 0;
   let removedCount = 0;
@@ -814,10 +814,10 @@ function buildResult(lines: string[], linesToRemove: Set<number>): string {
   
   console.log(`原始行数: ${lines.length}, 保留行数: ${keptCount}, 删除行数: ${removedCount}`);
   return result.join('\n');
-}
+}*/
 	
   // 去广告相关函数
-  /*function filterAdsFromM3U8(m3u8Content: string): string {
+  function filterAdsFromM3U8(m3u8Content: string): string {
     if (!m3u8Content) return '';
 
     // 按行分割M3U8内容
@@ -833,7 +833,7 @@ function buildResult(lines: string[], linesToRemove: Set<number>): string {
       }	  
     }
     return filteredLines.join('\n');
-  }*/
+  }
 
   // 跳过片头片尾配置相关函数
   const handleSkipConfigChange = async (newConfig: {
