@@ -445,7 +445,8 @@ if (
 ) {
   const url = currentSourceObj.episodes[episodeIndex];
   if (typeof url === 'string' && url.includes('$')) {
-    episodeLabel = url.split('$')[0];
+	const nameLabel = url.split('$')[0];
+    episodeLabel = nameLabel.replace(/-|\.|\s/g, '');
   }
   
 }
