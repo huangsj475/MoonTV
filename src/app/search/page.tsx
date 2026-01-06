@@ -615,7 +615,9 @@ function SearchPageClient() {
         {/* 搜索框 */}
         <div className='mb-8'>
           <form onSubmit={handleSearch} className='max-w-2xl mx-auto'>
-            <div className='relative'>
+		    <div className='flex'>
+		      {/* 输入框区域 - 占据剩余空间 */}
+		      <div className='relative flex-1'>
               <Search className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-gray-500' />
               <input
                 id='searchInput'
@@ -643,7 +645,17 @@ function SearchPageClient() {
                   <X className='h-5 w-5' />
                 </button>
               )}
-
+      	</div>
+		      {/* 搜索按钮 - 固定宽度 */}
+		      <button
+		        type='submit'
+		        className='h-12 w-10 bg-green-500 hover:bg-green-600 text-white rounded-r-lg rounded-l-none flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed border-l-0'
+		        aria-label='搜索'
+		        disabled={isLoading}
+		      >
+		        <Search className='h-5 w-5' />
+		      </button>
+		    </div>
               {/* 搜索建议 */}
               <SearchSuggestions
                 query={searchQuery}
@@ -664,7 +676,7 @@ function SearchPageClient() {
                   router.push(`/search?q=${encodeURIComponent(trimmed)}`);
                 }}
               />
-            </div>
+
           </form>
         </div>
 
