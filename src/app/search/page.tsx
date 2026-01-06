@@ -627,7 +627,7 @@ function SearchPageClient() {
                 onFocus={handleInputFocus}
                 placeholder='搜索电影、电视剧...'
                 autoComplete="off"
-                className='w-full h-12 rounded-lg bg-gray-50/80 py-3 pl-10 pr-12 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white border border-gray-200/50 shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500 dark:focus:bg-gray-700 dark:border-gray-700'
+                className='w-full h-12 rounded-l-lg rounded-r-none bg-gray-50/80 py-3 pl-10 pr-10 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white border border-gray-200/50 border-r-0 shadow-sm dark:bg-gray-800 dark:text-gray-300 dark:placeholder-gray-500 dark:focus:bg-gray-700 dark:border-gray-700 dark:border-r-0'
               />
 
               {/* 清除按钮 */}
@@ -649,7 +649,7 @@ function SearchPageClient() {
 		      {/* 搜索按钮 - 固定宽度 */}
 		      <button
 		        type='submit'
-		        className='h-12 w-10 bg-green-500 hover:bg-green-600 text-white rounded-r-lg rounded-l-none flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed border-l-0'
+		        className='h-12 w-9 bg-green-500 hover:bg-green-600 text-white rounded-r-lg rounded-l-none flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed border-l-0'
 		        aria-label='搜索'
 		        disabled={isLoading}
 		      >
@@ -657,6 +657,7 @@ function SearchPageClient() {
 		      </button>
 		    </div>
               {/* 搜索建议 */}
+    		<div className='relative'>
               <SearchSuggestions
                 query={searchQuery}
                 isVisible={showSuggestions}
@@ -676,7 +677,7 @@ function SearchPageClient() {
                   router.push(`/search?q=${encodeURIComponent(trimmed)}`);
                 }}
               />
-
+    		</div>
           </form>
         </div>
 
