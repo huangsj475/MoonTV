@@ -643,12 +643,12 @@ if (
 
                           {/* 集数信息 - 底部 */}
                           <div className='flex h-6 items-end justify-between'>
-                              <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
+                              <span className='text-xs text-gray-700 dark:text-gray-400 font-medium'>
                                 {source.remarks}
                               </span>
 
                             {source.episodes.length > 1 && (
-                              <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
+                              <span className='text-xs text-gray-700 dark:text-gray-400 font-medium'>
                                 {source.episodes.length} 集
                               </span>
                             )}
