@@ -610,20 +610,11 @@ if (
                             })()}
                           </div>
 
-                          {/* 源名称和集数信息 - 垂直居中 */}
+                          {/* 源名称和测速信息 - 垂直居中 */}
                           <div className='flex items-center justify-between'>
                             <span className='text-xs px-2 py-1 border border-gray-500/60 rounded text-gray-700 dark:text-gray-300'>
                               {source.source_name}
                             </span>
-                            {source.episodes.length > 1 && (
-                              <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
-                                {source.episodes.length} 集
-                              </span>
-                            )}
-                          </div>
-
-                          {/* 网络信息 - 底部 */}
-                          <div className='flex items-end h-6'>
                             {(() => {
                               const sourceKey = `${source.source}-${source.id}`;
                               const videoInfo = videoInfoMap.get(sourceKey);
@@ -648,6 +639,19 @@ if (
                                 }
                               }
                             })()}
+                          </div>
+
+                          {/* 集数信息 - 底部 */}
+                          <div className='flex h-6 items-end justify-between'>
+                              <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
+                                {source.remarks}
+                              </span>
+
+                            {source.episodes.length > 1 && (
+                              <span className='text-xs text-gray-500 dark:text-gray-400 font-medium'>
+                                {source.episodes.length} 集
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
