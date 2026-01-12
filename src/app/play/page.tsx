@@ -679,7 +679,7 @@ const parseEpisodeUrl = (url: string): { episodeName: string | null; videoUrl: s
     console.log('× 条件1不满足：ts文件少于2个');
   }
   
-  console.log('× 条件1不满足，执行条件2...');
+  console.log('× 条件1不满足，执行条件2...');*/
 
 	//条件2不完善，先暂时不用
   // 2. 条件2：按discontinuity分组检查ts数量
