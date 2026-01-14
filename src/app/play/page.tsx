@@ -1739,7 +1739,7 @@ useEffect(() => {
         fullscreen: true,
         fullscreenWeb: true,
         subtitleOffset: false,
-        miniProgressBar: false,
+        miniProgressBar: true,
         mutex: true,
         playsInline: true,
         autoPlayback: false,
