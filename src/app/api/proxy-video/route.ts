@@ -33,7 +33,23 @@ export async function GET(request: NextRequest) {
     // 用 else 块内容替换整个匹配
     html = html.replace(pattern, elseContent);
   }
-
+// 匹配字典并替换
+const dictMatch = html.match(/'([^']+)'\.split\('\|'\)/);
+if (dictMatch) {
+  const dictStr = dictMatch[1];
+  
+  // 直接使用字符串替换
+  const oldPart = "const|||||if|||||||||||function|url|else";
+  const newPart = "||||||||||||||||||";
+  
+  if (dictStr.includes(oldPart)) {
+    const newDictStr = dictStr.replace(oldPart, newPart);
+    html = html.replace(dictStr, newDictStr);
+    console.log('字符串替换成功');
+  } else {
+    console.log('没找到目标字符串，实际内容:', dictStr.substring(0, 200));
+  }
+}
     
     // 移除广告div
     html = html.replace(/<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g, '');
