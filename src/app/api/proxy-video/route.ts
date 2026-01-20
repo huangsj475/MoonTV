@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     
     // 关键：直接移除包含URL检查的混淆JavaScript代码
     // 查找 <script type="text/javascript"> 到 </script> 之间的内容
-    const scriptRegex = /<script\s+type="text\/javascript">[\s\S]*?eval\(function\(p,a,c,k,e,r\)[\s\S]*?\)\)\s*\(\)\s*;?\s*<\/script>/;
+    const scriptRegex = /<script[^>]*>[\s\S]*?eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/gi;
     
     if (scriptRegex.test(html)) {
       console.log('找到URL检查脚本，直接移除...');
