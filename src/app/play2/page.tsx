@@ -2,44 +2,33 @@
 
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 
 function SimpleThirdPartyPlayPageClient() {
-  const searchParams = useSearchParams();
+  // 固定的视频URL
+  const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
   
-  // 从URL参数获取视频URL
-  const videoUrlParam = searchParams.get('url');
+  // 第三方播放器基础URL
+  const PLAYER_BASE_URL = 'https://jx.xmflv.cc/?url=';
   
-  // 构建iframe的完整URL
+  // iframe的完整URL
   const [iframeSrc, setIframeSrc] = useState('');
   
   // 加载状态
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
-  // 第三方播放器基础URL
-  const PLAYER_BASE_URL = 'https://jx.xmflv.cc/?url=';
-  
   useEffect(() => {
-    console.log('视频URL参数:', videoUrlParam);
+    console.log('加载视频:', videoUrl);
     
-    if (!videoUrlParam) {
-      // 如果没有传入url参数，使用示例URL
-      const exampleUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
-      const encodedUrl = encodeURIComponent(exampleUrl);
-      setIframeSrc(`${PLAYER_BASE_URL}${encodedUrl}`);
-      console.log('使用示例URL:', exampleUrl);
-    } else {
-      // 如果有传入url参数，使用传入的URL
-      const encodedUrl = encodeURIComponent(videoUrlParam);
-      setIframeSrc(`${PLAYER_BASE_URL}${encodedUrl}`);
-      console.log('使用传入URL:', videoUrlParam);
-    }
+    // 编码URL并构建完整iframe地址
+    const encodedUrl = encodeURIComponent(videoUrl);
+    const fullUrl = `${PLAYER_BASE_URL}${encodedUrl}`;
+    setIframeSrc(fullUrl);
     
-    setLoading(false);
-  }, [videoUrlParam]);
+    console.log('iframe地址:', fullUrl);
+  }, []);
 
   // iframe加载完成
   const handleIframeLoad = () => {
@@ -54,7 +43,7 @@ function SimpleThirdPartyPlayPageClient() {
     setError('播放器加载失败，请检查网络或URL');
   };
 
-  if (loading) {
+  if (loading && !iframeSrc) {
     return (
       <PageLayout activePath='/play2'>
         <div className='flex items-center justify-center min-h-screen bg-transparent'>
@@ -67,7 +56,7 @@ function SimpleThirdPartyPlayPageClient() {
             </div>
             <div className='space-y-2'>
               <p className='text-xl font-semibold text-gray-800 dark:text-gray-200 animate-pulse'>
-                正在加载播放器...
+                正在初始化播放器...
               </p>
             </div>
           </div>
@@ -119,10 +108,10 @@ function SimpleThirdPartyPlayPageClient() {
           <div className='flex items-center justify-between'>
             <div>
               <h1 className='text-lg font-semibold text-gray-900 dark:text-gray-100'>
-                第三方播放器
+                第三方播放器演示
               </h1>
               <p className='text-sm text-gray-500 dark:text-gray-400 mt-1'>
-                {videoUrlParam ? '正在播放传入的视频' : '播放示例视频'}
+                正在播放示例视频（爱奇艺）
               </p>
             </div>
             <div className='text-sm text-gray-500 dark:text-gray-400'>
@@ -140,16 +129,11 @@ function SimpleThirdPartyPlayPageClient() {
           </div>
         </div>
         
-        {/* iframe播放器区域 */}
+        {/* iframe播放器区域 - 全屏 */}
         <div className='flex-1 relative bg-black'>
           {iframeSrc && (
             <iframe
-              ref={(el) => {
-                // 可以在这里获取iframe引用
-                if (el) {
-                  console.log('iframe已挂载');
-                }
-              }}
+              key="player-iframe"
               src={iframeSrc}
               title="第三方视频播放器"
               className="w-full h-full border-0"
@@ -176,9 +160,9 @@ function SimpleThirdPartyPlayPageClient() {
         <div className='flex-none p-4 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800'>
           <div className='flex items-center justify-between'>
             <div className='text-sm text-gray-500 dark:text-gray-400'>
-              <p>使用第三方播放器播放视频</p>
+              <p>演示：使用 xmflv.cc 解析播放视频</p>
               <p className='mt-1 text-xs'>
-                当前播放器: <span className='text-green-500'>xmflv.cc</span>
+                播放器地址: <span className='text-green-500'>https://jx.xmflv.cc</span>
               </p>
             </div>
             <div className='space-x-2'>
@@ -193,7 +177,12 @@ function SimpleThirdPartyPlayPageClient() {
                 全屏播放
               </button>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  const encodedUrl = encodeURIComponent(videoUrl);
+                  const newSrc = `${PLAYER_BASE_URL}${encodedUrl}`;
+                  setIframeSrc(newSrc);
+                  setLoading(true);
+                }}
                 className='px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg transition-colors'
               >
                 刷新播放器
@@ -202,30 +191,28 @@ function SimpleThirdPartyPlayPageClient() {
           </div>
         </div>
         
-        {/* URL信息显示（调试用） */}
-        <div className='hidden md:block fixed bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg text-xs max-w-md'>
-          <p className='font-mono break-all opacity-80'>
-            {iframeSrc}
-          </p>
-        </div>
+        {/* 调试信息 */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className='fixed bottom-4 left-4 bg-black/70 text-white p-3 rounded-lg text-xs max-w-md z-50'>
+            <p className='font-mono break-all opacity-80'>
+              {iframeSrc}
+            </p>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(iframeSrc);
+                alert('URL已复制到剪贴板');
+              }}
+              className='mt-2 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-xs'
+            >
+              复制URL
+            </button>
+          </div>
+        )}
       </div>
     </PageLayout>
   );
 }
 
 export default function SimpleThirdPartyPlayPage() {
-  return (
-    <Suspense fallback={
-      <PageLayout activePath='/play2'>
-        <div className='flex items-center justify-center min-h-screen'>
-          <div className='text-center'>
-            <div className='inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500 mb-2'></div>
-            <p className='text-gray-600 dark:text-gray-400'>加载中...</p>
-          </div>
-        </div>
-      </PageLayout>
-    }>
-      <SimpleThirdPartyPlayPageClient />
-    </Suspense>
-  );
+  return <SimpleThirdPartyPlayPageClient />;
 }
