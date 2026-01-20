@@ -1,200 +1,78 @@
+// app/api/proxy-video/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const videoUrl = searchParams.get('url') || 'https://www.iqiyi.com/v_egoc71bz3c.html';
+  
+  const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
+  
+  console.log('代理请求:', playerUrl);
+  
   try {
-    // 固定视频URL
-    const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
-    // 第三方播放器URL
-    const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
-    
-    console.log('代理播放器URL:', playerUrl);
-    
-    // 获取第三方播放器页面
-    const response = await fetch(playerUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://jx.xmflv.cc/',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-      }
-    });
+    const response = await fetch(playerUrl);
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP ${response.status}`);
     }
     
     let html = await response.text();
-    console.log('获取到HTML长度:', html.length);
+    
+    // 关键：直接移除包含URL检查的混淆JavaScript代码
+    // 查找 <script type="text/javascript"> 到 </script> 之间的内容
+    const scriptRegex = /<script\s+type="text\/javascript">[\s\S]*?eval\(function\(p,a,c,k,e,r\)[\s\S]*?\)\)\s*\(\)\s*;?\s*<\/script>/;
+    
+    if (scriptRegex.test(html)) {
+      console.log('找到URL检查脚本，直接移除...');
+      
+      // 完全移除这个script标签
+      html = html.replace(scriptRegex, '');
 
-        // 关键：修改混淆的JavaScript代码
-    // 找到eval(function(p,a,c,k,e,r)部分
-    const evalPattern = /eval\(function\(p,a,c,k,e,r\)\{[^}]*\}\)/;
-    
-    if (evalPattern.test(html)) {
-      console.log('找到混淆代码，进行修改...');
-      
-      // 在eval执行前注入我们的URL
-      const injectBeforeEval = `
-        <script>
-          // 强制设置URL变量，绕过检查
-          window._forceUrl = '${videoUrl}';
-          
-          // 重写关键函数
-          const originalDecodeURIComponent = decodeURIComponent;
-          window.decodeURIComponent = function(encoded) {
-            // 如果是在解码URL参数，直接返回我们的视频URL
-            if (encoded && (encoded.includes('url=') || encoded.includes('k='))) {
-              return 'url=${encodeURIComponent(videoUrl)}';
-            }
-            return originalDecodeURIComponent(encoded);
-          };
-          
-          // 重写URLSearchParams
-          const OriginalURLSearchParams = window.URLSearchParams;
-          window.URLSearchParams = function(searchString) {
-            const params = new OriginalURLSearchParams(searchString);
-            const originalGet = params.get;
-            params.get = function(key) {
-              if (key === 'url' || key === 'k') {
-                return '${videoUrl}';
-              }
-              return originalGet.call(this, key);
-            };
-            return params;
-          };
-          
-          console.log('已注入视频URL:', '${videoUrl}');
-        </script>
-      `;
-      
-      // 将注入代码插入到eval之前
-      html = html.replace(evalPattern, `${injectBeforeEval}${evalPattern.exec(html)?.[0]}`);
     }
+
     
-    // 移除广告元素（精确匹配）
-    const advPattern = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g;
-    const match = html.match(advPattern);
-    if (match) {
-      console.log('找到广告元素，长度:', match[0].length);
-      html = html.replace(advPattern, '');
-      console.log('已移除广告元素');
-    }
-    
-    /*// 移除其他可能的广告
-    const adPatterns = [
-      /<div[^>]*class\s*=\s*["']?adv[\w\s-]*["']?[^>]*>[\s\S]*?<\/div>/gi,
-      /<div[^>]*class\s*=\s*["']?ad[\w\s-]*["']?[^>]*>[\s\S]*?<\/div>/gi,
-      /<div[^>]*id\s*=\s*["']?ad[\w\s-]*["']?[^>]*>[\s\S]*?<\/div>/gi,
-      /<iframe[^>]*ad[^>]*>[\s\S]*?<\/iframe>/gi,
-    ];
-    
-    adPatterns.forEach(pattern => {
-      const matches = html.match(pattern);
-      if (matches) {
-        console.log('找到其他广告元素，数量:', matches.length);
-        html = html.replace(pattern, '');
-      }
-    });*/
+    // 移除广告div
+    html = html.replace(/<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g, '');
     
     // 添加CSS隐藏广告
     const hideAdsCSS = `
       <style>
-        /* 隐藏特定广告 */
-        #adv_wrap_hh {
-          display: none !important; 
-          visibility: hidden !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-          position: absolute !important;
-          left: -9999px !important;
-        }
-        
-        
-        /* 确保播放器正常显示 */
-        #player, video, .video-player {
-          width: 100% !important;
-          height: 100% !important;
-          position: relative !important;
-          z-index: 1 !important;
-        }
+        #adv_wrap_hh { display: none !important; }
+        [id*="adv"], [class*="adv"] { display: none !important; }
       </style>
     `;
     
-    // 插入到head中
     html = html.replace('</head>', `${hideAdsCSS}</head>`);
     
-    // 修复相对路径
-    html = html.replace(/src="\//g, 'src="https://jx.xmflv.cc/');
-    html = html.replace(/href="\//g, 'href="https://jx.xmflv.cc/');
+    // 修复资源路径
+    html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
     
-    // 设置正确的内容类型
     return new NextResponse(html, {
-      status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Access-Control-Allow-Origin': '*',
       },
     });
     
   } catch (error) {
-    console.error('代理视频错误:', error);
+    console.error('代理失败:', error);
     
-    // 返回错误页面
-    const errorHtml = `
+    // 返回一个简单的重定向页面
+    const redirectHtml = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>播放器加载失败</title>
-        <style>
-          body { 
-            margin: 0; 
-            padding: 40px; 
-            font-family: Arial, sans-serif; 
-            background: #f0f0f0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-          }
-          .error-container { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            text-align: center; 
-            max-width: 500px; 
-          }
-          h1 { color: #e53e3e; }
-          button { 
-            background: #3182ce; 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            margin-top: 20px; 
-          }
-        </style>
+        <title>正在跳转</title>
+        <meta http-equiv="refresh" content="0;url=${playerUrl}" />
+        <script>window.location.href = "${playerUrl}";</script>
       </head>
       <body>
-        <div class="error-container">
-          <h1>😢 播放器加载失败</h1>
-          <p>错误信息: ${error instanceof Error ? error.message : '未知错误'}</p>
-          <button onclick="window.location.reload()">重试</button>
-          <button onclick="window.location.href='/play2'">返回</button>
-        </div>
+        <p>正在跳转到播放器... <a href="${playerUrl}">点击这里</a></p>
       </body>
       </html>
     `;
     
-    return new NextResponse(errorHtml, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-      },
+    return new NextResponse(redirectHtml, {
+      headers: { 'Content-Type': 'text/html' },
     });
   }
 }
