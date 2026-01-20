@@ -12,9 +12,6 @@ export default function Play2Page() {
     setMounted(true);
   }, []);
 
-  const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
-  
-  // 关键：iframe的src要带参数！
   const proxyUrl = `/api/proxy-video`;
   
   const handleIframeLoad = () => {
@@ -60,8 +57,6 @@ export default function Play2Page() {
           src={proxyUrl}
           title="视频播放器"
           className="w-full h-full border-0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
           onLoad={handleIframeLoad}
           onError={handleIframeError}
           sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
