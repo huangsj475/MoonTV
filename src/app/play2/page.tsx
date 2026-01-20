@@ -15,7 +15,7 @@ export default function Play2Page() {
   const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
   
   // 关键：iframe的src要带参数！
-  const proxyUrl = `/api/proxy-video?url=${encodeURIComponent(videoUrl)}`;
+  const proxyUrl = `/api/proxy-video`;
   
   const handleIframeLoad = () => {
     console.log('iframe加载完成');
