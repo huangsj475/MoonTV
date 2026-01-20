@@ -6,17 +6,19 @@ import { useEffect, useState } from 'react';
 
 export default function Play2Page() {
   const [mounted, setMounted] = useState(false);
+  const [iframeSrc, setIframeSrc] = useState('');
   
   useEffect(() => {
     setMounted(true);
+    
+    const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
+    const encodedUrl = encodeURIComponent(videoUrl);
+    // 使用我们的代理API
+    const proxyUrl = `/api/proxy-video?url=${encodedUrl}`;
+    setIframeSrc(proxyUrl);
   }, []);
   
-  const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
-  const PLAYER_BASE_URL = 'https://jx.xmflv.cc/?url=';
-  const encodedUrl = encodeURIComponent(videoUrl);
-  const iframeSrc = `${PLAYER_BASE_URL}${encodedUrl}`;
-  
-  if (!mounted) {
+  if (!mounted || !iframeSrc) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -30,13 +32,14 @@ export default function Play2Page() {
   return (
     <div className="h-screen flex flex-col">
       <div className="p-4 bg-gray-100">
-        <h1 className="text-xl font-bold">第三方播放器演示</h1>
+        <h1 className="text-xl font-bold">第三方播放器演示（无广告）</h1>
       </div>
       <div className="flex-1">
         <iframe
           src={iframeSrc}
           className="w-full h-full border-0"
           allowFullScreen
+          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
         />
       </div>
     </div>
