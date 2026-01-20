@@ -24,10 +24,15 @@ export async function GET(request: NextRequest) {
     //const scriptRegex = /<script\s+type="text\/javascript">\s*eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/g;
     
   // 方法1：直接替换条件判断 // 代理模式：绕过URL检查'
-    html = html.replace(
-      /8\(k==""\|\|k=="18"\|\|k=="19"\)\{[^}]*视频1c地址不能为空[^}]*\}/g,
-      ''
-    );
+  const pattern = /p k=[^;]*;8\(k==""\|\|k=="18"\|\|k=="19"\)\{[^}]*\}l\{([^}]*)\}/;
+  const match = html.match(pattern);
+  
+  if (match && match[1]) {
+    // 提取 else 块内容
+    const elseContent = match[1];
+    // 用 else 块内容替换整个匹配
+    html = html.replace(pattern, elseContent);
+  }
 
     
     // 移除广告div
