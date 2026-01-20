@@ -21,46 +21,35 @@ export async function GET(request: NextRequest) {
     
     // 关键：直接移除包含URL检查的混淆JavaScript代码
     // 查找 <script type="text/javascript"> 到 </script> 之间的内容
-    const scriptRegex = /<script\s+type="text\/javascript">\s*eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/g;
+    //const scriptRegex = /<script\s+type="text\/javascript">\s*eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/g;
     
-    html = html.replace(scriptRegex, (match, scriptContent) => {
-      // 只修改包含URL检查的脚本
-      if (scriptContent.includes('eval(function(p,a,c,k,e,r)')) {
-        console.log('找到目标脚本，修改URL检查逻辑...');
-        
-        // 修改混淆代码中的URL检查部分
-        // 将 "视频URL地址不能为空" 错误条件改为总是通过
-        let modifiedScript = scriptContent;
-        
-        // 方法1：在eval执行前注入变量
-        const injectBeforeEval = `
-          // 代理模式：强制设置URL
-          window._proxyVideoUrl = '${videoUrl}';
-          window.url = '${videoUrl}';
-          window.k = '${videoUrl}';
-          window.vurl = '${videoUrl}';
-          
-          // 重写检查逻辑
-          window._originalDecodeURIComponent = decodeURIComponent;
-          decodeURIComponent = function(str) {
-            if (str && str.includes('url=')) {
+    const fixScript = `
+      <script>
+        // 代理修复：绕过URL检查
+        (function() {
+          // 在页面加载前拦截URL检查
+          const originalDecodeURIComponent = decodeURIComponent;
+          window.decodeURIComponent = function(encoded) {
+            if (encoded && encoded.includes('url=')) {
+              // 返回硬编码的URL，让k变量永远有值
               return 'url=${encodeURIComponent(videoUrl)}';
             }
-            return window._originalDecodeURIComponent(str);
+            return originalDecodeURIComponent(encoded);
           };
-        `;
-        
-        // 在eval前插入我们的代码
-        modifiedScript = modifiedScript.replace(
-          'eval(function(p,a,c,k,e,r)',
-          `${injectBeforeEval}eval(function(p,a,c,k,e,r)`
-        );
-        
-        return `<script type="text/javascript">${modifiedScript}</script>`;
-      }
-      
-      return match; // 其他脚本保持不变
-    });
+          
+          // 强制设置k变量
+          Object.defineProperty(window, 'k', {
+            get() { return '${videoUrl}'; },
+            set() {}, // 防止修改
+            configurable: true
+          });
+          
+          console.log('代理：URL检查已绕过');
+        })();
+      </script>
+    `;
+    
+    html = html.replace('</head>', `${fixScript}</head>`);
 
     
     // 移除广告div
