@@ -23,33 +23,11 @@ export async function GET(request: NextRequest) {
     // 查找 <script type="text/javascript"> 到 </script> 之间的内容
     //const scriptRegex = /<script\s+type="text\/javascript">\s*eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/g;
     
-    const fixScript = `
-      <script>
-        // 代理修复：绕过URL检查
-        (function() {
-          // 在页面加载前拦截URL检查
-          const originalDecodeURIComponent = decodeURIComponent;
-          window.decodeURIComponent = function(encoded) {
-            if (encoded && encoded.includes('url=')) {
-              // 返回硬编码的URL，让k变量永远有值
-              return 'url=${encodeURIComponent(videoUrl)}';
-            }
-            return originalDecodeURIComponent(encoded);
-          };
-          
-          // 强制设置k变量
-          Object.defineProperty(window, 'k', {
-            get() { return '${videoUrl}'; },
-            set() {}, // 防止修改
-            configurable: true
-          });
-          
-          console.log('代理：URL检查已绕过');
-        })();
-      </script>
-    `;
-    
-    html = html.replace('</head>', `${fixScript}</head>`);
+  // 方法1：直接替换条件判断 // 代理模式：绕过URL检查'
+  html = html.replace(
+    /8\(k==""\|\|k=="18"\|\|k=="19"\)/,
+    '8(false)
+  );
 
     
     // 移除广告div
