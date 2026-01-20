@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   // 方法1：直接替换条件判断 // 代理模式：绕过URL检查'
   html = html.replace(
     /8\(k==""\|\|k=="18"\|\|k=="19"\)/,
-    '8(false)'
+    '8(0>1)'
   );
 
     
