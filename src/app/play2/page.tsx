@@ -56,7 +56,7 @@ function SimpleThirdPartyPlayPageClient() {
 
   if (loading) {
     return (
-      <PageLayout activePath='/thirdparty-play'>
+      <PageLayout activePath='/play2'>
         <div className='flex items-center justify-center min-h-screen bg-transparent'>
           <div className='text-center max-w-md mx-auto px-6'>
             <div className='relative mb-8'>
@@ -78,7 +78,7 @@ function SimpleThirdPartyPlayPageClient() {
 
   if (error) {
     return (
-      <PageLayout activePath='/thirdparty-play'>
+      <PageLayout activePath='/play2'>
         <div className='flex items-center justify-center min-h-screen bg-transparent'>
           <div className='text-center max-w-md mx-auto px-6'>
             <div className='relative mb-8'>
@@ -112,7 +112,7 @@ function SimpleThirdPartyPlayPageClient() {
   }
 
   return (
-    <PageLayout activePath='/thirdparty-play'>
+    <PageLayout activePath='/play2'>
       <div className='flex flex-col h-screen p-0'>
         {/* 顶部信息栏 */}
         <div className='flex-none p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800'>
@@ -216,7 +216,7 @@ function SimpleThirdPartyPlayPageClient() {
 export default function SimpleThirdPartyPlayPage() {
   return (
     <Suspense fallback={
-      <PageLayout activePath='/thirdparty-play'>
+      <PageLayout activePath='/play2'>
         <div className='flex items-center justify-center min-h-screen'>
           <div className='text-center'>
             <div className='inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500 mb-2'></div>
