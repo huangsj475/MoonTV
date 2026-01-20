@@ -25,6 +25,51 @@ export async function GET(request: NextRequest) {
     
     let html = await response.text();
     console.log('获取到HTML长度:', html.length);
+
+        // 关键：修改混淆的JavaScript代码
+    // 找到eval(function(p,a,c,k,e,r)部分
+    const evalPattern = /eval\(function\(p,a,c,k,e,r\)\{[^}]*\}\)/;
+    
+    if (evalPattern.test(html)) {
+      console.log('找到混淆代码，进行修改...');
+      
+      // 在eval执行前注入我们的URL
+      const injectBeforeEval = `
+        <script>
+          // 强制设置URL变量，绕过检查
+          window._forceUrl = '${videoUrl}';
+          
+          // 重写关键函数
+          const originalDecodeURIComponent = decodeURIComponent;
+          window.decodeURIComponent = function(encoded) {
+            // 如果是在解码URL参数，直接返回我们的视频URL
+            if (encoded && (encoded.includes('url=') || encoded.includes('k='))) {
+              return 'url=${encodeURIComponent(videoUrl)}';
+            }
+            return originalDecodeURIComponent(encoded);
+          };
+          
+          // 重写URLSearchParams
+          const OriginalURLSearchParams = window.URLSearchParams;
+          window.URLSearchParams = function(searchString) {
+            const params = new OriginalURLSearchParams(searchString);
+            const originalGet = params.get;
+            params.get = function(key) {
+              if (key === 'url' || key === 'k') {
+                return '${videoUrl}';
+              }
+              return originalGet.call(this, key);
+            };
+            return params;
+          };
+          
+          console.log('已注入视频URL:', '${videoUrl}');
+        </script>
+      `;
+      
+      // 将注入代码插入到eval之前
+      html = html.replace(evalPattern, `${injectBeforeEval}${evalPattern.exec(html)?.[0]}`);
+    }
     
     // 移除广告元素（精确匹配）
     const advPattern = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g;
