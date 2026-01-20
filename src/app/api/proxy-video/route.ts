@@ -2,154 +2,158 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    // 固定视频URL
     const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
-    // 第三方播放器URL
     const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
     
-    console.log('代理播放器URL:', playerUrl);
+    console.log('获取播放器页面:', playerUrl);
     
-    // 获取第三方播放器页面
     const response = await fetch(playerUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Referer': 'https://jx.xmflv.cc/',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       }
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error: ${response.status}`);
     }
     
     let html = await response.text();
-    console.log('获取到HTML长度:', html.length);
     
-    // 移除广告元素（精确匹配）
-    const advPattern = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g;
-    const match = html.match(advPattern);
-    if (match) {
-      console.log('找到广告元素，长度:', match[0].length);
-      html = html.replace(advPattern, '');
-      console.log('已移除广告元素');
-    }
+    // 关键：在页面加载前注入代码，模拟window.location
+    const injectScript = `
+      <script>
+        // 在页面任何代码执行之前重写window.location
+        (function() {
+          // 保存原始URL
+          const originalSearch = '?url=${encodeURIComponent(videoUrl)}';
+          const originalHref = 'https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}';
+          
+          // 重写window.location对象
+          Object.defineProperty(window, 'location', {
+            configurable: false,
+            get: function() {
+              return {
+                search: originalSearch,
+                href: originalHref,
+                origin: 'https://jx.xmflv.cc',
+                protocol: 'https:',
+                host: 'jx.xmflv.cc',
+                hostname: 'jx.xmflv.cc',
+                port: '',
+                pathname: '/',
+                hash: '',
+                toString: function() { return originalHref; }
+              };
+            }
+          });
+          
+          // 也重写document.location
+          Object.defineProperty(document, 'location', {
+            configurable: false,
+            get: function() {
+              return window.location;
+            }
+          });
+          
+          // 预定义URL变量，防止未定义错误
+          window.VIDEO_URL = '${videoUrl}';
+          window.url = '${videoUrl}';
+          window.vurl = '${videoUrl}';
+          
+          console.log('已注入URL参数:', '${videoUrl}');
+        })();
+      </script>
+    `;
     
-    /*// 移除其他可能的广告
-    const adPatterns = [
-      /<div[^>]*class\s*=\s*["']?adv[\w\s-]*["']?[^>]*>[\s\S]*?<\/div>/gi,
-      /<div[^>]*class\s*=\s*["']?ad[\w\s-]*["']?[^>]*>[\s\S]*?<\/div>/gi,
-      /<div[^>]*id\s*=\s*["']?ad[\w\s-]*["']?[^>]*>[\s\S]*?<\/div>/gi,
-      /<iframe[^>]*ad[^>]*>[\s\S]*?<\/iframe>/gi,
-    ];
+    // 插入到最前面，确保在其他脚本之前执行
+    html = html.replace('<head>', `<head>${injectScript}`);
     
-    adPatterns.forEach(pattern => {
-      const matches = html.match(pattern);
-      if (matches) {
-        console.log('找到其他广告元素，数量:', matches.length);
-        html = html.replace(pattern, '');
-      }
-    });*/
+    // 再添加一个后执行的脚本，确保URL被正确设置
+    const afterScript = `
+      <script>
+        // DOM加载后再次检查
+        document.addEventListener('DOMContentLoaded', function() {
+          console.log('DOM加载完成，当前URL:', window.location.search);
+          
+          // 如果需要，可以手动触发页面初始化
+          setTimeout(function() {
+            // 查找页面中的URL输入框并设置值
+            var inputs = document.querySelectorAll('input');
+            inputs.forEach(function(input) {
+              if (input.type === 'text' || input.type === 'url') {
+                input.value = '${videoUrl}';
+                // 触发事件
+                var event = new Event('input', { bubbles: true });
+                input.dispatchEvent(event);
+              }
+            });
+          }, 500);
+        });
+      </script>
+    `;
     
-    // 添加CSS隐藏广告
-    const hideAdsCSS = `
+    html = html.replace('</body>', `${afterScript}</body>`);
+    
+    // 移除广告div
+    html = html.replace(/<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g, '');
+    
+    // 修复资源路径
+    html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
+    
+    // 添加CSS确保广告被隐藏
+    const hideCss = `
       <style>
-        /* 隐藏特定广告 */
-        #adv_wrap_hh {
-          display: none !important; 
-          visibility: hidden !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-          position: absolute !important;
-          left: -9999px !important;
-        }
-        
-        
-        /* 确保播放器正常显示 */
-        #player, video, .video-player {
-          width: 100% !important;
-          height: 100% !important;
-          position: relative !important;
-          z-index: 1 !important;
-        }
+        #adv_wrap_hh { display: none !important; }
+        [id*="adv"], [class*="adv"] { display: none !important; }
       </style>
     `;
     
-    // 插入到head中
-    html = html.replace('</head>', `${hideAdsCSS}</head>`);
+    html = html.replace('</head>', `${hideCss}</head>`);
     
-    // 修复相对路径
-    html = html.replace(/src="\//g, 'src="https://jx.xmflv.cc/');
-    html = html.replace(/href="\//g, 'href="https://jx.xmflv.cc/');
-    
-    // 设置正确的内容类型
     return new NextResponse(html, {
-      status: 200,
       headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/html',
+        'Cache-Control': 'no-cache',
       },
     });
     
   } catch (error) {
-    console.error('代理视频错误:', error);
+    console.error('代理错误:', error);
     
-    // 返回错误页面
-    const errorHtml = `
+    // 回退：直接返回带iframe的页面
+    const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
+    const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
+    
+    const fallbackHtml = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>播放器加载失败</title>
+        <title>视频播放器</title>
         <style>
-          body { 
-            margin: 0; 
-            padding: 40px; 
-            font-family: Arial, sans-serif; 
-            background: #f0f0f0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-          }
-          .error-container { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 10px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
-            text-align: center; 
-            max-width: 500px; 
-          }
-          h1 { color: #e53e3e; }
-          button { 
-            background: #3182ce; 
-            color: white; 
-            border: none; 
-            padding: 10px 20px; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            margin-top: 20px; 
+          body, html { margin: 0; padding: 0; height: 100%; }
+          iframe { width: 100%; height: 100%; border: none; }
+          .ad-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 400px;
+            background: black;
+            z-index: 10000000;
+            pointer-events: none;
           }
         </style>
       </head>
       <body>
-        <div class="error-container">
-          <h1>😢 播放器加载失败</h1>
-          <p>错误信息: ${error instanceof Error ? error.message : '未知错误'}</p>
-          <button onclick="window.location.reload()">重试</button>
-          <button onclick="window.location.href='/play2'">返回</button>
-        </div>
+        <div class="ad-overlay"></div>
+        <iframe src="${playerUrl}" allowfullscreen></iframe>
       </body>
       </html>
     `;
     
-    return new NextResponse(errorHtml, {
-      status: 500,
-      headers: {
-        'Content-Type': 'text/html; charset=utf-8',
-      },
+    return new NextResponse(fallbackHtml, {
+      headers: { 'Content-Type': 'text/html' },
     });
   }
 }
