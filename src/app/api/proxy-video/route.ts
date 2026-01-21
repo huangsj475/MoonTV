@@ -23,6 +23,14 @@ export async function GET(request: NextRequest) {
         // 动态拦截 API 请求
         (function() {
           const MY_DOMAIN = "${myDomain}";
+
+          // 保存原始请求头
+          const originalHeaders = {
+            'Accept': 'application/json, text/javascript, */*; q=0.01',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Origin': 'https://jx.xmflv.cc',
+            'Referer': 'https://jx.xmflv.cc/',
+          };
           
           // 拦截 fetch
           const originalFetch = window.fetch;
@@ -30,6 +38,16 @@ export async function GET(request: NextRequest) {
             if (typeof input === 'string' && input.includes('202.189.8.170/Api')) {
               const newUrl = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(input);
               console.log('拦截 fetch 请求:', input, '->', newUrl);
+            // 确保请求头正确
+            if (init) {
+              init.headers = {
+                ...originalHeaders,
+                ...init.headers,
+              };
+            } else {
+              init = { headers: originalHeaders };
+            }
+              
               return originalFetch(newUrl, init);
             }
             return originalFetch(input, init);
@@ -37,13 +55,24 @@ export async function GET(request: NextRequest) {
           
           // 拦截 XMLHttpRequest
           const originalOpen = XMLHttpRequest.prototype.open;
+          const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
           XMLHttpRequest.prototype.open = function(method, url) {
             if (url && url.includes('202.189.8.170/Api')) {
               const newUrl = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(url);
               console.log('拦截 XHR 请求:', url, '->', newUrl);
+              // 保存原始 URL 以便后续设置请求头
+              this._originalUrl = url;
               arguments[1] = newUrl;
             }
             return originalOpen.apply(this, arguments);
+          };
+
+          XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
+            // 如果请求的是代理 API，修改 Origin 头
+            if (header.toLowerCase() === 'origin' && this._originalUrl) {
+              value = 'https://jx.xmflv.cc';
+            }
+            return originalSetRequestHeader.call(this, header, value);
           };
           
           // 处理动态创建的 script 或 iframe
