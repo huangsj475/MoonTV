@@ -5,83 +5,77 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const videoUrl = searchParams.get('url') || '';
   
-  // 第三方播放器URL
   const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
-
-  const controller = new AbortController();
-  // 设置请求选项，包括信号和头部
-  const fetchOptions = {
-    signal: controller.signal,
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-      Referer: 'https://jx.xmflv.cc/',
-      Accept: 'application/json, text/plain, */*',
-    },
-  };
+  
+  console.log('代理请求:', playerUrl);
   
   try {
-    const response = await fetch(playerUrl, fetchOptions);
+        // 获取第三方播放器页面
+    const response = await fetch(playerUrl);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    console.log('获取解析url成功');
+    
     let html = await response.text();
-    const baseUrl = 'https://jx.xmflv.cc';
     
-    // 修复资源URL
-    html = html.replace(/(src|href)="\/([^"]*)"/g, `$1="${baseUrl}/$2"`);
-    html = html.replace(/url\(['"]?\/([^)'"]*)['"]?\)/g, `url('${baseUrl}/$1')`);
+    // 关键：直接移除包含URL检查的混淆JavaScript代码
+    // 查找 <script type="text/javascript"> 到 </script> 之间的内容
+    //const scriptRegex = /<script\s+type="text\/javascript">\s*eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/g;
     
-    // 将页面中所有的API请求重定向到我们的代理
-    /*html = html.replace(/https:\/\/202\.189\.8\.170(\/[^"']*)/g, (match, path) => {
-      return `/api/proxy-api?url=${encodeURIComponent('https://202.189.8.170' + path)}`;
-    });*/
+  // 方法1：直接替换条件判断 // 代理模式：绕过URL检查'
+  /*const pattern = /p k=[^;]*;8\(k==""\|\|k=="18"\|\|k=="19"\)\{[^}]*\}l\{([^}]*)\}/;
+  const match = html.match(pattern);
+  
+  if (match && match[1]) {
+    // 提取 else 块内容
+    const elseContent = match[1];
+    // 用 else 块内容替换整个匹配
+    html = html.replace(pattern, elseContent);
+  }*/
+
+    // 移除广告div
+    html = html.replace(/<div[^>]*id\s*=\s*["']?adv_wrap_hh["']?[^>]*>[\s\S]*?<\/div>/gi, '');
     
-    // 添加基础标签，确保相对路径正确
-    //html = html.replace('<head>', `<head><base href="${baseUrl}/">`);
+    // 添加CSS隐藏广告
+    const hideAdsCSS = `
+      <style>
+        #adv_wrap_hh { display: none !important; }
+        [id*="adv"], [class*="adv"] { display: none !important; }
+      </style>
+    `;
     
-    // 添加CORS头，允许iframe加载
+    html = html.replace('</head>', `${hideAdsCSS}</head>`);
+    
+    // 修复资源路径
+    //html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
+    
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Access-Control-Allow-Origin': '*',
       },
     });
-    console.log('返回NextResponse');
+    
   } catch (error) {
     console.error('代理失败:', error);
     
-    // 返回一个直接包含iframe的简单页面
-    return getFallbackPage(playerUrl);
+    // 返回一个简单的重定向页面
+    const redirectHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>正在跳转</title>
+        <meta http-equiv="refresh" content="0;url=${playerUrl}" />
+        <script>window.location.href = "${playerUrl}";</script>
+      </head>
+      <body>
+        <p>正在跳转到播放器... <a href="${playerUrl}">点击这里</a></p>
+      </body>
+      </html>
+    `;
+    
+    return new NextResponse(redirectHtml, {
+      headers: { 'Content-Type': 'text/html' },
+    });
   }
-}
-
-function getFallbackPage(playerUrl: string): NextResponse {
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-  <title>视频播放器</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
-    iframe { width: 100%; height: 100%; border: none; }
-  </style>
-</head>
-<body>
-  <iframe 
-    src="${playerUrl}"
-    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
-    allow="autoplay; fullscreen; encrypted-media"
-    allowfullscreen
-  ></iframe>
-</body>
-</html>`;
-  
-  return new NextResponse(html, {
-    headers: { 'Content-Type': 'text/html' },
-  });
 }
