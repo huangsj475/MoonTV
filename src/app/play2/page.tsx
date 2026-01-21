@@ -11,8 +11,8 @@ export default function Play2Page() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const proxyUrl = `/api/proxy-video`;
+  const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
+  const proxyUrl = `/api/proxy-video?url=${encodeURIComponent(videoUrl)}`;
   
   const handleIframeLoad = () => {
     console.log('iframe加载完成');
