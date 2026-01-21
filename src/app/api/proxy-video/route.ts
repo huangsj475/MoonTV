@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
+    console.log('请求成功');
     let html = await response.text();
     
     // 关键：直接移除包含URL检查的混淆JavaScript代码
@@ -34,9 +34,13 @@ export async function GET(request: NextRequest) {
     html = html.replace(pattern, elseContent);
   }*/
 
+    // 修复资源路径
+    html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
+    console.log('修复资源路径');
+    
     // 移除广告div
     html = html.replace(/<div[^>]*id\s*=\s*["']?adv_wrap_hh["']?[^>]*>[\s\S]*?<\/div>/gi, '');
-    
+   console.log('移除广告div');
     // 添加CSS隐藏广告
     const hideAdsCSS = `
       <style>
@@ -46,9 +50,7 @@ export async function GET(request: NextRequest) {
     `;
     
     html = html.replace('</head>', `${hideAdsCSS}</head>`);
-    
-    // 修复资源路径
-    //html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
+    console.log('添加CSS隐藏广告');
     
     return new NextResponse(html, {
       headers: {
