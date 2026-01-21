@@ -14,6 +14,24 @@ export default function Play2Page() {
   
   useEffect(() => {
     setMounted(true);
+    
+  const iframe = document.querySelector('iframe');
+  // 尝试注入CSS（可能因跨域失败）
+  setTimeout(() => {
+    try {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      const style = iframeDoc.createElement('style');
+      style.textContent = `
+        #adv_wrap_hh {
+          display: none !important;
+          visibility: hidden !important;
+        }
+      `;
+      iframeDoc.head.appendChild(style);
+    } catch (e) {
+      console.log('无法注入CSS（跨域限制）:', e.message);
+    }
+  }, 3000);
   }, []);
   
   const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
