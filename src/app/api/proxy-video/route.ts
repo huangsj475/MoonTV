@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
   console.log('代理请求:', playerUrl);
   
   try {
-    /*// 获取第三方播放器页面，添加更多 headers 模拟浏览器
+    // 获取第三方播放器页面，添加更多 headers 模拟浏览器
     const response = await fetch(playerUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -81,8 +81,6 @@ export async function GET(request: NextRequest) {
         'Sec-Fetch-Mode': 'navigate',
         'Sec-Fetch-Site': 'same-origin',
       },
-      // 重要：保持 referrer 策略
-      referrerPolicy: 'no-referrer-when-downgrade' as ReferrerPolicy,
        // 跟随重定向
       redirect: 'follow' as RequestRedirect,
     });
@@ -94,7 +92,7 @@ export async function GET(request: NextRequest) {
     console.log('请求成功，状态码:', response.status);
     let html = await response.text();
     
-    // 1. 移除反 iframe 的响应头相关设置
+    /*// 1. 移除反 iframe 的响应头相关设置
     html = html.replace(/<meta[^>]*X-Frame-Options[^>]*>/gi, '');
     html = html.replace(/<meta[^>]*Content-Security-Policy[^>]*frame-ancestors[^>]*>/gi, '');
     
@@ -135,8 +133,6 @@ export async function GET(request: NextRequest) {
         'Content-Security-Policy': "frame-ancestors 'self' *", // 允许所有来源嵌入
       },
     });*/
-    const response = await fetch(playerUrl);
-    let html = await response.text();
     
     // 只添加允许 iframe 的头部，不做任何 HTML 处理
     return new NextResponse(html, {
