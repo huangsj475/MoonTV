@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     });*/
     
     // 添加基础标签，确保相对路径正确
-    html = html.replace('<head>', `<head><base href="${baseUrl}/">`);
+    //html = html.replace('<head>', `<head><base href="${baseUrl}/">`);
     
     // 添加CORS头，允许iframe加载
     return new NextResponse(html, {
