@@ -34,11 +34,28 @@ const fixUrl = (url: string): string => {
 const fixResourcePaths = (htmlContent: string): string => {
   // 匹配所有的 src 和 href 属性
   const regex = /(src|href)=(["'])(.*?)\2/gi;
+  let replacementCount = 0;
   
-  return htmlContent.replace(regex, (match: string, attr: string, quote: string, url: string) => {
+  const result = htmlContent.replace(regex, (match: string, attr: string, quote: string, url: string) => {
+    const originalUrl = url;
     const fixedUrl = fixUrl(url);
+    
+    // 如果 URL 被修改了，记录一下
+    if (originalUrl !== fixedUrl) {
+      replacementCount++;
+      console.log(`修复资源路径 ${replacementCount}: ${originalUrl} -> ${fixedUrl}`);
+    }
+    
+    // 特别检查 Cloudflare 脚本
+    if (originalUrl.includes('cloudflareinsights.com')) {
+      console.log('找到 Cloudflare 脚本:', originalUrl, '修改后:', fixedUrl);
+    }
+    
     return `${attr}=${quote}${fixedUrl}${quote}`;
   });
+  
+  console.log(`总共修复了 ${replacementCount} 个资源路径`);
+  return result;
 };
 
 export async function GET(request: NextRequest) {
@@ -103,7 +120,7 @@ export async function GET(request: NextRequest) {
     ];
     
     blockingScripts.forEach(pattern => {
-      html = html.replace(pattern, '// 已移除反iframe检查');
+      html = html.replace(pattern, '');// 已移除反iframe检查
     });
     
     console.log('HTML 处理完成，长度:', html.length);
