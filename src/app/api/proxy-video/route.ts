@@ -32,148 +32,32 @@ export async function GET(request: NextRequest) {
     // 用 else 块内容替换整个匹配
     html = html.replace(pattern, elseContent);
   }*/
-   // 4. 修改HTML：注入JS来拦截爱奇艺请求
-const injectScript = `
-  <script>
-    (function() {
-      console.log('开始拦截爱奇艺API请求...');
-      
-      // 保存原始方法
-      const originalFetch = window.fetch;
-      const originalXHROpen = XMLHttpRequest.prototype.open;
-      const originalXHRSend = XMLHttpRequest.prototype.send;
-      
-      // 判断是否需要代理
-      function shouldProxy(url) {
-        if (!url) return false;
-        const urlStr = url.toString();
-        return urlStr.includes('iqiyi.com') || 
-               urlStr.includes('qiyi.com') ||
-               urlStr.includes('pps.tv') ||
-               urlStr.includes('iqiyi');
+
+    // 关键：找到所有对202.189.8.170的请求，替换为我们的代理
+    const apiBase = 'https://202.189.8.170';
+    const proxyBase = '/api/proxy-api';
+    
+    // 替换所有API请求
+    html = html.replace(
+      new RegExp(`${apiBase}/`, 'g'),
+      `${proxyBase}?url=${encodeURIComponent(apiBase + '/')}`
+    );
+    
+    // 替换完整的API URL
+    html = html.replace(
+      /"https:\/\/202\.189\.8\.170(\/[^"]*)"/g,
+      (match, path) => {
+        return `"${proxyBase}?url=${encodeURIComponent(apiBase + path)}"`;
       }
-      
-      // 创建代理URL
-      function createProxyUrl(originalUrl) {
-        return '/api/proxy-api?url=' + encodeURIComponent(originalUrl);
+    );
+    
+    // 同样替换单引号
+    html = html.replace(
+      /'https:\/\/202\.189\.8\.170(\/[^']*)'/g,
+      (match, path) => {
+        return `'${proxyBase}?url=${encodeURIComponent(apiBase + path)}"'`;
       }
-      
-      // 1. 拦截fetch请求（主要处理POST）
-      window.fetch = async function(input, init = {}) {
-        const url = input instanceof Request ? input.url : input;
-        
-        if (shouldProxy(url)) {
-          const proxyUrl = createProxyUrl(url);
-          console.log('拦截fetch请求:', url, '方法:', init.method || 'GET');
-          
-          // 构建新的请求
-          const newInit = { ...init };
-          
-          // 如果是POST且有请求体，需要特殊处理
-          if ((init.method || 'GET').toUpperCase() === 'POST' && init.body) {
-            // 对于FormData，需要转换为可序列化的格式
-            if (init.body instanceof FormData) {
-              const formDataObj = {};
-              for (let [key, value] of init.body.entries()) {
-                formDataObj[key] = value;
-              }
-              newInit.body = JSON.stringify(formDataObj);
-              newInit.headers = {
-                ...init.headers,
-                'Content-Type': 'application/json'
-              };
-            }
-            // 其他类型的请求体保持不变
-          }
-          
-          // 移除可能引起问题的头
-          if (newInit.headers) {
-            delete newInit.headers['host'];
-          }
-          
-          try {
-            return await originalFetch.call(this, proxyUrl, newInit);
-          } catch (error) {
-            console.error('代理请求失败:', error);
-            // 失败时尝试原请求
-            return originalFetch.call(this, input, init);
-          }
-        }
-        
-        return originalFetch.call(this, input, init);
-      };
-      
-      // 2. 拦截XMLHttpRequest（很多库仍在使用）
-      XMLHttpRequest.prototype.open = function(method, url, ...rest) {
-        this._method = method;
-        this._url = url;
-        
-        if (shouldProxy(url)) {
-          const proxyUrl = createProxyUrl(url);
-          console.log('拦截XHR请求:', url, '方法:', method);
-          return originalXHROpen.call(this, method, proxyUrl, ...rest);
-        }
-        
-        return originalXHROpen.call(this, method, url, ...rest);
-      };
-      
-      XMLHttpRequest.prototype.send = function(body) {
-        this._body = body;
-        
-        // 如果是爱奇艺的POST请求，需要处理请求体
-        if (this._method === 'POST' && shouldProxy(this._url)) {
-          console.log('XHR发送POST数据:', this._url, body);
-          
-          // 如果请求头是FormData，转换为JSON
-          const contentType = this.getRequestHeader('Content-Type');
-          if (contentType && contentType.includes('application/x-www-form-urlencoded')) {
-            // 保持原样
-          } else if (body instanceof FormData) {
-            // 转换为JSON
-            const formDataObj = {};
-            for (let [key, value] of body.entries()) {
-              formDataObj[key] = value;
-            }
-            body = JSON.stringify(formDataObj);
-            this.setRequestHeader('Content-Type', 'application/json');
-          }
-        }
-        
-        return originalXHRSend.call(this, body);
-      };
-      
-      // 3. 覆盖XMLHttpRequest的setRequestHeader以添加必要头
-      const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
-      XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
-        // 对于爱奇艺请求，移除或修改某些头
-        if (shouldProxy(this._url)) {
-          if (header.toLowerCase() === 'host') {
-            return; // 跳过Host头
-          }
-          if (header.toLowerCase() === 'origin' && value.includes('iqiyi.com')) {
-            value = window.location.origin; // 修改Origin
-          }
-        }
-        return originalSetRequestHeader.call(this, header, value);
-      };
-      
-      console.log('爱奇艺API拦截器已安装');
-      
-      // 4. 拦截动态脚本加载（爱奇艺可能用JS加载配置）
-      const originalAppendChild = Element.prototype.appendChild;
-      Element.prototype.appendChild = function(node) {
-        if (node.tagName === 'SCRIPT' && node.src && shouldProxy(node.src)) {
-          console.log('拦截动态script加载:', node.src);
-          node.src = createProxyUrl(node.src);
-        }
-        return originalAppendChild.call(this, node);
-      };
-      
-    })();
-  </script>
-`;
-    // 5. 将脚本注入到页面中
-    html = html.replace('</head>', injectScript + '</head>');
+    );
     
     // 移除广告div
     //html = html.replace(/<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g, '');
