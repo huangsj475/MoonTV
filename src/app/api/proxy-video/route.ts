@@ -33,7 +33,21 @@ export async function GET(request: NextRequest) {
     // 用 else 块内容替换整个匹配
     html = html.replace(pattern, elseContent);
   }*/
-
+   // 4. 修改HTML：注入JS来拦截爱奇艺请求
+    const injectScript = `
+      <script>
+        // 拦截所有请求，将爱奇艺URL重定向到我们的代理
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+          if (typeof url === 'string' && url.includes('iqiyi.com')) {
+            url = '/api/proxy-api?url=' + encodeURIComponent(url);
+          }
+          return originalFetch.call(this, url, options);
+        };
+      </script>
+    `;
+    // 5. 将脚本注入到页面中
+    html = html.replace('</head>', injectScript + '</head>');
     
     // 移除广告div
     //html = html.replace(/<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g, '');
