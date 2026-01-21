@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-console
+/* eslint-disable no-console,@typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
