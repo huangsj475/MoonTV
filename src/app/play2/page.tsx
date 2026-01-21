@@ -16,10 +16,21 @@ export default function Play2Page() {
     setMounted(true);
     
   const iframe = document.querySelector('iframe');
+    if (!iframe) return; 
+
   // 尝试注入CSS（可能因跨域失败）
   setTimeout(() => {
     try {
+      if (!iframe.contentWindow) {
+        console.log('iframe未加载完成');
+        return;
+      }
       const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      // 检查iframeDoc是否存在
+      if (!iframeDoc) {
+        console.log('无法访问iframe文档（跨域限制）');
+        return;
+      }
       const style = iframeDoc.createElement('style');
       style.textContent = `
         #adv_wrap_hh {
@@ -28,6 +39,7 @@ export default function Play2Page() {
         }
       `;
       iframeDoc.head.appendChild(style);
+      console.log('成功注入CSS');
     } catch (e) {
       console.log('无法注入CSS（跨域限制）:', e.message);
     }
