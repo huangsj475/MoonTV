@@ -39,19 +39,38 @@ export async function GET(request: NextRequest) {
     html = html.replace(/<meta[^>]*Content-Security-Policy[^>]*frame-ancestors[^>]*>/gi, '');
     
     // 2. 修复资源路径 - 确保所有相对路径都变为绝对路径
-    html = html.replace(/(src|href)=(["'])\/([^"']+)\2/gi, (match, attr, quote, path) => {
-      return `${attr}=${quote}https:${path}${quote}`;
-    });
+// 统一处理资源路径
+const fixResourcePaths = (htmlContent) => {
+    // 匹配所有的 src 和 href 属性
+    const regex = /(src|href)=(["'])(.*?)\2/gi;
     
-    // 3. 修复相对路径的资源（不带斜杠的）
-    html = html.replace(/(src|href)=(["'])(?!https?:\/\/)(?!#)([^"']+)\2/gi, (match, attr, quote, path) => {
-      // 如果是 // 开头的协议相对路径
-      if (path.startsWith('//')) {
-        return `${attr}=${quote}https:${path}${quote}`;
-      }
-      // 其他相对路径
-      return `${attr}=${quote}https://jx.xmflv.cc/${path}${quote}`;
+    return htmlContent.replace(regex, (match, attr, quote, url) => {
+        // 1. 如果已经是完整 URL、data URL 或 blob URL，保持不变
+        if (url.startsWith('http://') || 
+            url.startsWith('https://') || 
+            url.startsWith('data:') || 
+            url.startsWith('blob:') ||
+            url.startsWith('#')) {
+            return match;
+        }
+        
+        // 2. 协议相对路径（//开头）
+        if (url.startsWith('//')) {
+            return `${attr}=${quote}https:${url}${quote}`;
+        }
+        
+        // 3. 绝对路径（/开头）
+        if (url.startsWith('/')) {
+            return `${attr}=${quote}https://jx.xmflv.cc${url}${quote}`;
+        }
+        
+        // 4. 相对路径
+        return `${attr}=${quote}https://jx.xmflv.cc/${url}${quote}`;
     });
+};
+
+// 使用它
+html = fixResourcePaths(html);
     
     // 4. 移除广告 div（使用更精确的选择器）
     const adPatterns = [
