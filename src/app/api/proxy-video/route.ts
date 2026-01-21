@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
   console.log('代理请求:', playerUrl);
   
   try {
-    // 获取第三方播放器页面，添加更多 headers 模拟浏览器
+    /*// 获取第三方播放器页面，添加更多 headers 模拟浏览器
     const response = await fetch(playerUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -134,8 +134,17 @@ export async function GET(request: NextRequest) {
         'X-Frame-Options': 'ALLOWALL', // 允许被 iframe 嵌入
         'Content-Security-Policy': "frame-ancestors 'self' *", // 允许所有来源嵌入
       },
-    });
+    });*/
+    const response = await fetch(playerUrl);
+    let html = await response.text();
     
+    // 只添加允许 iframe 的头部，不做任何 HTML 处理
+    return new NextResponse(html, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'X-Frame-Options': 'ALLOWALL',
+      },
+    });
   } catch (error) {
     console.error('代理失败:', error);
     
