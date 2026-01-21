@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
-    
+    console.log('获取解析url成功');
     let html = await response.text();
     const baseUrl = 'https://jx.xmflv.cc';
     
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         'Access-Control-Allow-Origin': '*',
       },
     });
-    
+    console.log('返回NextResponse');
   } catch (error) {
     console.error('代理失败:', error);
     
