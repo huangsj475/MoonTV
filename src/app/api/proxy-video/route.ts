@@ -1,3 +1,4 @@
+/* eslint-disable no-console,@typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -38,9 +39,9 @@ export async function GET(request: NextRequest) {
     html = html.replace(/url\(['"]?\/([^)'"]*)['"]?\)/g, `url('${baseUrl}/$1')`);
     
     // 将页面中所有的API请求重定向到我们的代理
-    html = html.replace(/https:\/\/202\.189\.8\.170(\/[^"']*)/g, (match, path) => {
+    /*html = html.replace(/https:\/\/202\.189\.8\.170(\/[^"']*)/g, (match, path) => {
       return `/api/proxy-api?url=${encodeURIComponent('https://202.189.8.170' + path)}`;
-    });
+    });*/
     
     // 添加基础标签，确保相对路径正确
     html = html.replace('<head>', `<head><base href="${baseUrl}/">`);
