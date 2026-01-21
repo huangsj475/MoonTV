@@ -1,4 +1,3 @@
-// app/api/proxy-video/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -56,7 +55,7 @@ const injectScript = `
       
       // 创建代理URL
       function createProxyUrl(originalUrl) {
-        return '/api/proxy-resource?url=' + encodeURIComponent(originalUrl);
+        return '/api/proxy-api?url=' + encodeURIComponent(originalUrl);
       }
       
       // 1. 拦截fetch请求（主要处理POST）
