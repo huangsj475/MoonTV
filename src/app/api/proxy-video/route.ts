@@ -7,25 +7,21 @@ export async function GET(request: NextRequest) {
   
   // 第三方播放器URL
   const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
+
+  const controller = new AbortController();
+  // 设置请求选项，包括信号和头部
+  const fetchOptions = {
+    signal: controller.signal,
+    headers: {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      Referer: 'https://jx.xmflv.cc/',
+      Accept: 'application/json, text/plain, */*',
+    },
+  };
   
   try {
-    // 直接获取播放器页面，不经过CORS代理
-    const response = await fetch(playerUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'none',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-      }
-    });
+    const response = await fetch(url, fetchOptions);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
