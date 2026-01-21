@@ -39,21 +39,6 @@ export async function GET(request: NextRequest) {
             setInterval(hideAd, 500);
           }
           
-          // 额外监听可能的显示事件
-          const observer = new MutationObserver((mutations) => {
-            for (let mutation of mutations) {
-              if (mutation.type === 'attributes' && 
-                  mutation.attributeName === 'style') {
-                hideAd();
-              }
-            }
-          });
-          
-          observer.observe(document.body, {
-            attributes: true,
-            subtree: true,
-            attributeFilter: ['style']
-          });
         })();
       </script>
     `;
