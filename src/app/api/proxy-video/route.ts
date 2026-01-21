@@ -41,17 +41,7 @@ export async function GET(request: NextRequest) {
     // 移除广告div
     html = html.replace(/<div[^>]*id\s*=\s*["']?adv_wrap_hh["']?[^>]*>[\s\S]*?<\/div>/gi, '');
    console.log('移除广告div');
-    // 添加CSS隐藏广告
-    const hideAdsCSS = `
-      <style>
-        #adv_wrap_hh { display: none !important; }
-        [id*="adv"], [class*="adv"] { display: none !important; }
-      </style>
-    `;
-    
-    html = html.replace('</head>', `${hideAdsCSS}</head>`);
-    console.log('添加CSS隐藏广告');
-    
+ 
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
