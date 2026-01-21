@@ -1,6 +1,46 @@
 /* eslint-disable no-console,@typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server';
 
+// 辅助函数：修复单个 URL
+const fixUrl = (url: string): string => {
+  // 跳过不需要处理的 URL
+  if (!url || 
+      url.startsWith('http://') || 
+      url.startsWith('https://') || 
+      url.startsWith('data:') || 
+      url.startsWith('blob:') ||
+      url.startsWith('#') ||
+      url.startsWith('javascript:') ||
+      url.startsWith('mailto:') ||
+      url.startsWith('tel:')) {
+    return url;
+  }
+  
+  // 协议相对路径
+  if (url.startsWith('//')) {
+    return `https:${url}`;
+  }
+  
+  // 绝对路径
+  if (url.startsWith('/')) {
+    return `https://jx.xmflv.cc${url}`;
+  }
+  
+  // 相对路径
+  return `https://jx.xmflv.cc/${url}`;
+};
+
+// 统一处理资源路径
+const fixResourcePaths = (htmlContent: string): string => {
+  // 匹配所有的 src 和 href 属性
+  const regex = /(src|href)=(["'])(.*?)\2/gi;
+  
+  return htmlContent.replace(regex, (match: string, attr: string, quote: string, url: string) => {
+    const fixedUrl = fixUrl(url);
+    return `${attr}=${quote}${fixedUrl}${quote}`;
+  });
+};
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const videoUrl = searchParams.get('url') || '';
@@ -23,8 +63,8 @@ export async function GET(request: NextRequest) {
         'Sec-Fetch-Mode': 'navigate',
         'Sec-Fetch-Site': 'same-origin',
       },
-      // 跟随重定向
-      redirect: 'follow',
+       // 跟随重定向
+      redirect: 'follow' as RequestRedirect,
     });
     
     if (!response.ok) {
@@ -39,20 +79,7 @@ export async function GET(request: NextRequest) {
     html = html.replace(/<meta[^>]*Content-Security-Policy[^>]*frame-ancestors[^>]*>/gi, '');
     
     // 2. 修复资源路径 - 确保所有相对路径都变为绝对路径
-    // 1. 首先处理协议相对路径（//开头的）
-    html = html.replace(/(src|href)=(["'])//([^"']+)\2/gi, (match, attr, quote, path) => {
-        return `${attr}=${quote}https://${path}${quote}`;
-    });
-    
-    // 2. 处理绝对路径（/开头的）
-    html = html.replace(/(src|href)=(["'])\/([^"']+)\2/gi, (match, attr, quote, path) => {
-        return `${attr}=${quote}https://jx.xmflv.cc/${path}${quote}`;
-    });
-    
-    // 3. 处理相对路径（非协议、非斜杠开头）
-    html = html.replace(/(src|href)=(["'])(?!https?:|#|blob:|data:)([^"']+)\2/gi, (match, attr, quote, path) => {
-        return `${attr}=${quote}https://jx.xmflv.cc/${path}${quote}`;
-    });
+    html = fixResourcePaths(html);
     
     // 4. 移除广告 div（使用更精确的选择器）
     const adPatterns = [
