@@ -75,11 +75,14 @@ export async function GET(request: NextRequest) {
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Accept-Encoding': 'gzip, deflate, br',
         'Referer': 'https://jx.xmflv.cc/',
+        'Referrer-Policy': 'no-referrer-when-downgrade',
         'Upgrade-Insecure-Requests': '1',
         'Sec-Fetch-Dest': 'document',
         'Sec-Fetch-Mode': 'navigate',
         'Sec-Fetch-Site': 'same-origin',
       },
+      // 重要：保持 referrer 策略
+      referrerPolicy: 'no-referrer-when-downgrade' as ReferrerPolicy,
        // 跟随重定向
       redirect: 'follow' as RequestRedirect,
     });
