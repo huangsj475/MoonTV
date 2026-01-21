@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const videoUrl = searchParams.get('url') || 'https://www.iqiyi.com/v_egoc71bz3c.html';
+  const videoUrl = searchParams.get('url');
   
   const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
   
