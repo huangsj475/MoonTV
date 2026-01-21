@@ -41,7 +41,11 @@ export default function Play2Page() {
       iframeDoc.head.appendChild(style);
       console.log('成功注入CSS');
     } catch (e) {
-      console.log('无法注入CSS（跨域限制）:', e.message);
+      if (e instanceof Error) {
+        console.log('无法注入CSS（跨域限制）:', e.message);
+      } else {
+        console.log('无法注入CSS（跨域限制）:', String(e));
+      }
     }
   }, 3000);
   }, []);
