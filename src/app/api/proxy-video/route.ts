@@ -50,8 +50,6 @@ function fixResourceUrls(html: string, baseUrl: string): string {
   // 修复相对路径
 html = html.replace(/src="\/([^"]*)"/g, `src="${baseUrl}/$1"`);
 html = html.replace(/href="\/([^"]*)"/g, `href="${baseUrl}/$1"`);
-html = html.replace(/url\('/([^']*)'\)/g, `url('${baseUrl}/$1')`);
-html = html.replace(/url\("\/\/([^"]*)"\)/g, `url("https://$1")`);
   
   return html;
 }
