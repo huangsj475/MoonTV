@@ -68,11 +68,10 @@ export async function GET(request: NextRequest) {
     
     // 第二步：修复资源路径（简单版）
     // 1. 处理 // 开头的协议相对路径
-    html = html.replace(/(src|href)=(["'])//([^"']+)\2/gi, '$1=$2https://$3$2');
+    html = html.replace(/(src|href)=(["'])\/\/([^"']+)\2/gi, '$1=$2https://$3$2');
     
     // 2. 处理 / 开头的绝对路径
-    html = html.replace(/(src|href)=(["'])\/([^"']+)\2/gi, '$1=$2https://jx.xmflv.cc/$3$2');
-    
+    html = html.replace(/(src|href)=(["'])\/(?!Api)([^"']+)\2/gi, '$1=$2https://jx.xmflv.cc/$3$2');
     // 第三步：添加 base 标签
     if (!html.includes('<base ')) {
       html = html.replace(/<head>/i, '<head>\n<base href="https://jx.xmflv.cc/">');
