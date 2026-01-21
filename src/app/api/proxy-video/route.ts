@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
   }*/
 
     // 修复资源路径
-    html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
-    console.log('修复资源路径');
+    //html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
+    //console.log('修复资源路径');
     
     // 移除广告div
     html = html.replace(/<div[^>]*id\s*=\s*["']?adv_wrap_hh["']?[^>]*>[\s\S]*?<\/div>/gi, '');
