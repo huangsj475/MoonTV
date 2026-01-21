@@ -15,11 +15,12 @@ export default function Play2Page() {
   useEffect(() => {
     setMounted(true);
     
-  const iframe = document.querySelector('iframe');
-    if (!iframe) return; 
+
 
   // 尝试注入CSS（可能因跨域失败）
   setTimeout(() => {
+    const iframe = document.querySelector('iframe');
+    if (!iframe) return; 
     try {
       if (!iframe.contentWindow) {
         console.log('iframe未加载完成');
@@ -47,7 +48,7 @@ export default function Play2Page() {
         console.log('无法注入CSS（跨域限制）:', String(e));
       }
     }
-  }, 3000);
+  }, 5000);
   }, []);
   
   const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
