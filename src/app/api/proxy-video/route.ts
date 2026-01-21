@@ -4,13 +4,19 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const videoUrl = searchParams.get('url') || '';
   
+  // 使用公共CORS代理
+  const corsProxy = 'https://cors-anywhere.herokuapp.com/';
   const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
-  
-  console.log('代理请求:', playerUrl);
+  const proxiedUrl = corsProxy + playerUrl;
   
   try {
-        // 获取第三方播放器页面
-    const response = await fetch(playerUrl);
+    // 获取播放器页面
+    const response = await fetch(proxiedUrl, {
+      headers: {
+        'Origin': 'https://jx.xmflv.cc',
+        'User-Agent': 'Mozilla/5.0',
+      }
+    });
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -18,89 +24,114 @@ export async function GET(request: NextRequest) {
     
     let html = await response.text();
     
-    // 关键：直接移除包含URL检查的混淆JavaScript代码
-    // 查找 <script type="text/javascript"> 到 </script> 之间的内容
-    //const scriptRegex = /<script\s+type="text\/javascript">\s*eval\(function\(p,a,c,k,e,r\)[\s\S]*?<\/script>/g;
+    // 修复所有资源链接
+    const baseUrl = 'https://jx.xmflv.cc';
+    html = fixResourceUrls(html, baseUrl);
     
-  // 方法1：直接替换条件判断 // 代理模式：绕过URL检查'
-  /*const pattern = /p k=[^;]*;8\(k==""\|\|k=="18"\|\|k=="19"\)\{[^}]*\}l\{([^}]*)\}/;
-  const match = html.match(pattern);
-  
-  if (match && match[1]) {
-    // 提取 else 块内容
-    const elseContent = match[1];
-    // 用 else 块内容替换整个匹配
-    html = html.replace(pattern, elseContent);
-  }*/
-
-    // 关键：找到所有对202.189.8.170的请求，替换为我们的代理
-    const apiBase = 'https://202.189.8.170';
-    const proxyBase = '/api/proxy-api';
-    
-    // 替换所有API请求
-    html = html.replace(
-      new RegExp(`${apiBase}/`, 'g'),
-      `${proxyBase}?url=${encodeURIComponent(apiBase + '/')}`
-    );
-    
-    // 替换完整的API URL
-    html = html.replace(
-      /"https:\/\/202\.189\.8\.170(\/[^"]*)"/g,
-      (match, path) => {
-        return `"${proxyBase}?url=${encodeURIComponent(apiBase + path)}"`;
-      }
-    );
-    
-    // 同样替换单引号
-    html = html.replace(
-      /'https:\/\/202\.189\.8\.170(\/[^']*)'/g,
-      (match, path) => {
-        return `'${proxyBase}?url=${encodeURIComponent(apiBase + path)}"'`;
-      }
-    );
-    
-    // 移除广告div
-    //html = html.replace(/<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/g, '');
-    
-    // 添加CSS隐藏广告
-    const hideAdsCSS = `
-      <style>
-        #adv_wrap_hh { display: none !important; }
-        [id*="adv"], [class*="adv"] { display: none !important; }
-      </style>
-    `;
-    
-    html = html.replace('</head>', `${hideAdsCSS}</head>`);
-    
-    // 修复资源路径
-    //html = html.replace(/(src|href)="\/([^"]*)"/g, '$1="https://jx.xmflv.cc/$2"');
+    // 添加CORS代理到所有请求
+    html = addCorsProxyToScripts(html);
     
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
       },
     });
     
   } catch (error) {
     console.error('代理失败:', error);
-    
-    // 返回一个简单的重定向页面
-    const redirectHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>正在跳转</title>
-        <meta http-equiv="refresh" content="0;url=${playerUrl}" />
-        <script>window.location.href = "${playerUrl}";</script>
-      </head>
-      <body>
-        <p>正在跳转到播放器... <a href="${playerUrl}">点击这里</a></p>
-      </body>
-      </html>
-    `;
-    
-    return new NextResponse(redirectHtml, {
-      headers: { 'Content-Type': 'text/html' },
-    });
+    // 返回iframe包装页面
+    return getFallbackPage(playerUrl);
   }
+}
+
+function fixResourceUrls(html: string, baseUrl: string): string {
+  // 修复相对路径
+  html = html.replace(/src="\/([^"]*)"/g, `src="${baseUrl}/$1"`);
+  html = html.replace(/href="\/([^"]*)"/g, `href="${baseUrl}/$1"`);
+  html = html.replace(/url\(\'\/([^']*)\'\)/g, `url('${baseUrl}/$1')`);
+  html = html.replace(/url\("\/\/([^)]*)"\)/g, `url("https://$1")`);
+  
+  return html;
+}
+
+function addCorsProxyToScripts(html: string): string {
+  const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+  
+  // 添加脚本拦截器
+  const script = `
+    <script>
+      (function() {
+        // 代理fetch
+        const originalFetch = window.fetch;
+        window.fetch = function(url, options) {
+          if (typeof url === 'string' && !url.startsWith('blob:')) {
+            if (!url.startsWith('http')) {
+              url = 'https://jx.xmflv.cc' + (url.startsWith('/') ? url : '/' + url);
+            }
+            url = '${corsProxy}' + url;
+          }
+          return originalFetch.call(this, url, options);
+        };
+        
+        // 代理XMLHttpRequest
+        const originalOpen = XMLHttpRequest.prototype.open;
+        XMLHttpRequest.prototype.open = function(method, url, ...args) {
+          if (typeof url === 'string' && !url.startsWith('blob:')) {
+            if (!url.startsWith('http')) {
+              url = 'https://jx.xmflv.cc' + (url.startsWith('/') ? url : '/' + url);
+            }
+            url = '${corsProxy}' + url;
+          }
+          return originalOpen.apply(this, [method, url, ...args]);
+        };
+        
+        // 修复已加载的资源
+        document.addEventListener('DOMContentLoaded', function() {
+          // 修复script标签
+          document.querySelectorAll('script[src]').forEach(script => {
+            let src = script.getAttribute('src');
+            if (src && !src.startsWith('blob:')) {
+              if (!src.startsWith('http')) {
+                src = 'https://jx.xmflv.cc' + (src.startsWith('/') ? src : '/' + src);
+              }
+              script.src = '${corsProxy}' + src;
+            }
+          });
+          
+          // 修复iframe
+          document.querySelectorAll('iframe[src]').forEach(iframe => {
+            let src = iframe.getAttribute('src');
+            if (src && src.includes('202.189.8.170')) {
+              iframe.src = '${corsProxy}' + src;
+            }
+          });
+        });
+      })();
+    </script>
+  `;
+  
+  return html.replace('</head>', script + '</head>');
+}
+
+function getFallbackPage(playerUrl: string): NextResponse {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>播放器</title>
+      <style>
+        body { margin: 0; padding: 0; background: #000; }
+        iframe { width: 100vw; height: 100vh; border: none; }
+      </style>
+    </head>
+    <body>
+      <iframe src="${playerUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
+    </body>
+    </html>
+  `;
+  
+  return new NextResponse(html, {
+    headers: { 'Content-Type': 'text/html' },
+  });
 }
