@@ -8,7 +8,9 @@ export async function GET(request: NextRequest) {
   const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
   
   console.log('代理请求:', playerUrl);
-  
+
+  const requestUrl = new URL(request.url);
+  const myDomain = `${requestUrl.protocol}//${requestUrl.host}`;
   try {
     // 获取第三方播放器页面
     const response = await fetch(playerUrl);
@@ -20,11 +22,13 @@ export async function GET(request: NextRequest) {
       <script>
         // 动态拦截 API 请求
         (function() {
+          const MY_DOMAIN = "${myDomain}";
+          
           // 拦截 fetch
           const originalFetch = window.fetch;
           window.fetch = function(input, init) {
             if (typeof input === 'string' && input.includes('202.189.8.170/Api')) {
-              const newUrl = '/api/proxy-api?url=' + encodeURIComponent(input);
+              const newUrl = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(input);
               console.log('拦截 fetch 请求:', input, '->', newUrl);
               return originalFetch(newUrl, init);
             }
@@ -35,7 +39,7 @@ export async function GET(request: NextRequest) {
           const originalOpen = XMLHttpRequest.prototype.open;
           XMLHttpRequest.prototype.open = function(method, url) {
             if (url && url.includes('202.189.8.170/Api')) {
-              const newUrl = '/api/proxy-api?url=' + encodeURIComponent(url);
+              const newUrl = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(url);
               console.log('拦截 XHR 请求:', url, '->', newUrl);
               arguments[1] = newUrl;
             }
@@ -50,7 +54,7 @@ export async function GET(request: NextRequest) {
               const originalSetAttribute = element.setAttribute;
               element.setAttribute = function(name, value) {
                 if (name === 'src' && value && value.includes('202.189.8.170/Api')) {
-                  value = '/api/proxy-api?url=' + encodeURIComponent(value);
+                  value = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(value);
                   console.log('拦截 script src:', value);
                 }
                 return originalSetAttribute.call(this, name, value);
