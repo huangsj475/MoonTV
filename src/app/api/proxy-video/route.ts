@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   };
   
   try {
-    const response = await fetch(url, fetchOptions);
+    const response = await fetch(playerUrl, fetchOptions);
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
