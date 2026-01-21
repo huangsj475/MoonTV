@@ -90,16 +90,16 @@ export async function GET(request: NextRequest) {
     }
     
     console.log('请求成功，状态码:', response.status);
-    let html = await response.text();
+    const html = await response.text();
     
-    /*// 1. 移除反 iframe 的响应头相关设置
-    html = html.replace(/<meta[^>]*X-Frame-Options[^>]*>/gi, '');
-    html = html.replace(/<meta[^>]*Content-Security-Policy[^>]*frame-ancestors[^>]*>/gi, '');
+    // 1. 移除反 iframe 的响应头相关设置
+    //html = html.replace(/<meta[^>]*X-Frame-Options[^>]*>/gi, '');
+    //html = html.replace(/<meta[^>]*Content-Security-Policy[^>]*frame-ancestors[^>]*>/gi, '');
     
     // 2. 修复资源路径 - 确保所有相对路径都变为绝对路径
-    html = fixResourcePaths(html);
+    //html = fixResourcePaths(html);
     
-    // 4. 移除广告 div（使用更精确的选择器）
+    /*// 4. 移除广告 div（使用更精确的选择器）
     const adPatterns = [
       /<div[^>]*id\s*=\s*["'][^"']*adv[^"']*["'][^>]*>[\s\S]*?<\/div>/gi,
     ];
