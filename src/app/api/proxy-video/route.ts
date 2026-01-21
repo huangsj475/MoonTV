@@ -6,143 +6,167 @@ export async function GET(request: NextRequest) {
   const videoUrl = searchParams.get('url') || '';
   
   const playerUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
+  const yourDomain = `${request.nextUrl.protocol}//${request.nextUrl.host}`;
   
-  console.log('代理请求:', playerUrl);
-
-  const requestUrl = new URL(request.url);
-  const myDomain = `${requestUrl.protocol}//${requestUrl.host}`;
+  console.log('直接代理视频页面到iframe');
+  
   try {
-    // 获取第三方播放器页面
-    const response = await fetch(playerUrl);
-    let html = await response.text();
-    
-    // 第一步：让所有 API 请求走我们的代理
-    // 第四步：注入一个脚本，动态处理后续的 API 请求
-    const injectScript = `
-      <script>
-        // 动态拦截 API 请求
-        (function() {
-          const MY_DOMAIN = "${myDomain}";
-
-          // 保存原始请求头
-          const originalHeaders = {
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'Origin': 'https://jx.xmflv.cc',
-            'Referer': 'https://jx.xmflv.cc/',
-          };
-          
-          // 拦截 fetch
-          const originalFetch = window.fetch;
-          window.fetch = function(input, init) {
-            if (typeof input === 'string' && input.includes('202.189.8.170/Api')) {
-              const newUrl = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(input);
-              console.log('拦截 fetch 请求:', input, '->', newUrl);
-            // 确保请求头正确
-            if (init) {
-              init.headers = {
-                ...originalHeaders,
-                ...init.headers,
-              };
-            } else {
-              init = { headers: originalHeaders };
+    // 不再修改HTML，直接返回重定向或简单页面
+    const directIframeHtml = `
+      <!DOCTYPE html>
+      <html lang="zh-CN">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>视频播放器 - 直接模式</title>
+        <style>
+          body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+          }
+          .container {
+            width: 100%;
+            height: 100%;
+          }
+          iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+          }
+          .error {
+            color: white;
+            text-align: center;
+            padding: 50px;
+            font-family: Arial;
+          }
+        </style>
+        <script>
+          // 尝试绕过一些iframe检测
+          try {
+            // 伪装一些属性
+            if (window.top !== window.self) {
+              window.isInIframe = true;
+              // 尝试修复某些检测
+              try {
+                Object.defineProperty(window, 'top', { 
+                  get: function() { return window; },
+                  configurable: true 
+                });
+                Object.defineProperty(window, 'parent', { 
+                  get: function() { return window; },
+                  configurable: true 
+                });
+              } catch(e) {}
             }
+          } catch(e) {}
+        </script>
+      </head>
+      <body>
+        <div class="container">
+          <iframe 
+            id="playerFrame"
+            src="${playerUrl}"
+            title="视频播放器"
+            sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-pointer-lock allow-presentation"
+            allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+            allowfullscreen
+            referrerpolicy="no-referrer-when-downgrade"
+            scrolling="no"
+          ></iframe>
+        </div>
+        
+        <script>
+          // 监听iframe加载
+          const iframe = document.getElementById('playerFrame');
+          
+          // 尝试注入脚本到iframe
+          setTimeout(() => {
+            try {
+              const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
               
-              return originalFetch(newUrl, init);
-            }
-            return originalFetch(input, init);
-          };
-          
-          // 拦截 XMLHttpRequest
-          const originalOpen = XMLHttpRequest.prototype.open;
-          const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
-          XMLHttpRequest.prototype.open = function(method, url) {
-            if (url && url.includes('202.189.8.170/Api')) {
-              const newUrl = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(url);
-              console.log('拦截 XHR 请求:', url, '->', newUrl);
-              // 保存原始 URL 以便后续设置请求头
-              this._originalUrl = url;
-              arguments[1] = newUrl;
-            }
-            return originalOpen.apply(this, arguments);
-          };
-
-          XMLHttpRequest.prototype.setRequestHeader = function(header, value) {
-            // 如果请求的是代理 API，修改 Origin 头
-            if (header.toLowerCase() === 'origin' && this._originalUrl) {
-              value = 'https://jx.xmflv.cc';
-            }
-            return originalSetRequestHeader.call(this, header, value);
-          };
-          
-          // 处理动态创建的 script 或 iframe
-          const originalCreateElement = document.createElement;
-          document.createElement = function(tagName) {
-            const element = originalCreateElement.call(document, tagName);
-            if (tagName.toLowerCase() === 'script') {
-              const originalSetAttribute = element.setAttribute;
-              element.setAttribute = function(name, value) {
-                if (name === 'src' && value && value.includes('202.189.8.170/Api')) {
-                  value = MY_DOMAIN + '/api/proxy-api?url=' + encodeURIComponent(value);
-                  console.log('拦截 script src:', value);
+              // 注入一个脚本，尝试绕过检测
+              const script = iframeDoc.createElement('script');
+              script.textContent = \`
+                try {
+                  // 绕过iframe检测 - 方法1
+                  if (typeof window.top !== 'undefined' && window.top !== window.self) {
+                    // 重写检测逻辑
+                    const originalToString = Function.prototype.toString;
+                    Function.prototype.toString = function() {
+                      const str = originalToString.call(this);
+                      if (str.includes('top!==self') || str.includes('top != self') || 
+                          str.includes('window.top!==window.self') || str.includes('parent!==window')) {
+                        return str.replace(/top\\s*!==?\\s*self|window\\.top\\s*!==?\\s*window\\.self|parent\\s*!==?\\s*window/gi, 'false');
+                      }
+                      return str;
+                    };
+                    
+                    // 方法2：重写关键函数
+                    const checkers = ['checkIframe', 'iframeCheck', 'isInIframe', 'checkFrame'];
+                    checkers.forEach(funcName => {
+                      if (typeof window[funcName] === 'function') {
+                        window[funcName] = function() { return false; };
+                      }
+                    });
+                    
+                    console.log('已尝试绕过iframe检测');
+                  }
+                } catch(e) {
+                  console.log('绕过检测失败:', e.message);
                 }
-                return originalSetAttribute.call(this, name, value);
-              };
+              \`;
+              
+              iframeDoc.head.appendChild(script);
+            } catch(e) {
+              // 跨域错误，正常
             }
-            return element;
+          }, 2000);
+          
+          // 如果iframe失败，显示错误
+          iframe.onerror = function() {
+            document.body.innerHTML = \`
+              <div class="error">
+                <h2>播放器加载失败</h2>
+                <p>请尝试：</p>
+                <p><a href="${playerUrl}" target="_blank" style="color: #4dabf7;">直接访问播放器</a></p>
+                <p><a href="${yourDomain}/api/proxy-api?url=\${encodeURIComponent(playerUrl)}" style="color: #4dabf7;">使用JS代理模式</a></p>
+              </div>
+            \`;
           };
-        })();
-      </script>
+        </script>
+      </body>
+      </html>
     `;
     
-    html = html.replace('</head>', `${injectScript}</head>`);
-    
-    console.log('处理后续的 API 请求脚本注入');
-    
-    // 第二步：修复资源路径（简单版）
-    // 1. 处理 // 开头的协议相对路径
-    html = html.replace(/(src|href)=(["'])\/\/([^"']+)\2/gi, '$1=$2https://$3$2');
-    
-    // 2. 处理 / 开头的绝对路径
-    html = html.replace(/(src|href)=(["'])\/(?!Api)([^"']+)\2/gi, '$1=$2https://jx.xmflv.cc/$3$2');
-    // 第三步：添加 base 标签
-    if (!html.includes('<base ')) {
-      html = html.replace(/<head>/i, '<head>\n<base href="https://jx.xmflv.cc/">');
-    }
-    
-    // 第四步：移除明显的广告 div
-    html = html.replace(/<div[^>]*id\s*=\s*["'][^"']*adv[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '');
-    
-    console.log('HTML 处理完成');
-    
-    return new NextResponse(html, {
+    return new NextResponse(directIframeHtml, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'X-Frame-Options': 'ALLOWALL',
+        'Content-Security-Policy': "frame-ancestors 'self' *",
       },
     });
     
   } catch (error) {
     console.error('代理失败:', error);
     
-    // 返回一个简单的重定向页面
-    const redirectHtml = `
+    // 最简单的回退：直接iframe
+    const fallbackHtml = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>正在跳转</title>
-        <base href="https://jx.xmflv.cc/">
-        <meta http-equiv="refresh" content="0;url=${playerUrl}" />
-        <script>window.location.href = "${playerUrl}";</script>
+        <title>视频播放器</title>
+        <style>body,html{margin:0;padding:0;height:100%;} iframe{width:100%;height:100%;border:none;}</style>
       </head>
-      <body style="margin:0;padding:20px;">
-        <p>正在跳转到播放器... <a href="${playerUrl}">点击这里</a></p>
+      <body>
+        <iframe src="${playerUrl}" sandbox="allow-scripts allow-same-origin"></iframe>
       </body>
       </html>
     `;
     
-    return new NextResponse(redirectHtml, {
-      headers: { 'Content-Type': 'text/html' },
-    });
+    return new NextResponse(fallbackHtml, { headers: { 'Content-Type': 'text/html' } });
   }
 }
