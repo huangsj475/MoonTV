@@ -21,10 +21,8 @@ export default function Play2Page() {
     const originalUrl = `${PLAYER_BASE_URL}${encodedUrl}`;
     
     // 使用API代理
-    //const localProxyUrl = `/api/proxy-video?url=${encodeURIComponent(originalUrl)}`;
-    const localProxyUrl = `https://go.netlist.dpdns.org/cors/?url=${encodeURIComponent(originalUrl)}`;
-    
-    
+    const localProxyUrl = `/api/proxy-video?url=${encodeURIComponent(originalUrl)}`;
+  
     // 选择其中一个使用
     setIframeSrc(localProxyUrl); // 或使用 externalProxyUrl
     
