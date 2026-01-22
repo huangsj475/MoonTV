@@ -1,4 +1,3 @@
-// app/api/proxy-video/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -7,74 +6,55 @@ export async function GET(request: NextRequest) {
     const url = searchParams.get('url');
     
     if (!url) {
-      return NextResponse.json(
-        { error: 'URL参数是必需的' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'URL参数是必需的' }, { status: 400 });
     }
     
-    // 解码URL
-    const decodedUrl = decodeURIComponent(url);
-    
-    // 这里你可以添加额外的安全检查
-    // 例如，限制只允许特定的域名
-    const allowedDomains = ['iqiyi.com', 'jx.xmflv.cc'];
-    const isAllowed = allowedDomains.some(domain => decodedUrl.includes(domain));
-    
-    if (!isAllowed) {
-      return NextResponse.json(
-        { error: '不允许的域名' },
-        { status: 403 }
-      );
-    }
-    
-    // 发起请求
-    const response = await fetch(decodedUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Referer': 'https://jx.xmflv.cc/',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-    });
+    // 先用外部代理获取内容
+    const externalProxyUrl = `https://go.netlist.dpdns.org/cors/?url=${url}`;
+    const response = await fetch(externalProxyUrl);
     
     if (!response.ok) {
-      throw new Error(`请求失败: ${response.status}`);
+      throw new Error(`外部代理请求失败: ${response.status}`);
     }
     
-    // 获取响应文本
-    const html = await response.text();
-    //去广告div
+    let html = await response.text();
+    
+    // 在本地清理广告
     html = html.replace(
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
     );
     
-    // 返回响应，设置适当的CORS头
+    // 添加CSS确保隐藏
+    const hideAdCSS = `
+      <style>
+        #adv_wrap_hh { 
+          display: none !important; 
+          visibility: hidden !important;
+          width: 0 !important;
+          height: 0 !important;
+        }
+      </style>
+    `;
+    
+    if (html.includes('</head>')) {
+      html = html.replace('</head>', `${hideAdCSS}</head>`);
+    } else {
+      html = hideAdCSS + html;
+    }
+    
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html',
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
       },
     });
     
   } catch (error) {
     console.error('代理请求失败:', error);
     return NextResponse.json(
-      { error: '代理请求失败', details: error instanceof Error ? error.message : '未知错误' },
+      { error: '代理请求失败' },
       { status: 500 }
     );
   }
-}
-
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
 }
