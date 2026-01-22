@@ -17,8 +17,7 @@ export default function Play2Page() {
     
     const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
     const PLAYER_BASE_URL = 'https://jx.xmflv.cc/?url=';
-    const encodedUrl = encodeURIComponent(videoUrl);
-    const originalUrl = `${PLAYER_BASE_URL}${encodedUrl}`;
+    const originalUrl = `${PLAYER_BASE_URL}${videoUrl}`;
     
     // 使用API代理
     const localProxyUrl = `/api/proxy-video?url=${encodeURIComponent(originalUrl)}`;
