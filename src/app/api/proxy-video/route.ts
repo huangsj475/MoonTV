@@ -33,11 +33,26 @@ export async function GET(request: NextRequest) {
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
       );
-        // 关键修复：移除危险的sandbox组合
+        // 关键修复：移除sandbox组合
       html = html.replace(
         /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g,
         'sandbox="allow-scripts"'
       );
+
+      // 3. 添加CORS头（让视频可以跨域播放）
+      const corsScript = `
+      <script>
+        // 允许视频资源跨域
+        document.addEventListener('DOMContentLoaded', function() {
+          const videoElements = document.querySelectorAll('video');
+          videoElements.forEach(video => {
+            video.crossOrigin = 'anonymous';
+          });
+        });
+      </script>
+      `;
+      html = html.replace('</body>', corsScript + '</body>');
+      
       console.log('清理广告');
       return new Response(html, {
         headers: {
