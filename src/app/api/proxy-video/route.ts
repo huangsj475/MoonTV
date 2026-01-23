@@ -20,15 +20,16 @@ export async function GET(request: NextRequest) {
 
       let html = await response.text();
       //去除加载广告的js
-     /*html = html.replace(
+     html = html.replace(
       /<script[^>]*src=['"]\/\/pc\.stgowan\.com\/pc\/video-tf\.js['"][^>]*><\/script>/gi,
       ''
-      );*/
-    html = html.replace(
-      /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
-      ''
-    );
-      return new Response(html);
+      );
+
+      return new Response(html, {
+        headers: {
+          'Content-Type': 'text/html
+        }
+      });
 /*const adRegex = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi;
 const adMatches = html.match(adRegex);
 console.log('找到广告div数量:', adMatches ? adMatches.length : 0);
