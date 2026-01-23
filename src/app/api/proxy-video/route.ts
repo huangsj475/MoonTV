@@ -16,8 +16,15 @@ export async function GET(request: NextRequest) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/*,*/*;q=0.8',
         'Accept-Language': 'zh-CN,zh;q=0.9',
-      }
+      },
+      redirect: 'manual'
     });
+    // 检查重定向状态码
+    if (response.status === 301 || response.status === 302) {
+      const redirectUrl = response.headers.get('location');
+      console.log('重定向到:', redirectUrl);
+      // 重新请求重定向的URL
+    }
     if (!response.ok) {
       throw new Error(`外部代理请求失败: ${response.status}`);
     }
@@ -30,7 +37,7 @@ export async function GET(request: NextRequest) {
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
       );
-      
+      console.log('清理广告');
       return new Response(modifiedHtml, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
@@ -41,6 +48,7 @@ export async function GET(request: NextRequest) {
     // 图片、CSS、JS等静态资源直接转发
     else {
       const buffer = await response.arrayBuffer();
+      console.log('图片资源直接转发');
       return new Response(buffer, {
         headers: {
           'Content-Type': contentType,
