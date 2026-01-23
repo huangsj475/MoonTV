@@ -35,12 +35,13 @@ console.log('找到广告div数量:', adMatches ? adMatches.length : 0);
       );
 console.log('删除广告后HTML长度:', html.length);*/
 
-      return new Response(html, {
+     return new Response(html);
+      /*return new Response(html, {
         headers: {
           //'Content-Type': 'text/html; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
-      });
+      });*/
 
     /*let html = await response.text();
     
