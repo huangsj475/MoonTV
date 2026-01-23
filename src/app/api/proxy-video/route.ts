@@ -10,14 +10,47 @@ export async function GET(request: NextRequest) {
     }
     
     // 先用外部代理获取内容
-    const externalProxyUrl = `https://go.netlist.dpdns.org/cors/?url=${url}`;
-    const response = await fetch(externalProxyUrl);
-    
+    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(url)}`;
+    const response = await fetch(externalProxyUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/*,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+      }
+    });
     if (!response.ok) {
       throw new Error(`外部代理请求失败: ${response.status}`);
     }
+    const contentType = response.headers.get('content-type') || '';
+      // 根据类型处理
+    if (contentType.includes('text/html')) {
+      const html = await response.text();
+      // 在本地清理广告
+      const modifiedHtml = html.replace(
+      /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
+      ''
+      );
+      
+      return new Response(modifiedHtml, {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Access-Control-Allow-Origin': '*'
+        }
+      });
+    } 
+    // 图片、CSS、JS等静态资源直接转发
+    else {
+      const buffer = await response.arrayBuffer();
+      return new Response(buffer, {
+        headers: {
+          'Content-Type': contentType,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        }
+      });
+    }
     
-    let html = await response.text();
+    /*let html = await response.text();
     
     // 在本地清理广告
     html = html.replace(
@@ -48,7 +81,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'text/html',
         'Access-Control-Allow-Origin': '*',
       },
-    });
+    });*/
     
   } catch (error) {
     console.error('代理请求失败:', error);
