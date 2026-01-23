@@ -36,9 +36,7 @@ export async function GET(request: NextRequest) {
         // 关键修复：移除危险的sandbox组合
       html = html.replace(
         /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g,
-        (match) => {
-          return match.replace('allow-same-origin', '');
-        }
+        'sandbox="allow-scripts"'
       );
       console.log('清理广告');
       return new Response(html, {
