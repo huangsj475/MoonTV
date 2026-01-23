@@ -31,24 +31,40 @@ export async function GET(request: NextRequest) {
       // 根据类型处理
     if (contentType.includes('text/html')) {
       let html = await response.text();
-
+console.log('=== 代理调试开始 ===');
+console.log('原始HTML长度:', html.length);
+console.log('内容类型:', response.headers.get('content-type'));
+console.log('状态码:', response.status);
+      
+const tongjiRegex = /<iframe[^>]*name=["']tongji["'][^>]*>[\s\S]*?<\/iframe>/gi;
+const tongjiMatches = html.match(tongjiRegex);
+console.log('找到tongji iframe数量:', tongjiMatches ? tongjiMatches.length : 0);
       // 在代理中删除tongji iframe
       html = html.replace(
         /<iframe[^>]*name=["']tongji["'][^>]*>[\s\S]*?<\/iframe>/gi,
         ''
       );
+console.log('删除tongji后HTML长度:', html.length);
+      
+const adRegex = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi;
+const adMatches = html.match(adRegex);
+console.log('找到广告div数量:', adMatches ? adMatches.length : 0);
       // 在本地清理广告
       html = html.replace(
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
       );
-
+console.log('删除广告后HTML长度:', html.length);
+      
+const sandboxRegex = /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g;
+const sandboxMatches = html.match(sandboxRegex);
+console.log('找到危险sandbox组合数量:', sandboxMatches ? sandboxMatches.length : 0);
         // 关键修复：移除sandbox组合
       html = html.replace(
         /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g,
         'sandbox="allow-scripts"'
       );
-
+console.log('修复sandbox后HTML长度:', html.length);
       // 3. 添加CORS头（让视频可以跨域播放）
       const corsScript = `
       <script>
