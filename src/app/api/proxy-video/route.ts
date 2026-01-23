@@ -31,11 +31,18 @@ export async function GET(request: NextRequest) {
       // 根据类型处理
     if (contentType.includes('text/html')) {
       let html = await response.text();
+
+      // 在代理中删除tongji iframe
+      html = html.replace(
+        /<iframe[^>]*name=["']tongji["'][^>]*>[\s\S]*?<\/iframe>/gi,
+        ''
+      );
       // 在本地清理广告
       html = html.replace(
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
       );
+
         // 关键修复：移除sandbox组合
       html = html.replace(
         /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g,
