@@ -1,24 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const url = searchParams.get('proxyurl');
-    
-    if (!url) {
+
+  const { searchParams } = new URL(request.url);
+  const encodedVideoUrl = searchParams.get('proxyurl');
+    if (!encodedVideoUrl) {
       return NextResponse.json({ error: 'URL参数是必需的' }, { status: 400 });
     }
-    
+  try {
+    // 解码视频URL
+    const videoUrl = decodeURIComponent(encodedVideoUrl);
     // 先用外部代理获取内容
-    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(url)}`;
+    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
     const response = await fetch(externalProxyUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Referer': 'https://jx.xmflv.cc/',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
       },
      redirect: 'follow'
     });
@@ -27,26 +26,14 @@ export async function GET(request: NextRequest) {
       throw new Error(`外部代理请求失败: ${response.status}`);
     }
 
-    const contentType = response.headers.get('content-type') || '';
-      // 根据类型处理
-    if (contentType.includes('text/html')) {
       let html = await response.text();
-console.log('=== 代理调试开始 ===');
-console.log('原始HTML长度:', html.length);
-console.log('内容类型:', response.headers.get('content-type'));
-console.log('状态码:', response.status);
-      
-const tongjiRegex = /<iframe[^>]*name=["']tongji["'][^>]*>[\s\S]*?<\/iframe>/gi;
-const tongjiMatches = html.match(tongjiRegex);
-console.log('找到tongji iframe数量:', tongjiMatches ? tongjiMatches.length : 0);
-      // 在代理中删除tongji iframe
+      //去除加载广告的js
       html = html.replace(
-        /<iframe[^>]*name=["']tongji["'][^>]*>[\s\S]*?<\/iframe>/gi,
-        ''
+      /<script[^>]*src=['"]\/\/pc\.stgowan\.com\/pc\/video-tf\.js['"][^>]*><\/script>/gi,
+      ''
       );
-console.log('删除tongji后HTML长度:', html.length);
       
-const adRegex = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi;
+/*const adRegex = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi;
 const adMatches = html.match(adRegex);
 console.log('找到广告div数量:', adMatches ? adMatches.length : 0);
       // 在本地清理广告
@@ -54,52 +41,15 @@ console.log('找到广告div数量:', adMatches ? adMatches.length : 0);
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
       );
-console.log('删除广告后HTML长度:', html.length);
-      
-const sandboxRegex = /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g;
-const sandboxMatches = html.match(sandboxRegex);
-console.log('找到危险sandbox组合数量:', sandboxMatches ? sandboxMatches.length : 0);
-        // 关键修复：移除sandbox组合
-      html = html.replace(
-        /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g,
-        'sandbox="allow-scripts"'
-      );
-console.log('修复sandbox后HTML长度:', html.length);
-      // 3. 添加CORS头（让视频可以跨域播放）
-      const corsScript = `
-      <script>
-        // 允许视频资源跨域
-        document.addEventListener('DOMContentLoaded', function() {
-          const videoElements = document.querySelectorAll('video');
-          videoElements.forEach(video => {
-            video.crossOrigin = 'anonymous';
-          });
-        });
-      </script>
-      `;
-      html = html.replace('</body>', corsScript + '</body>');
-      
-      console.log('清理广告');
+console.log('删除广告后HTML长度:', html.length);*/
+
       return new Response(html, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       });
-    } 
-    // 图片、CSS、JS等静态资源直接转发
-    else {
-      const buffer = await response.arrayBuffer();
-      console.log('图片资源直接转发');
-      return new Response(buffer, {
-        headers: {
-          'Content-Type': contentType,
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'public, max-age=86400'
-        }
-      });
-    }
-    
+
     /*let html = await response.text();
     
     // 在本地清理广告
