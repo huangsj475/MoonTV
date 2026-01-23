@@ -12,15 +12,14 @@ export async function GET(request: NextRequest) {
     const videoUrl = decodeURIComponent(encodedVideoUrl);
     // 先用外部代理获取内容
     const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
-    const response = await fetch(externalProxyUrl, {
+    /*const response = await fetch(externalProxyUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'zh-CN,zh;q=0.9',
-        'Referer': 'https://jx.xmflv.cc/',
       }
-    });
-    
+    });*/
+    const response = await fetch(externalProxyUrl);
     if (!response.ok) {
       throw new Error(`外部代理请求失败: ${response.status}`);
     }
