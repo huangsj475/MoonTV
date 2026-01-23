@@ -10,7 +10,8 @@ export async function GET(request: NextRequest) {
     }
     
     // 先用外部代理获取内容
-    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(url)}`;
+    //const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(url)}`;
+    const externalProxyUrl = `https://jx.xmflv.cc/?url=${url}`;
     const response = await fetch(externalProxyUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
