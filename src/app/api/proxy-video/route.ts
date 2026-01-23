@@ -27,14 +27,21 @@ export async function GET(request: NextRequest) {
     const contentType = response.headers.get('content-type') || '';
       // 根据类型处理
     if (contentType.includes('text/html')) {
-      const html = await response.text();
+      let html = await response.text();
       // 在本地清理广告
-      const modifiedHtml = html.replace(
+      html = html.replace(
       /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi,
       ''
       );
+        // 关键修复：移除危险的sandbox组合
+      html = html.replace(
+        /sandbox="[^"]*allow-scripts[^"]*allow-same-origin[^"]*"/g,
+        (match) => {
+          return match.replace('allow-same-origin', '');
+        }
+      );
       console.log('清理广告');
-      return new Response(modifiedHtml, {
+      return new Response(html, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
