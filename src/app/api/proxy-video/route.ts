@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // 解码视频URL
     const videoUrl = decodeURIComponent(encodedVideoUrl);
     // 先用外部代理获取内容
-    const externalProxyUrl = `https://jx.xmflv.cc/?url=${videoUrl}`;
+    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
 
     const response = await fetch(externalProxyUrl);
     if (!response.ok) {
@@ -37,7 +37,7 @@ console.log('删除广告后HTML长度:', html.length);*/
 
       return new Response(html, {
         headers: {
-          'Content-Type': 'text/html; charset=utf-8',
+          //'Content-Type': 'text/html; charset=utf-8',
           'Access-Control-Allow-Origin': '*'
         }
       });
