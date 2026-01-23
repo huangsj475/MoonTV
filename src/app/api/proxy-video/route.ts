@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
       return new Response(html, {
         headers: {
-          'Content-Type': 'text/html
+          'Content-Type': 'text/html'
         }
       });
 /*const adRegex = /<div\s+id="adv_wrap_hh"[^>]*>[\s\S]*?<\/div>/gi;
