@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const url = searchParams.get('url');
+    const url = searchParams.get('proxyurl');
     
     if (!url) {
       return NextResponse.json({ error: 'URL参数是必需的' }, { status: 400 });
     }
     
     // 先用外部代理获取内容
-    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(url)}`;
+    const externalProxyUrl = `https://jx.xmflv.cc/?proxyurl=${encodeURIComponent(url)}`;
     const response = await fetch(externalProxyUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
