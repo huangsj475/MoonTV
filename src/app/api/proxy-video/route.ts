@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     // 解码视频URL
     const videoUrl = decodeURIComponent(encodedVideoUrl);
     // 先用外部代理获取内容
-    const externalProxyUrl = `https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`;
+    const externalProxyUrl = `https://jx.xmflv.cc/?url=${videoUrl}`;
 
     const response = await fetch(externalProxyUrl);
     if (!response.ok) {
