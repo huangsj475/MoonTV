@@ -20,7 +20,7 @@ export default function Play2Page() {
     const originalUrl = `${PLAYER_BASE_URL}${videoUrl}`;
     
     // 使用API代理
-    const localProxyUrl = `/api/proxy-video?proxyurl=${originalUrl}`;
+    const localProxyUrl = `/api/proxy-video?proxyurl=${encodeURIComponent(videoUrl)}`;
   
     // 选择其中一个使用
     setIframeSrc(localProxyUrl); // 或使用 externalProxyUrl
