@@ -51,8 +51,6 @@ export default function Play2Page() {
           <iframe
             src={iframeSrc}
             className="w-full h-full border-0"
-            allowFullScreen
-            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
           />
         ) : (
           <div className="flex items-center justify-center h-full">
