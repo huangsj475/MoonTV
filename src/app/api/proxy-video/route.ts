@@ -14,20 +14,15 @@ export async function GET(request: NextRequest) {
     const response = await fetch(externalProxyUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/*,*/*;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'zh-CN,zh;q=0.9',
-      },
-      redirect: 'manual'
+      }
     });
-    // 检查重定向状态码
-    if (response.status === 301 || response.status === 302) {
-      const redirectUrl = response.headers.get('location');
-      console.log('重定向到:', redirectUrl);
-      // 重新请求重定向的URL
-    }
+    
     if (!response.ok) {
       throw new Error(`外部代理请求失败: ${response.status}`);
     }
+
     const contentType = response.headers.get('content-type') || '';
       // 根据类型处理
     if (contentType.includes('text/html')) {
