@@ -26,10 +26,7 @@ export async function GET(request: NextRequest) {
     html = html.replace(adDivPattern, '<!-- 广告div已移除 -->');
     
     // 🎯 3. 移除其他可能广告
-    
-    otherAds.forEach(pattern => {
-      html = html.replace(pattern, '');
-    });
+
     
     // 🎯 4. 修复相对路径
     html = html.replace(/(src|href)=['"]\/\/([^'"]+)['"]/g, '$1="https://$2"');
