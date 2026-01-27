@@ -14,7 +14,15 @@ export async function GET(request: NextRequest) {
     
     console.log('🚀 获取原始页面...');
     
-    const response = await fetch(targetUrl);
+    const response = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'zh-CN,zh;q=0.9',
+        'Referer': 'https://jx.xmflv.cc/',
+        // 🎯 关键：不发送某些可能触发CORS检查的头
+      },
+    });
     let html = await response.text();
     
     // 🎯 1. 移除广告JS
