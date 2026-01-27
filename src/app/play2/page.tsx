@@ -15,7 +15,6 @@ export default function Play2Page() {
         setLoading(true);
         setError('');
         
-        // 🎯 获取代理后的页面内容
         const response = await fetch(
           `/api/proxy-video?url=${encodeURIComponent(videoUrl)}`
         );
@@ -27,7 +26,7 @@ export default function Play2Page() {
         const html = await response.text();
         setHtmlContent(html);
         
-      } catch (err) {
+      } catch (err: unknown) {
         setError(err instanceof Error ? err.message : '加载失败');
         console.error('加载失败:', err);
       } finally {
@@ -38,43 +37,13 @@ export default function Play2Page() {
     loadProxyPage();
   }, [videoUrl]);
   
-  // 🎯 当HTML内容加载后，手动插入到页面
-  useEffect(() => {
-    if (!htmlContent || loading) return;
-    
-    // 创建一个临时容器来解析和插入HTML
-    const container = document.getElementById('player-container');
-    if (!container) return;
-    
-    // 🎯 关键：使用dangerouslySetInnerHTML直接插入HTML
-    // 但我们需要先做一些处理
-    
-    // 1. 创建一个临时div来解析HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = htmlContent;
-    
-    // 2. 清理容器
-    container.innerHTML = '';
-    
-    // 3. 将解析后的节点移动到容器
-    while (tempDiv.firstChild) {
-      container.appendChild(tempDiv.firstChild);
-    }
-    
-    // 🎯 4. 修复相对路径（可选）
-    fixRelativePaths(container);
-    
-    console.log('页面已直接渲染');
-    
-  }, [htmlContent, loading]);
-  
-  // 修复相对路径的辅助函数
-  const fixRelativePaths = (container) => {
+  // 🎯 修复：添加参数类型
+  const fixRelativePaths = (container: HTMLElement) => {
     // 修复 <base> 标签
     let baseElement = container.querySelector('base');
     if (!baseElement) {
       baseElement = document.createElement('base');
-      baseElement.href = 'https://jx.xmflv.cc/';
+      baseElement.setAttribute('href', 'https://jx.xmflv.cc/');
       container.prepend(baseElement);
     }
     
@@ -85,18 +54,44 @@ export default function Play2Page() {
       const href = el.getAttribute('href');
       
       if (src && src.startsWith('//')) {
-        el.src = 'https:' + src;
+        el.setAttribute('src', 'https:' + src);
       } else if (src && src.startsWith('/')) {
-        el.src = 'https://jx.xmflv.cc' + src;
+        el.setAttribute('src', 'https://jx.xmflv.cc' + src);
       }
       
       if (href && href.startsWith('//')) {
-        el.href = 'https:' + href;
+        el.setAttribute('href', 'https:' + href);
       } else if (href && href.startsWith('/')) {
-        el.href = 'https://jx.xmflv.cc' + href;
+        el.setAttribute('href', 'https://jx.xmflv.cc' + href);
       }
     });
   };
+  
+  // 🎯 当HTML内容加载后，手动插入到页面
+  useEffect(() => {
+    if (!htmlContent || loading) return;
+    
+    const container = document.getElementById('player-container');
+    if (!container) return;
+    
+    // 创建一个临时div来解析HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    // 清理容器
+    container.innerHTML = '';
+    
+    // 将解析后的节点移动到容器
+    while (tempDiv.firstChild) {
+      container.appendChild(tempDiv.firstChild);
+    }
+    
+    // 🎯 修复相对路径
+    fixRelativePaths(container);
+    
+    console.log('页面已直接渲染');
+    
+  }, [htmlContent, loading]);
   
   if (loading) {
     return (
