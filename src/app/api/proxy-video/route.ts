@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     });*/
     
     // 🎯 7. 添加我们自己的控制脚本
-    const controlScript = `
+    /*const controlScript = `
       <script>
         // 修复可能的事件监听
         window.addEventListener('error', (e) => {
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
       </script>
     `;
     
-    html = html.replace('</head>', controlScript + '</head>');
+    html = html.replace('</head>', controlScript + '</head>');*/
     
     console.log('✅ 页面处理完成，可直接渲染');
     
