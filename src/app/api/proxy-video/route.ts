@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
 
     
     // 🎯 4. 修复相对路径
-    html = html.replace(/(src|href)=['"]\/\/([^'"]+)['"]/g, '$1="https://$2"');
-    html = html.replace(/(src|href)=['"]\/([^'"]+)['"]/g, '$1="https://jx.xmflv.cc/$2"');
+    //html = html.replace(/(src|href)=['"]\/\/([^'"]+)['"]/g, '$1="https://$2"');
+    //html = html.replace(/(src|href)=['"]\/([^'"]+)['"]/g, '$1="https://jx.xmflv.cc/$2"');
     
     // 🎯 5. 确保有base标签
     if (!html.includes('<base ')) {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
     
     // 🎯 6. 移除反iframe/反代理代码
-    const antiScripts = [
+    /*const antiScripts = [
       /if\s*\([^)]*top[^)]*!==[^)]*self[^)]*\)[^{]*{[^}]*location[^}]*}/gi,
       /if\s*\([^)]*parent[^)]*!==[^)]*window[^)]*\)[^{]*{[^}]*}/gi,
       /document\.domain\s*=/gi,
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
     
     antiScripts.forEach(pattern => {
       html = html.replace(pattern, '// 已移除安全限制');
-    });
+    });*/
     
     // 🎯 7. 添加我们自己的控制脚本
     const controlScript = `
