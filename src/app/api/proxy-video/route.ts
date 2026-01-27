@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
     let html = await response.text();
     
     // 🎯 1. 移除广告JS
-    const adScriptPattern = /<script[^>]*src=['"]\/\/pc\.stgowan\.com\/pc\/video-tf\.js['"][^>]*><\/script>/gi;
-    html = html.replace(adScriptPattern, '<!-- 广告JS已移除 -->');
+    /*const adScriptPattern = /<script[^>]*src=['"]\/\/pc\.stgowan\.com\/pc\/video-tf\.js['"][^>]*><\/script>/gi;
+    html = html.replace(adScriptPattern, '<!-- 广告JS已移除 -->');*/
     
     // 🎯 2. 移除广告div
     const adDivPattern = /<div[^>]*id=['"]adv_wrap_hh['"][^>]*>[\s\S]*?<\/div>/gi;
