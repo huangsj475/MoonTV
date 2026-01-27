@@ -40,12 +40,12 @@ export default function Play2Page() {
   // 🎯 修复：添加参数类型
   const fixRelativePaths = (container: HTMLElement) => {
     // 修复 <base> 标签
-    let baseElement = container.querySelector('base');
+    /*let baseElement = container.querySelector('base');
     if (!baseElement) {
       baseElement = document.createElement('base');
       baseElement.setAttribute('href', 'https://jx.xmflv.cc/');
       container.prepend(baseElement);
-    }
+    }*/
     
     // 修复相对链接
     const elements = container.querySelectorAll('[src], [href]');
@@ -56,13 +56,13 @@ export default function Play2Page() {
       if (src && src.startsWith('//')) {
         el.setAttribute('src', 'https:' + src);
       } else if (src && src.startsWith('/')) {
-        el.setAttribute('src', 'https://jx.xmflv.cc' + src);
+        //el.setAttribute('src', 'https://jx.xmflv.cc' + src);
       }
       
       if (href && href.startsWith('//')) {
         el.setAttribute('href', 'https:' + href);
       } else if (href && href.startsWith('/')) {
-        el.setAttribute('href', 'https://jx.xmflv.cc' + href);
+        //el.setAttribute('href', 'https://jx.xmflv.cc' + href);
       }
     });
   };
