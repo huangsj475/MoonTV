@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Referer': 'https://jx.xmflv.cc/',
-        // 🎯 关键：不发送某些可能触发CORS检查的头
       },
     });
     let html = await response.text();
@@ -41,12 +40,12 @@ export async function GET(request: NextRequest) {
     html = html.replace(/(src|href)=['"]\/([^'"]+)['"]/g, '$1="https://jx.xmflv.cc/$2"');
     
     // 🎯 5. 确保有base标签
-    /*if (!html.includes('<base ')) {
+    if (!html.includes('<base ')) {
       html = html.replace(
         /<head>/i, 
         '<head>\n<base href="https://jx.xmflv.cc/" target="_blank">'
       );
-    }*/
+    }
     
     // 🎯 6. 移除反iframe/反代理代码
     /*const antiScripts = [
