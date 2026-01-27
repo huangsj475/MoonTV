@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
     let html = await response.text();
     
     // 🎯 1. 移除广告JS
-    /*const adScriptPattern = /<script[^>]*src=['"]\/\/pc\.stgowan\.com\/pc\/video-tf\.js['"][^>]*><\/script>/gi;
-    html = html.replace(adScriptPattern, '<!-- 广告JS已移除 -->');*/
+    const adScriptPattern = /<script[^>]*src=['"]\/\/pc\.stgowan\.com\/pc\/video-tf\.js['"][^>]*><\/script>/gi;
+    html = html.replace(adScriptPattern, '<!-- 广告JS已移除 -->');
     
     // 🎯 2. 移除广告div
     const adDivPattern = /<div[^>]*id=['"]adv_wrap_hh['"][^>]*>[\s\S]*?<\/div>/gi;
@@ -29,16 +29,16 @@ export async function GET(request: NextRequest) {
 
     
     // 🎯 4. 修复相对路径
-    //html = html.replace(/(src|href)=['"]\/\/([^'"]+)['"]/g, '$1="https://$2"');
-    //html = html.replace(/(src|href)=['"]\/([^'"]+)['"]/g, '$1="https://jx.xmflv.cc/$2"');
+    html = html.replace(/(src|href)=['"]\/\/([^'"]+)['"]/g, '$1="https://$2"');
+    html = html.replace(/(src|href)=['"]\/([^'"]+)['"]/g, '$1="https://jx.xmflv.cc/$2"');
     
     // 🎯 5. 确保有base标签
-    if (!html.includes('<base ')) {
+    /*if (!html.includes('<base ')) {
       html = html.replace(
         /<head>/i, 
         '<head>\n<base href="https://jx.xmflv.cc/" target="_blank">'
       );
-    }
+    }*/
     
     // 🎯 6. 移除反iframe/反代理代码
     /*const antiScripts = [
