@@ -1,65 +1,161 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 'use client';
 
 import { useEffect, useState } from 'react';
 
 export default function Play2Page() {
-  const [mounted, setMounted] = useState(false);
-  const [iframeSrc, setIframeSrc] = useState<string>('');
+  const [htmlContent, setHtmlContent] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  
+  const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
   
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    async function loadProxyPage() {
+      try {
+        setLoading(true);
+        setError('');
+        
+        // 🎯 获取代理后的页面内容
+        const response = await fetch(
+          `/api/proxy-video?url=${encodeURIComponent(videoUrl)}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const html = await response.text();
+        setHtmlContent(html);
+        
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '加载失败');
+        console.error('加载失败:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    loadProxyPage();
+  }, [videoUrl]);
   
+  // 🎯 当HTML内容加载后，手动插入到页面
   useEffect(() => {
-    if (!mounted) return;
+    if (!htmlContent || loading) return;
     
-    const videoUrl = 'https://www.iqiyi.com/v_egoc71bz3c.html';
-    const PLAYER_BASE_URL = 'https://jx.xmflv.cc/?url=';
-    const originalUrl = `${PLAYER_BASE_URL}${videoUrl}`;
+    // 创建一个临时容器来解析和插入HTML
+    const container = document.getElementById('player-container');
+    if (!container) return;
     
-    // 使用API代理
-    const localProxyUrl = `/api/proxy-video?proxyurl=${encodeURIComponent(videoUrl)}`;
+    // 🎯 关键：使用dangerouslySetInnerHTML直接插入HTML
+    // 但我们需要先做一些处理
+    
+    // 1. 创建一个临时div来解析HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    
+    // 2. 清理容器
+    container.innerHTML = '';
+    
+    // 3. 将解析后的节点移动到容器
+    while (tempDiv.firstChild) {
+      container.appendChild(tempDiv.firstChild);
+    }
+    
+    // 🎯 4. 修复相对路径（可选）
+    fixRelativePaths(container);
+    
+    console.log('页面已直接渲染');
+    
+  }, [htmlContent, loading]);
   
-    // 选择其中一个使用
-    setIframeSrc(localProxyUrl); // 或使用 externalProxyUrl
+  // 修复相对路径的辅助函数
+  const fixRelativePaths = (container) => {
+    // 修复 <base> 标签
+    let baseElement = container.querySelector('base');
+    if (!baseElement) {
+      baseElement = document.createElement('base');
+      baseElement.href = 'https://jx.xmflv.cc/';
+      container.prepend(baseElement);
+    }
     
-  }, [mounted]);
+    // 修复相对链接
+    const elements = container.querySelectorAll('[src], [href]');
+    elements.forEach(el => {
+      const src = el.getAttribute('src');
+      const href = el.getAttribute('href');
+      
+      if (src && src.startsWith('//')) {
+        el.src = 'https:' + src;
+      } else if (src && src.startsWith('/')) {
+        el.src = 'https://jx.xmflv.cc' + src;
+      }
+      
+      if (href && href.startsWith('//')) {
+        el.href = 'https:' + href;
+      } else if (href && href.startsWith('/')) {
+        el.href = 'https://jx.xmflv.cc' + href;
+      }
+    });
+  };
   
-  if (!mounted) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500 mb-2"></div>
-          <p className="text-gray-600">加载中...</p>
-        </div>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        background: '#000',
+        color: '#fff'
+      }}>
+        加载去广告播放器...
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div style={{ 
+        padding: '20px',
+        background: '#000',
+        color: '#fff',
+        height: '100vh'
+      }}>
+        <h2>加载失败</h2>
+        <p>{error}</p>
+        <a 
+          href={`https://jx.xmflv.cc/?url=${encodeURIComponent(videoUrl)}`}
+          target="_blank"
+          rel="noopener"
+          style={{ color: '#4dabf7' }}
+        >
+          直接访问播放器
+        </a>
       </div>
     );
   }
   
   return (
-    <div className="h-screen flex flex-col">
-      <div className="p-4 bg-gray-100">
-        <h1 className="text-xl font-bold">第三方播放器演示</h1>
-        <div className="mt-2 text-sm text-gray-600">
-          通过代理服务加载，解决跨域限制
-        </div>
-      </div>
-      <div className="flex-1">
-        {iframeSrc ? (
-          <iframe
-            src={iframeSrc}
-            className="w-full h-full border-0"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-500 mb-2"></div>
-              <p className="text-gray-600">正在准备播放器...</p>
-            </div>
-          </div>
-        )}
+    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      {/* 🎯 关键：这是我们的播放器容器 */}
+      <div 
+        id="player-container" 
+        style={{ width: '100%', height: '100%' }}
+      />
+      
+      {/* 状态提示 */}
+      <div style={{
+        position: 'fixed',
+        bottom: '10px',
+        right: '10px',
+        background: 'rgba(0,0,0,0.8)',
+        color: '#0f0',
+        padding: '5px 10px',
+        fontSize: '12px',
+        borderRadius: '3px',
+        zIndex: 9999
+      }}>
+        直接渲染模式 ✓
       </div>
     </div>
   );
