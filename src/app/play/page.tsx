@@ -55,9 +55,10 @@ function PlayPageClient() {
   //const outroCheckStartedRef = useRef(false);//---新增：是否跳过片尾
   const videoReadyRef = useRef(false)//新增：视频准备状态，由于初次加载hls会初始化，加载2次hls，导致恢复进度后被重置
   const levelSwitchCountRef = useRef(0);
+  //新增：添加重试计数器的 ref
+  const hlsRetryCountRef = useRef(0);
+  const hlsRetryTimerRef = useRef<NodeJS.Timeout | null>(null);
   
-
-
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
 
@@ -142,6 +143,15 @@ function PlayPageClient() {
     videoTitle,
     videoYear,
   ]);
+
+// 重置重试计数器
+const resetHlsRetry = () => {
+  hlsRetryCountRef.current = 0;
+  if (hlsRetryTimerRef.current) {
+    clearTimeout(hlsRetryTimerRef.current);
+    hlsRetryTimerRef.current = null;
+  }
+};
 
 // 智能提取剧集/期数名称
 const extractEpisodeTitle = (
@@ -1566,6 +1576,7 @@ useEffect(() => {
   // 清理定时器
   useEffect(() => {
     return () => {
+	  resetHlsRetry();// 清理 HLS 重试计数器
       if (saveIntervalRef.current) {
         clearInterval(saveIntervalRef.current);
       }
@@ -1675,8 +1686,10 @@ useEffect(() => {
       typeof (window as any).webkitConvertPointFromNodeToPage === 'function';
 
 	      // 切换视频后重置跳过状态
-	skipIntroProcessedRef.current = false;
+	  skipIntroProcessedRef.current = false;
 	  levelSwitchCountRef.current = 0;
+	  // 重置 HLS 重试计数器
+	  resetHlsRetry();
 	  
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
    if (!isWebkit && artPlayerRef.current) {
@@ -1868,31 +1881,119 @@ useEffect(() => {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     console.log('网络错误，尝试恢复...');
-					//hls 全局错误提示
-				    if (typeof window !== 'undefined') {
-				      window.dispatchEvent(
-				        new CustomEvent('globalError', {
-				          detail: { message: '网络错误，尝试恢复...'},
-				        })
-				      );
-				    }
-                    hls.startLoad();
+					// 检查重试次数，最多重试3次
+					if (hlsRetryCountRef.current < 3) {
+					  hlsRetryCountRef.current++;
+					  console.log(`第 ${hlsRetryCountRef.current} 次重试...`);
+					  
+					  // 添加延迟后重试
+					  const retryDelay = 2000;
+					  
+					  // 清除之前的定时器
+					  if (hlsRetryTimerRef.current) {
+						clearTimeout(hlsRetryTimerRef.current);
+					  }
+					  
+					  hlsRetryTimerRef.current = setTimeout(() => {
+						// 重新开始加载
+						hls.startLoad();
+						
+						// 显示重试信息
+						if (typeof window !== 'undefined') {
+						  window.dispatchEvent(
+							new CustomEvent('globalError', {
+							  detail: { 
+								message: `网络错误，第 ${hlsRetryCountRef.current} 次尝试恢复...`,
+							  },
+							})
+						  );
+						}
+					  }, retryDelay);
+					  
+					} else {
+					  // 超过最大重试次数，停止重试
+					  console.error('超过最大重试次数，停止恢复');
+					  hls.destroy();
+					  
+					  // 显示最终错误信息
+					  if (typeof window !== 'undefined') {
+						window.dispatchEvent(
+						  new CustomEvent('globalError', {
+							detail: { 
+							  message: '网络错误，请检查网络或切换播放源',
+							},
+						  })
+						);
+					  }
+					}
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
-					//hls 全局错误提示
-				    if (typeof window !== 'undefined') {
-				      window.dispatchEvent(
-				        new CustomEvent('globalError', {
-				          detail: { message: '视频错误，尝试恢复...'},
-				        })
-				      );
-				    }
-                    hls.recoverMediaError();
+					// 媒体错误恢复（2次）
+					if (hlsRetryCountRef.current < 2) {
+					  hlsRetryCountRef.current++;
+					  
+					  // 清除之前的定时器
+					  if (hlsRetryTimerRef.current) {
+						clearTimeout(hlsRetryTimerRef.current);
+					  }
+					  
+					  hlsRetryTimerRef.current = setTimeout(() => {
+						try {
+						  hls.recoverMediaError();
+						  
+						  if (typeof window !== 'undefined') {
+							window.dispatchEvent(
+							  new CustomEvent('globalError', {
+								detail: { 
+								  message: '视频错误，第 ${hlsRetryCountRef.current} 次恢复...',
+								},
+							  })
+							);
+						  }
+						} catch (recoverError) {
+						  console.error('恢复媒体错误失败:', recoverError);
+						  hls.destroy();
+						  
+						  if (typeof window !== 'undefined') {
+							window.dispatchEvent(
+							  new CustomEvent('globalError', {
+								detail: { 
+								  message: '视频格式不支持，请切换播放源',
+								},
+							  })
+							);
+						  }
+						}
+					  }, 2000);
+					  
+					} else {
+					  console.error('超过最大重试次数，媒体错误恢复失败');
+					  hls.destroy();
+					  
+					  if (typeof window !== 'undefined') {
+						window.dispatchEvent(
+						  new CustomEvent('globalError', {
+							detail: { 
+							  message: '视频格式错误，请切换播放源',
+							},
+						  })
+						);
+					  }
+					}
                     break;
                   default:
                     console.log('无法恢复的错误');
                     hls.destroy();
+					if (typeof window !== 'undefined') {
+					  window.dispatchEvent(
+						new CustomEvent('globalError', {
+						  detail: { 
+							message: '播放器遇到未知错误',
+						  },
+						})
+					  );
+					}
                     break;
                 }
               }
