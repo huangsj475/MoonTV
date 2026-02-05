@@ -57,7 +57,6 @@ function PlayPageClient() {
   const levelSwitchCountRef = useRef(0);
   //新增：添加重试计数器的 ref
   const hlsRetryCountRef = useRef(0);
-  const hlsRetryTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   // 收藏状态
   const [favorited, setFavorited] = useState(false);
@@ -143,15 +142,6 @@ function PlayPageClient() {
     videoTitle,
     videoYear,
   ]);
-
-// 重置重试计数器
-const resetHlsRetry = () => {
-  hlsRetryCountRef.current = 0;
-  if (hlsRetryTimerRef.current) {
-    clearTimeout(hlsRetryTimerRef.current);
-    hlsRetryTimerRef.current = null;
-  }
-};
 
 // 智能提取剧集/期数名称
 const extractEpisodeTitle = (
@@ -1576,7 +1566,6 @@ useEffect(() => {
   // 清理定时器
   useEffect(() => {
     return () => {
-	  resetHlsRetry();// 清理 HLS 重试计数器
       if (saveIntervalRef.current) {
         clearInterval(saveIntervalRef.current);
       }
@@ -1689,7 +1678,7 @@ useEffect(() => {
 	  skipIntroProcessedRef.current = false;
 	  levelSwitchCountRef.current = 0;
 	  // 重置 HLS 重试计数器
-	  resetHlsRetry();
+	  hlsRetryCountRef.current = 0;
 	  
     // 非WebKit浏览器且播放器已存在，使用switch方法切换
    if (!isWebkit && artPlayerRef.current) {
@@ -1885,16 +1874,7 @@ useEffect(() => {
 					if (hlsRetryCountRef.current < 3) {
 					  hlsRetryCountRef.current++;
 					  console.log(`第 ${hlsRetryCountRef.current} 次重试...`);
-					  
-					  // 添加延迟后重试
-					  const retryDelay = 2000;
-					  
-					  // 清除之前的定时器
-					  if (hlsRetryTimerRef.current) {
-						clearTimeout(hlsRetryTimerRef.current);
-					  }
-					  
-					  hlsRetryTimerRef.current = setTimeout(() => {
+
 						// 重新开始加载
 						hls.startLoad();
 						
@@ -1908,8 +1888,6 @@ useEffect(() => {
 							})
 						  );
 						}
-					  }, retryDelay);
-					  
 					} else {
 					  // 超过最大重试次数，停止重试
 					  console.error('超过最大重试次数，停止恢复');
@@ -1929,30 +1907,45 @@ useEffect(() => {
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
                     console.log('媒体错误，尝试恢复...');
-					// 媒体错误恢复（2次）
-					if (hlsRetryCountRef.current < 2) {
-					  hlsRetryCountRef.current++;
-					  
-					  // 清除之前的定时器
-					  if (hlsRetryTimerRef.current) {
-						clearTimeout(hlsRetryTimerRef.current);
+					  // 媒体错误立即尝试恢复，最多2次
+					  if (hlsRetryCountRef.current >= 2) {
+						console.error('媒体错误超过最大重试次数');
+						hls.destroy();
+						
+						if (typeof window !== 'undefined') {
+						  window.dispatchEvent(
+							new CustomEvent('globalError', {
+							  detail: { 
+								message: '视频格式错误，请切换播放源',
+							  },
+							})
+						  );
+						}
+						return;
 					  }
 					  
-					  hlsRetryTimerRef.current = setTimeout(() => {
-						try {
-						  hls.recoverMediaError();
-						  
-						  if (typeof window !== 'undefined') {
-							window.dispatchEvent(
-							  new CustomEvent('globalError', {
-								detail: { 
-								  message: '视频错误，第 ${hlsRetryCountRef.current} 次恢复...',
-								},
-							  })
-							);
-						  }
-						} catch (recoverError) {
-						  console.error('恢复媒体错误失败:', recoverError);
+					  hlsRetryCountRef.current++;
+
+					  // 立即尝试恢复
+					  try {
+						hls.recoverMediaError();
+						console.log(`视频错误，第 ${hlsRetryCountRef.current} 次恢复`);
+						
+						if (typeof window !== 'undefined') {
+						  window.dispatchEvent(
+							new CustomEvent('globalError', {
+							  detail: { 
+								message: `视频错误，第 ${hlsRetryCountRef.current} 次恢复...`,
+							  },
+							})
+						  );
+						}
+						
+					  } catch (recoverError) {
+						console.error('恢复媒体错误失败:', recoverError);
+						
+						// 如果恢复失败，检查是否达到最大次数
+						if (hlsRetryCountRef.current >= 2) {
 						  hls.destroy();
 						  
 						  if (typeof window !== 'undefined') {
@@ -1965,22 +1958,7 @@ useEffect(() => {
 							);
 						  }
 						}
-					  }, 2000);
-					  
-					} else {
-					  console.error('超过最大重试次数，媒体错误恢复失败');
-					  hls.destroy();
-					  
-					  if (typeof window !== 'undefined') {
-						window.dispatchEvent(
-						  new CustomEvent('globalError', {
-							detail: { 
-							  message: '视频格式错误，请切换播放源',
-							},
-						  })
-						);
 					  }
-					}
                     break;
                   default:
                     console.log('无法恢复的错误');
