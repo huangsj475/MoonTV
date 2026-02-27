@@ -1501,6 +1501,17 @@ useEffect(() => {
       });
 
       lastSaveTimeRef.current = Date.now();
+		//全局信息显示
+		if (typeof window !== 'undefined') {
+		  window.dispatchEvent(
+			new CustomEvent('globalError', {
+			  detail: { 
+				message: `保存进度成功`,
+				type: 'success'
+			  },
+			})
+		  );
+		}
       console.log('播放进度已保存:', {
         title: videoTitleRef.current,
         episode: currentEpisodeIndexRef.current + 1,
