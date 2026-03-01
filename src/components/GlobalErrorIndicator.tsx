@@ -49,7 +49,7 @@ export function GlobalErrorIndicator() {
       }
       autoHideTimer.current = setTimeout(() => {
         handleClose();
-      }, 3000); // 3秒后自动关闭
+      }, 2000); // 2秒后自动关闭
     };
 
     // 监听错误事件
