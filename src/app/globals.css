@@ -224,3 +224,9 @@ div[data-media-provider] video {
 .art-bottom .art-progress .art-control-progress .art-control-progress-inner .art-progress-loaded {
   background: rgba(255, 255, 255, 0.5) !important;
 }
+
+/* 修复移动端控制栏按钮被挤出的问题 - 覆盖播放器默认样式 */
+.art-controls .art-control {
+  white-space: normal !important;  /* 允许换行，替代 nowrap */
+  min-width: auto !important;       /* 使用自动宽度，替代固定最小值 */
+}
