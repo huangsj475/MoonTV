@@ -41,7 +41,7 @@ function SearchPageClient() {
   const eventSourceRef = useRef<EventSource | null>(null);
   const pendingResultsRef = useRef<SearchResult[]>([]);
   const flushTimerRef = useRef<number | null>(null);
-  const [useFluidSearch, setUseFluidSearch] = useState(true);
+  const [useFluidSearch, setUseFluidSearch] = useState(false);
 
   // 获取默认聚合设置：只读取用户本地设置，默认为 true
   const getDefaultAggregate = () => {
