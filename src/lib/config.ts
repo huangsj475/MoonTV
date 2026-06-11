@@ -202,7 +202,7 @@ async function initConfig() {
             SiteInterfaceCacheTime: fileConfig.cache_time || 7200,
 	        DoubanProxyType: process.env.NEXT_PUBLIC_DOUBAN_PROXY_TYPE || 'direct',
 	        DoubanProxy: process.env.NEXT_PUBLIC_DOUBAN_PROXY || '',
-	        DoubanImageProxyType: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'direct',
+	        DoubanImageProxyType: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'server',
 	        DoubanImageProxy: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '',
             DisableYellowFilter:
               process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
@@ -252,7 +252,7 @@ async function initConfig() {
         SiteInterfaceCacheTime: fileConfig.cache_time || 7200,
 	        DoubanProxyType: process.env.NEXT_PUBLIC_DOUBAN_PROXY_TYPE || 'direct',
 	        DoubanProxy: process.env.NEXT_PUBLIC_DOUBAN_PROXY || '',
-	        DoubanImageProxyType: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'direct',
+	        DoubanImageProxyType: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'server',
 	        DoubanImageProxy: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '',
         DisableYellowFilter:
           process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
@@ -343,7 +343,7 @@ export async function getConfig(): Promise<AdminConfig> {
   }
   if (!adminConfig.SiteConfig.DoubanImageProxyType) {
     adminConfig.SiteConfig.DoubanImageProxyType =
-      process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'direct';
+      process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'server';
   }
   if (!adminConfig.SiteConfig.DoubanImageProxy) {
     adminConfig.SiteConfig.DoubanImageProxy =
@@ -486,7 +486,7 @@ export async function resetConfig() {
       SiteInterfaceCacheTime: fileConfig.cache_time || 7200,
 	        DoubanProxyType: process.env.NEXT_PUBLIC_DOUBAN_PROXY_TYPE || 'direct',
 	        DoubanProxy: process.env.NEXT_PUBLIC_DOUBAN_PROXY || '',
-	        DoubanImageProxyType: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'direct',
+	        DoubanImageProxyType: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY_TYPE || 'server',
 	        DoubanImageProxy: process.env.NEXT_PUBLIC_DOUBAN_IMAGE_PROXY || '',
       DisableYellowFilter:
         process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
