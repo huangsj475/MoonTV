@@ -32,7 +32,11 @@ export async function middleware(request: NextRequest) {
     if (!authInfo.password || authInfo.password !== process.env.PASSWORD) {
       return handleAuthFailure(request, pathname);
     }
-    return NextResponse.next();
+    //return NextResponse.next();
+    // ✅ 验证通过，续期
+    const response = NextResponse.next();
+    refreshAuthCookie(request, response);
+    return response;
   }
 
   // 其他模式：只验证签名
@@ -51,12 +55,31 @@ export async function middleware(request: NextRequest) {
 
     // 签名验证通过即可
     if (isValidSignature) {
-      return NextResponse.next();
+      //return NextResponse.next();
+      // ✅ 验证通过，续期
+      const response = NextResponse.next();
+      refreshAuthCookie(request, response);
+      return response;
     }
   }
 
   // 签名验证失败或不存在签名
   return handleAuthFailure(request, pathname);
+}
+
+// ✅ 新增：刷新 cookie 过期时间的函数
+function refreshAuthCookie(request: NextRequest, response: NextResponse) {
+  const authCookie = request.cookies.get('auth');
+   // 重新设置7天
+  if (authCookie?.value) {
+    response.cookies.set('auth', authCookie.value, {
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60,
+      sameSite: 'lax',
+      httpOnly: false,
+      secure: false,
+    });
+  }
 }
 
 // 验证签名
