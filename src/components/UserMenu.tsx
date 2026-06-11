@@ -31,7 +31,7 @@ export const UserMenu: React.FC = () => {
   const [enableOptimization, setEnableOptimization] = useState(true);
   //const [enableImageProxy, setEnableImageProxy] = useState(false);
   //const [enableDoubanProxy, setEnableDoubanProxy] = useState(false);
-  const [fluidSearch, setFluidSearch] = useState(true);//新增：流式选项
+  const [fluidSearch, setFluidSearch] = useState(false);//新增：流式选项
     //豆瓣代理状态
   const [doubanDataSource, setDoubanDataSource] = useState('direct');
   const [doubanImageProxyType, setDoubanImageProxyType] = useState('direct');
